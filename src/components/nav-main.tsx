@@ -1,5 +1,3 @@
-"use client";
-
 import { useLocation } from "react-router-dom";
 import { type LucideIcon } from "lucide-react";
 import { Link } from 'react-router-dom'

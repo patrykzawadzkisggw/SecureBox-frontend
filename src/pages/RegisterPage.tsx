@@ -1,8 +1,8 @@
-import { GalleryVerticalEnd } from "lucide-react"
+import { GalleryVerticalEnd } from "lucide-react";
+import { RegisterForm } from "@/components/RegisterForm";
+import image from "../assets/registerImage.jpg";
 
-import { LoginForm } from "@/components/login-form"
-import image from "../assets/loginImage.jpg"
-export default function LoginPage() {
+export default function RegisterPage() {
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">
@@ -16,7 +16,7 @@ export default function LoginPage() {
         </div>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">
-            <LoginForm />
+            <RegisterForm />
           </div>
         </div>
       </div>
@@ -28,5 +28,5 @@ export default function LoginPage() {
         />
       </div>
     </div>
-  )
+  );
 }

@@ -1,13 +1,12 @@
 import * as React from "react"
-import { ChevronDown, LogOut, Plus } from "lucide-react"
-
+import { ChevronDown, LogOut } from "lucide-react"
+// Removed duplicate import
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
@@ -16,6 +15,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { useNavigate } from "react-router-dom"
+import { usePasswordContext } from "@/data/PasswordContext"
 
 export function TeamSwitcher({
   teams,
@@ -26,13 +26,11 @@ export function TeamSwitcher({
     plan: string
   }[]
 }) {
+  const { state } = usePasswordContext();
   const [activeTeam, setActiveTeam] = React.useState(teams[0])
-
   if (!activeTeam) {
     return null
   }
-  const navigate = useNavigate();
-  
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -42,7 +40,7 @@ export function TeamSwitcher({
               <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-5 items-center justify-center rounded-md">
                 <activeTeam.logo className="size-3" />
               </div>
-              <span className="truncate font-medium">{activeTeam.name}</span>
+              <span className="truncate font-medium">{state.currentUser?.first_name + " "+ state.currentUser?.last_name}</span>
               <ChevronDown className="opacity-50" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
@@ -55,7 +53,7 @@ export function TeamSwitcher({
             <DropdownMenuLabel className="text-muted-foreground text-xs">
               Konto
             </DropdownMenuLabel>
-            {teams.map((team, index) => (
+            {teams.map((team, ) => (
               <DropdownMenuItem
                 key={team.name}
                 onClick={() => setActiveTeam(team)}
@@ -69,11 +67,12 @@ export function TeamSwitcher({
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 p-2" onClick={() => navigate("/login")}>
+            <DropdownMenuItem className="gap-2 p-2" onClick={() => {localStorage.jwt_token="vv";
+    window.location.reload();}}>
               <div className="bg-background flex size-6 items-center justify-center rounded-md border">
                 <LogOut className="size-4" />
               </div>
-              <div className="text-muted-foreground font-medium">Wyloguj</div>
+              <div className="text-muted-foreground font-medium" >Wyloguj</div>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
