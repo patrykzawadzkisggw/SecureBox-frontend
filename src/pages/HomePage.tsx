@@ -15,7 +15,7 @@ export default function HomePage() {
           </div>
           <div className="w-full lg:w-5/16">
             <h2 className="text-xl font-bold mb-4">Aktywność w tygodniu</h2>
-            <Chart />
+             <Chart />
           </div>
         </div>
       </div>
@@ -23,11 +23,11 @@ export default function HomePage() {
       <div className="container mx-auto p-4 max-w-[1200px]">
         <div className="flex flex-col lg:flex-row md:space-x-8">
           <div className="w-full lg:w-11/16 mb-4 lg:mb-0">
-            <RecentlyAdded />
+             <RecentlyAdded />
           </div>
           <div className="w-full lg:w-5/16">
             <h2 className="text-xl font-bold mb-4">Ostatnie aktywności</h2>
-            <ActivityList />
+          <ActivityList /> 
           </div>
         </div>
       </div>

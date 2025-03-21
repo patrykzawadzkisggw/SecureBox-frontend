@@ -29,7 +29,7 @@ export default function DashboardCards() {
       
 
       <Link to="/genpass" className="group">
-        <div className="bg-white p-6 rounded-xl  flex flex-col items-center justify-between h-48 transition hover:shadow-lg">
+        <div className="bg-slate-50 p-6 rounded-xl  flex flex-col items-center justify-between h-48 transition hover:shadow-lg">
           <div className="bg-purple-100 p-2 rounded-lg">
             <Wand className="w-6 h-6 text-purple-600" />
           </div>

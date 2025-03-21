@@ -1,8 +1,6 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import { usePasswordContext } from "../data/PasswordContext";
 
 interface Activity {
@@ -14,9 +12,7 @@ interface Activity {
 }
 
 export default function ActivityList() {
-  const { state, getUserLogins } = usePasswordContext();
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { state } = usePasswordContext();
 
   const formatActivity = (entry: { timestamp: string; login: string; page: string }): Activity => {
     const date = new Date(entry.timestamp);
@@ -46,34 +42,13 @@ export default function ActivityList() {
     };
   };
 
-  useEffect(() => {
-    const fetchLogins = async () => {
-      if (!state.currentUser || !state.token) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const userId = state.currentUser.id;
-        const logins = await getUserLogins(userId);
-        const formattedActivities = logins.map(formatActivity);
-        formattedActivities.length = Math.min(formattedActivities.length, 5); // Limit do 5 ostatnich
-        setActivities(formattedActivities);
-        toast.success("Pobrano aktywności!");
-      } catch (error) {
-        console.error("Błąd pobierania danych:", error);
-        toast.error("Nie udało się pobrać aktywności.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchLogins();
-  }, [state.currentUser, state.token, getUserLogins]);
-
-  if (isLoading) {
-    return <div className="text-center text-gray-500">Ładowanie...</div>;
-  }
+  // Przetwarzamy dane z kontekstu
+  const activities = state.currentUser
+    ? state.userLogins
+        .filter((entry) => state.currentUser && entry.user_id === state.currentUser.id)
+        .map(formatActivity)
+        .slice(0, 5) // Limit do 5 ostatnich
+    : [];
 
   if (!state.currentUser) {
     return <div className="text-center text-gray-500">Zaloguj się, aby zobaczyć aktywności.</div>;

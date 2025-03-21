@@ -11,7 +11,6 @@ import {
 import { usePasswordContext } from "../data/PasswordContext";
 import { toast } from "sonner";
 
-
 interface ChartData {
   month: string; // Dzień tygodnia
   logins: number; // Liczba logowań
@@ -27,7 +26,7 @@ const chartConfig = {
 export function Chart() {
   const { state, getUserLogins } = usePasswordContext();
   const [chartData, setChartData] = useState<ChartData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [hasFetched, setHasFetched] = useState(false); // Flaga kontrolująca, czy dane zostały pobrane
 
   const processLoginData = (logins: { timestamp: string }[]): ChartData[] => {
     const daysOfWeek = [
@@ -55,39 +54,40 @@ export function Chart() {
 
   useEffect(() => {
     const fetchLogins = async () => {
-      if (!state.currentUser || !state.token) {
-        setChartData([]); 
-        setIsLoading(false);
-        return;
+      if (!state.currentUser?.id || !state.token || hasFetched) {
+        return; // Nie pobieraj, jeśli już raz pobrano dane
       }
 
       try {
         const userId = state.currentUser.id;
-       
+
         if (state.userLogins.length > 0 && state.userLogins.some((entry) => entry.user_id === userId)) {
           const processedData = processLoginData(state.userLogins);
           setChartData(processedData);
           console.log("Użyto danych z pamięci podręcznej w stanie kontekstu.");
         } else {
-          
           const logins = await getUserLogins(userId);
           const processedData = processLoginData(logins);
           setChartData(processedData);
           toast.success("Pobrano dane logowań!");
         }
+        setHasFetched(true); // Ustawiamy flagę po pobraniu danych
       } catch (error) {
         console.error("Błąd pobierania danych:", error);
         toast.error("Nie udało się pobrać danych logowań.");
-        setChartData([]); 
-      } finally {
-        setIsLoading(false);
+        setChartData([]); // Ustawiamy pustą tablicę w przypadku błędu
+        setHasFetched(true); // Ustawiamy flagę nawet w przypadku błędu
       }
     };
 
     fetchLogins();
-  }, [state.currentUser, state.token, state.userLogins, getUserLogins]); 
+  }, [state.currentUser?.id, state.token, hasFetched, getUserLogins]); // Zależności: ID użytkownika, token i flaga pobrania
 
-  if (isLoading) {
+  if (!state.currentUser) {
+    return <div className="text-center text-gray-500">Zaloguj się, aby zobaczyć wykres.</div>;
+  }
+
+  if (!hasFetched) {
     return <div className="text-center text-gray-500">Ładowanie...</div>;
   }
 

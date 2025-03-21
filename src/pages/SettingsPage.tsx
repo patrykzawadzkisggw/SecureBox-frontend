@@ -3,8 +3,12 @@ import ExportToJSON from "@/components/ExportToJSON";
 import ImportFromJSON from "@/components/ImportFromJSON";
 import UserProfile from "@/components/UserProfile";
 import PageTemplate from "./PageTemplate";
+import { UpdateMasterkeyDialog } from "@/components/UpdateMasterkeyDialog";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 export default function SettingsPage() {
+  const [isMasterkeyDialogOpen, setIsMasterkeyDialogOpen] = useState(false);
   return (
     <PageTemplate title="Manager haseł">
       <div className="flex justify-center">
@@ -18,7 +22,11 @@ export default function SettingsPage() {
               <TabsTrigger value="import">Import</TabsTrigger>
               <TabsTrigger value="accountSettings">Konto</TabsTrigger>
             </TabsList>
-            <TabsContent value="2fa">Ekran weryfikacji dwuetapowej.</TabsContent>
+            <TabsContent value="2fa">
+            
+
+
+            </TabsContent>
             {/* <TabsContent value="trusted">
               <TrustedDevicesTable />
             </TabsContent> */}
@@ -30,6 +38,11 @@ export default function SettingsPage() {
             </TabsContent>
             <TabsContent value="accountSettings">
               <UserProfile />
+              <Button onClick={() => setIsMasterkeyDialogOpen(true)}>Zmień Masterkey</Button>
+            <UpdateMasterkeyDialog
+        isDialogOpen={isMasterkeyDialogOpen}
+        setIsDialogOpen={setIsMasterkeyDialogOpen}
+      />
             </TabsContent>
           </Tabs>
         </div>

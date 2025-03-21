@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { RecoverMasterkeyDialog } from "./RecoverMasterkeyDialog";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -37,14 +38,16 @@ import { usePasswordContext, PasswordTable } from "../data/PasswordContext";
 import { Toaster } from "sonner";
 import { UpdatePasswordDialog } from "./UpdatePasswordDialog";
 import { DeleteAccountDialog } from "./DeleteAccountDialog";
+import { findIconUrl } from "@/lib/icons";
 
 export const columns: ColumnDef<PasswordTable>[] = [
   {
-    accessorKey: "logo",
+    accessorKey: "platform",
     header: "Serwis",
     cell: ({ row }) => (
       <img
-        src={row.getValue("logo")}
+        src={ findIconUrl(row.getValue("platform"))}
+          
         alt="Logo"
         width="40"
         height="40"
@@ -72,16 +75,23 @@ export const columns: ColumnDef<PasswordTable>[] = [
       const { copyToClipboard } = usePasswordContext();
       const platform = row.original.platform;
       const login = row.original.login;
+      const [isRecoverDialogOpen, setIsRecoverDialogOpen] = useState(false); 
+    const handleDecryptionFail = () => {
+      setIsRecoverDialogOpen(true);
+    };
       return (
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button
             variant="outline"
             size="icon"
             style={{ cursor: "pointer" }}
-            onClick={() => copyToClipboard(row.getValue("passwordfile"), platform, login)}
+            onClick={() => copyToClipboard(row.getValue("passwordfile"), platform, login, handleDecryptionFail)}
           >
             <ClipboardCopy className="w-5 h-5" />
           </Button>
+          <RecoverMasterkeyDialog
+            isDialogOpen={isRecoverDialogOpen}
+            setIsDialogOpen={setIsRecoverDialogOpen}  />
         </div>
       );
     },
@@ -95,8 +105,15 @@ export const columns: ColumnDef<PasswordTable>[] = [
       const [isShowDialogOpen, setIsShowDialogOpen] = useState(false);
       const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false); 
       const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+      const [isRecoverDialogOpen, setIsRecoverDialogOpen] = useState(false); 
+      const handleDecryptionFail = () => {
+        setIsRecoverDialogOpen(true);
+      };
       return (
         <>
+        <RecoverMasterkeyDialog
+          isDialogOpen={isRecoverDialogOpen}
+          setIsDialogOpen={setIsRecoverDialogOpen} />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
@@ -107,7 +124,8 @@ export const columns: ColumnDef<PasswordTable>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Akcje</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => copyToClipboard(payment.passwordfile, payment.platform, payment.login)}
+              onClick={() => copyToClipboard(payment.passwordfile, payment.platform, payment.login, handleDecryptionFail)
+              }
             >
               Kopiuj hasło
             </DropdownMenuItem>
@@ -155,6 +173,7 @@ export function DataTable() {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
 
   const table = useReactTable({
     data: state.passwords,

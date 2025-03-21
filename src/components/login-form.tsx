@@ -1,11 +1,14 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import React, { useState } from "react";
-import { usePasswordContext } from "../data/PasswordContext";
+import { encryptMasterkey, usePasswordContext } from "../data/PasswordContext";
 import { ResetPasswordDialog } from "./ResetPasswordDialog";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast, Toaster } from "sonner";
 
 export function LoginForm({
   className,
@@ -14,6 +17,8 @@ export function LoginForm({
   const { login: loginUser } = usePasswordContext();
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
+  const [masterkey, setMasterkey] = useState("");
+  const [masterkey2, setMasterkey2] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
@@ -22,14 +27,27 @@ export function LoginForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    if (masterkey !== masterkey2) {
+      setErrorMessage("Masterkey i jego potwierdzenie muszą być identyczne.");
+      setIsLoading(false);
+      return;
+    }
     setErrorMessage("");
 
     try {
-      await loginUser(login, password);
-      navigate("/"); 
+      // Przekazujemy login, password i masterkey do loginUser
+      localStorage.setItem("masterkey", await encryptMasterkey(masterkey, "123"));
+      await loginUser(login, password, masterkey);
+      toast.success("Zalogowano pomyślnie!", { duration: 3000 });
+      navigate("/");
     } catch (error) {
-      setErrorMessage("Nieprawidłowy login lub hasło");
+      setErrorMessage("Nieprawidłowy login, hasło lub masterkey");
       setPassword("");
+      setMasterkey(""); // Czyścimy masterkey przy błędzie
+      toast.error("Błąd logowania!", {
+        description: "Sprawdź dane i spróbuj ponownie.",
+        duration: 3000,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -45,7 +63,7 @@ export function LoginForm({
         <div className="flex flex-col items-center gap-2 text-center">
           <h1 className="text-2xl font-bold">Zaloguj się na swoje konto</h1>
           <p className="text-muted-foreground text-sm text-balance">
-            Wprowadź swoje dane logowania, aby kontynuować
+            Wprowadź dane
           </p>
         </div>
         <div className="grid gap-6">
@@ -54,7 +72,7 @@ export function LoginForm({
             <Input
               id="login"
               type="text"
-              placeholder="email"
+              placeholder="user123"
               value={login}
               onChange={(e) => setLogin(e.target.value)}
               required
@@ -63,7 +81,7 @@ export function LoginForm({
           </div>
           <div className="grid gap-3">
             <div className="flex items-center">
-              <Label htmlFor="password">Hasło</Label>
+              <Label htmlFor="password">Hasło logowania</Label>
               <a
                 href="#"
                 className="ml-auto text-sm underline-offset-4 hover:underline"
@@ -83,6 +101,29 @@ export function LoginForm({
               required
               disabled={isLoading}
             />
+          </div>
+          <div className="grid gap-3">
+            <Label htmlFor="masterkey">Masterkey (hasło szyfrowania)</Label>
+            <Input
+              id="masterkey"
+              type="password"
+              value={masterkey}
+              onChange={(e) => setMasterkey(e.target.value)}
+              required
+              disabled={isLoading}
+            />
+            
+          </div>
+          <div className="grid gap-3">
+            <Label htmlFor="masterkey">Masterkey (hasło szyfrowania)</Label>
+            <Input
+              id="masterkey2"
+              type="password"
+              value={masterkey2}
+              onChange={(e) => setMasterkey2(e.target.value)}
+              required
+              disabled={isLoading}
+            />
             {errorMessage && (
               <p className="text-red-500 text-sm mt-1">{errorMessage}</p>
             )}
@@ -92,7 +133,7 @@ export function LoginForm({
           </Button>
           <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
             <span className="bg-background text-muted-foreground relative z-10 px-2">
-              Lub kontynuj z
+              Lub kontynuuj z
             </span>
           </div>
           <Button variant="outline" className="w-full" disabled={isLoading}>
@@ -107,15 +148,16 @@ export function LoginForm({
         </div>
         <div className="text-center text-sm">
           Nie masz jeszcze konta?{" "}
-          <a href="/register" className="underline underline-offset-4">
+          <Link to="/register" className="underline underline-offset-4">
             Utwórz konto
-          </a>
+          </Link>
         </div>
       </form>
       <ResetPasswordDialog
         isOpen={isResetDialogOpen}
         onClose={() => setIsResetDialogOpen(false)}
       />
+      <Toaster />
     </>
   );
 }

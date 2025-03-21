@@ -14,7 +14,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { useNavigate } from "react-router-dom"
 import { usePasswordContext } from "@/data/PasswordContext"
 
 export function TeamSwitcher({
@@ -27,6 +26,7 @@ export function TeamSwitcher({
   }[]
 }) {
   const { state } = usePasswordContext();
+  const { logout } = usePasswordContext();
   const [activeTeam, setActiveTeam] = React.useState(teams[0])
   if (!activeTeam) {
     return null
@@ -67,8 +67,7 @@ export function TeamSwitcher({
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 p-2" onClick={() => {localStorage.jwt_token="vv";
-    window.location.reload();}}>
+            <DropdownMenuItem className="gap-2 p-2" onClick={() => {logout()}}>
               <div className="bg-background flex size-6 items-center justify-center rounded-md border">
                 <LogOut className="size-4" />
               </div>

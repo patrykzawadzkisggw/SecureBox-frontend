@@ -17,17 +17,19 @@ export function RegisterForm({
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [login, setLogin] = useState("");
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState(""); // Hasło logowania
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMessage("");
 
     try {
-      await addUser(firstName, lastName, login, password);
+      // Przekazujemy oba hasła do addUser
+      await addUser(firstName, lastName, login, password, "123");
       toast.success("Konto utworzone!", {
         description: `Witaj, ${firstName} ${lastName}! Możesz się teraz zalogować.`,
         duration: 3000,
@@ -39,10 +41,10 @@ export function RegisterForm({
       setLogin("");
       setPassword("");
 
-      navigate("/");
+      navigate("/login"); // Przekierowanie na stronę logowania
     } catch (error) {
       console.error("Błąd rejestracji:", error);
-      setErrorMessage("Rejestracja nie powiodła się. Login może już istnieć.");
+      setErrorMessage("Rejestracja nie powiodła się. Login może już istnieć lub dane są nieprawidłowe.");
       setPassword(""); // Czyścimy pole hasła przy błędzie
       toast.error("Błąd rejestracji!", {
         description: "Nie udało się utworzyć konta. Sprawdź dane i spróbuj ponownie.",
@@ -103,17 +105,19 @@ export function RegisterForm({
           />
         </div>
         <div className="grid gap-3">
-          <Label htmlFor="password">Hasło</Label>
+          <Label htmlFor="password">Hasło logowania</Label>
           <Input
             id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}" 
+            pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}"
             title="Hasło musi mieć min. 8 znaków, dużą i małą literę, cyfrę oraz znak specjalny!"
             required
             disabled={isLoading}
           />
+        </div>
+        <div className="grid gap-3">
           {errorMessage && (
             <p className="text-red-500 text-sm mt-1">{errorMessage}</p>
           )}
@@ -125,7 +129,7 @@ export function RegisterForm({
       <div className="text-center text-sm">
         Masz już konto?{" "}
         <NavLink to="/login" className="underline underline-offset-4">
-            Zaloguj się
+          Zaloguj się
         </NavLink>
       </div>
       <Toaster />

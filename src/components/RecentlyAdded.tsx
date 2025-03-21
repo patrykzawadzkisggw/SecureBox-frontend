@@ -10,8 +10,7 @@ export default function RecentlyAdded() {
   const { state } = usePasswordContext();
 
   useEffect(() => {
-    console.log("RecentlyAdded - state.history:", state.history);
-    console.log("RecentlyAdded - state.passwords:", state.passwords);
+    
   }, [state.history, state.passwords]);
 
   // Sortowanie historii po timestampie (od najnowszych) i filtrowanie istniejących kont
@@ -24,7 +23,7 @@ export default function RecentlyAdded() {
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
     .slice(0, 5);
 
-  console.log("RecentlyAdded - sortedHistory:", sortedHistory);
+  
 
   const getTimeDifference = (timestamp: string) => {
     const now = new Date();
