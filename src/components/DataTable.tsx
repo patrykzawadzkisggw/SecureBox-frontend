@@ -44,16 +44,21 @@ export const columns: ColumnDef<PasswordTable>[] = [
   {
     accessorKey: "platform",
     header: "Serwis",
-    cell: ({ row }) => (
-      <img
-        src={ findIconUrl(row.getValue("platform"))}
-          
-        alt="Logo"
-        width="40"
-        height="40"
-        style={{ borderRadius: "50%" }}
-      />
-    ),
+    cell: ({ row }) => {
+      const iconUrl = findIconUrl(row.getValue("platform"));
+      return iconUrl ? (
+        <img
+          src={iconUrl}
+          alt="Logo"
+          width="40"
+          height="40"
+          style={{ borderRadius: "50%" }}
+          className="select-none"
+        />
+      ) : (
+        <span>{row.getValue("platform")}</span>
+      );
+    },
   },
   {
     accessorKey: "login",
@@ -75,23 +80,31 @@ export const columns: ColumnDef<PasswordTable>[] = [
       const { copyToClipboard } = usePasswordContext();
       const platform = row.original.platform;
       const login = row.original.login;
-      const [isRecoverDialogOpen, setIsRecoverDialogOpen] = useState(false); 
-    const handleDecryptionFail = () => {
-      setIsRecoverDialogOpen(true);
-    };
+      const [isRecoverDialogOpen, setIsRecoverDialogOpen] = useState(false);
+      const handleDecryptionFail = () => {
+        setIsRecoverDialogOpen(true);
+      };
       return (
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button
             variant="outline"
             size="icon"
             style={{ cursor: "pointer" }}
-            onClick={() => copyToClipboard(row.getValue("passwordfile"), platform, login, handleDecryptionFail)}
+            onClick={() =>
+              copyToClipboard(
+                row.getValue("passwordfile"),
+                platform,
+                login,
+                handleDecryptionFail
+              )
+            }
           >
             <ClipboardCopy className="w-5 h-5" />
           </Button>
           <RecoverMasterkeyDialog
             isDialogOpen={isRecoverDialogOpen}
-            setIsDialogOpen={setIsRecoverDialogOpen}  />
+            setIsDialogOpen={setIsRecoverDialogOpen}
+          />
         </div>
       );
     },
@@ -103,64 +116,71 @@ export const columns: ColumnDef<PasswordTable>[] = [
       const payment = row.original;
       const { copyToClipboard } = usePasswordContext();
       const [isShowDialogOpen, setIsShowDialogOpen] = useState(false);
-      const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false); 
+      const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
       const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-      const [isRecoverDialogOpen, setIsRecoverDialogOpen] = useState(false); 
+      const [isRecoverDialogOpen, setIsRecoverDialogOpen] = useState(false);
       const handleDecryptionFail = () => {
         setIsRecoverDialogOpen(true);
       };
       return (
         <>
-        <RecoverMasterkeyDialog
-          isDialogOpen={isRecoverDialogOpen}
-          setIsDialogOpen={setIsRecoverDialogOpen} />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Akcje</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => copyToClipboard(payment.passwordfile, payment.platform, payment.login, handleDecryptionFail)
-              }
-            >
-              Kopiuj hasło
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setIsUpdateDialogOpen(true)}>
-              Zmień hasło
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setIsShowDialogOpen(true)}>
-              Pokaż
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>
-              Usuń konto
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <ShowPasswordDialog
-          isDialogOpen={isShowDialogOpen}
-          setIsDialogOpen={setIsShowDialogOpen}
-          passwordfile={payment.passwordfile}
-          platform={payment.platform}
-          login={payment.login}
-        />
-        <UpdatePasswordDialog
-          isDialogOpen={isUpdateDialogOpen}
-          setIsDialogOpen={setIsUpdateDialogOpen}
-          platform={payment.platform}
-          login={payment.login}
-        />
-        <DeleteAccountDialog
-          isDialogOpen={isDeleteDialogOpen}
-          setIsDialogOpen={setIsDeleteDialogOpen}
-          platform={payment.platform}
-          login={payment.login}
-        />
-      </>
+          <RecoverMasterkeyDialog
+            isDialogOpen={isRecoverDialogOpen}
+            setIsDialogOpen={setIsRecoverDialogOpen}
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="select-none">
+              <DropdownMenuLabel>Akcje</DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() =>
+                  copyToClipboard(
+                    payment.passwordfile,
+                    payment.platform,
+                    payment.login,
+                    handleDecryptionFail
+                  )
+                }
+              >
+                Kopiuj hasło
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsUpdateDialogOpen(true)}>
+                Zmień hasło
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsShowDialogOpen(true)}>
+                Pokaż
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>
+                Usuń konto
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <ShowPasswordDialog
+            isDialogOpen={isShowDialogOpen}
+            setIsDialogOpen={setIsShowDialogOpen}
+            passwordfile={payment.passwordfile}
+            platform={payment.platform}
+            login={payment.login}
+          />
+          <UpdatePasswordDialog
+            isDialogOpen={isUpdateDialogOpen}
+            setIsDialogOpen={setIsUpdateDialogOpen}
+            platform={payment.platform}
+            login={payment.login}
+          />
+          <DeleteAccountDialog
+            isDialogOpen={isDeleteDialogOpen}
+            setIsDialogOpen={setIsDeleteDialogOpen}
+            platform={payment.platform}
+            login={payment.login}
+          />
+        </>
       );
     },
   },
@@ -208,8 +228,8 @@ export function DataTable() {
           className="max-w-sm"
         />
         <AddPasswordDialog isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} />
-        <Button variant="default" onClick={() => setIsDialogOpen(true)}>
-          <Plus className="w-5 h-5 mr-2" />
+        <Button variant="default" onClick={() => setIsDialogOpen(true)} className="select-none">
+          <Plus className="w-5 h-5 mr-2 select-none" />
           Dodaj
         </Button>
       </div>
@@ -257,6 +277,7 @@ export function DataTable() {
             size="sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
+            className="select-none"
           >
             Poprzednia
           </Button>
@@ -265,6 +286,7 @@ export function DataTable() {
             size="sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
+            className="select-none"
           >
             Następna
           </Button>

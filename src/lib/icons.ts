@@ -1,3 +1,5 @@
+import { extractDomain } from "./functions";
+
 type Platform = {
     name: string; // Nazwa strony/platformy
     url: string; // Adres strony
@@ -108,12 +110,13 @@ type Platform = {
     { name: "Reddit", url: "reddit.com", logo: "https://www.reddit.com/favicon.ico" },
     { name: "BBC", url: "bbc.com", logo: "https://www.bbc.com/favicon.ico" },
     { name: "CNN", url: "cnn.com", logo: "https://www.cnn.com/favicon.ico" },
+    { name: "int", url: "int.pl", logo: "https://poczta.iplsc.com/n/public/images/skins/int/favicons/favicon.ico" },
   ];
 
   export const findIconUrl = (input: string): string => {
     // Usuń spacje i zmień na małe litery dla niewrażliwości na wielkość liter
-    const normalizedInput = input.replace(/\s+/g, "").toLowerCase();
-  
+    const normalizedInput = extractDomain(input.replace(/\s+/g, "").toLowerCase());
+    
     // Znajdź pasującą platformę na podstawie nazwy lub URL
     const matchedPlatform = platforms.find((platform) => {
       const normalizedName = platform.name.replace(/\s+/g, "").toLowerCase();
@@ -122,5 +125,5 @@ type Platform = {
     });
   
     // Zwróć URL ikony lub domyślną ikonę, jeśli nie znaleziono
-    return matchedPlatform ? matchedPlatform.logo : "/icons/default.png";
+    return matchedPlatform ? matchedPlatform.logo : "";
   };

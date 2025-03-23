@@ -126,6 +126,7 @@ export default function UserProfile() {
               <>
                 <Button
                   variant="outline"
+                  className="select-none"
                   onClick={() => {
                     setFirstName(currentUser.first_name);
                     setLastName(currentUser.last_name);
@@ -136,12 +137,12 @@ export default function UserProfile() {
                 >
                   Anuluj
                 </Button>
-                <Button onClick={handleSave} disabled={isSaving}>
+                <Button onClick={handleSave} disabled={isSaving} className="select-none">
                   {isSaving ? "Zapisywanie..." : "Zapisz"}
                 </Button>
               </>
             ) : (
-              <Button onClick={() => setIsEditing(true)}>Edytuj</Button>
+              <Button onClick={() => setIsEditing(true)} className="select-none">Edytuj</Button>
             )}
           </div>
         </div>

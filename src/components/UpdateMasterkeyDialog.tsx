@@ -34,7 +34,7 @@ export function UpdateMasterkeyDialog({
   const handleSubmit = async () => {
     setError("");
 
-    // Walidacja pól
+   
     if (!oldMasterkey || !newMasterkey || !confirmNewMasterkey) {
       setError("Wszystkie pola są wymagane.");
       return;
@@ -49,7 +49,7 @@ export function UpdateMasterkeyDialog({
         throw new Error("Brak danych użytkownika lub tokenu.");
       }
       const [zipResponse] = await Promise.all([
-        axios.get(`http://127.0.0.1:5000/users/${state.currentUser.id}/files`, {
+        axios.get(`${import.meta.env.VITE_API_URL}/passwords/${state.currentUser.id}/files`, {
           responseType: "blob",
           headers: { Authorization: `Bearer ${state.token}` },
         })
@@ -60,7 +60,7 @@ export function UpdateMasterkeyDialog({
             throw new Error("Nie udało się załadować plików z serwera.");
         }
 
-      // 1. Sprawdź poprawność starego masterkey
+      
       const encryptedMasterkey = localStorage.getItem(`masterkey`);
       if (!encryptedMasterkey) {
         throw new Error("Brak masterkey w localStorage.");
@@ -71,10 +71,10 @@ export function UpdateMasterkeyDialog({
         return;
       }
 
-      // 2. Wywiedź stary klucz szyfrowania
+      
       const oldEncryptionKey = await deriveEncryptionKeyFromMasterkey(oldMasterkey);
 
-      // 3. Deszyfruj wszystkie hasła
+     
       const passwordsToUpdate = [];
       for (const passwordEntry of state.passwords) {
         const encryptedData = await loadedZip.file(passwordEntry.passwordfile)?.async("string");
@@ -90,7 +90,7 @@ export function UpdateMasterkeyDialog({
         });
       }
 
-      // 4. Wywiedź nowy klucz szyfrowania i zaszyfruj hasła
+    
       const newEncryptionKey = await deriveEncryptionKeyFromMasterkey(newMasterkey);
       const encryptedPasswords = await Promise.all(
         passwordsToUpdate.map(async (entry) => {
@@ -103,9 +103,9 @@ export function UpdateMasterkeyDialog({
         })
       );
 
-      // 5. Wyślij zaktualizowane hasła do endpointu
+      
        await axios.put(
-        `http://127.0.0.1:5000/users/${state.currentUser.id}/passwords`,
+        `${import.meta.env.VITE_API_URL}/passwords/${state.currentUser.id}/passwords`,
         { passwordsall: encryptedPasswords },
         { headers: { Authorization: `Bearer ${state.token}` } }
       );

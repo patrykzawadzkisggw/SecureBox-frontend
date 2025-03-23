@@ -17,7 +17,7 @@ export default function DashboardCards() {
 
   const averageStrength = calculateAverageStrength();
   return (
-    <div className="grid md:grid-cols-3 gap-6 p-6 grid-cols-1">
+    <div className="grid md:grid-cols-3 gap-6 p-6 grid-cols-1 select-none">
       
       <AddPasswordDialog isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} />
         <div onClick={() => setIsDialogOpen(true)} className="bg-purple-50 p-6 rounded-xl  flex flex-col items-center justify-between h-48 transition hover:shadow-lg cursor-pointer">

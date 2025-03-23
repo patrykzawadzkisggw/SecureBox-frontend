@@ -4,6 +4,8 @@ import {  Plus } from "lucide-react";
 import { useState, useEffect } from "react"; 
 import { AddPasswordDialog } from "./AddPasswordDialog";
 import { usePasswordContext } from "../data/PasswordContext";
+import { extractDomain } from "@/lib/functions";
+import { findIconUrl } from "@/lib/icons";
 
 export default function RecentlyAdded() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -55,29 +57,32 @@ export default function RecentlyAdded() {
         {sortedHistory.length > 0 ? (
           sortedHistory.map((item) => {
             const strengthInfo = getStrengthInfo(item.strength);
-            const passwordEntry = state.passwords.find(
-              (p) => p.platform === item.platform && p.login === item.login
-            );
-            const logo = passwordEntry?.logo || "https://static.vecteezy.com/system/resources/previews/013/948/544/non_2x/gmail-logo-on-transparent-white-background-free-vector.jpg";
+            
+            const logo = findIconUrl(item.platform); 
 
             return (
               <div key={item.id} className="flex items-center justify-between space-x-4">
                 <div className="flex items-center space-x-4">
-                  <img src={logo} alt={item.platform} className="w-12 h-12 rounded-full" />
+                  {logo && <img src={logo} alt={item.platform} className="w-12 h-12 rounded-full" />}
+                    {!logo && (
+                    <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
+                    </div>
+                    )}
                   <div>
-                    <p className="text-lg font-medium text-gray-900">{item.platform}</p>
+                    <p className="text-lg font-medium text-gray-900">{extractDomain(item.platform)}</p>
                     <p className="text-sm text-gray-500">
                       {item.login} • {getTimeDifference(item.timestamp)}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex-1 flex flex-col items-center">
-                  <p className={`text-sm font-medium ${strengthInfo.color}`}>
-                    {strengthInfo.text}
-                  </p>
-                  <Progress value={item.strength} className="w-32 h-2 bg-gray-200" />
-                </div>
+                <div className="flex-1 flex flex-col items-end">
+  <p className={`text-sm font-medium ${strengthInfo.color} text-right`}>
+    {strengthInfo.text}
+  </p>
+  <Progress value={item.strength} className="w-32 h-2 bg-gray-200" />
+</div>
+
 
                 
               </div>

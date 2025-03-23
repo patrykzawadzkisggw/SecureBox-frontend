@@ -46,7 +46,7 @@ export default function GenPasswordPage() {
 
   return (
     <PageTemplate title="Manager haseł - Generator">
-      <div className="flex justify-center">
+      <div className="flex justify-center select-none">
         <div className="flex flex-1 flex-col gap-4 px-4 py-10 max-w-4xl">
           <div className="flex items-center justify-center p-4">
             <Card className="w-full max-w-md shadow-lg rounded-2xl">

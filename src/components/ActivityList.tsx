@@ -1,7 +1,6 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 import { usePasswordContext } from "../data/PasswordContext";
+import { extractDomain } from "@/lib/functions";
 
 interface Activity {
   time: string; // np. "10:15"
@@ -67,7 +66,7 @@ export default function ActivityList() {
             </div>
             <div className={cn("w-1 h-10 rounded-full", activity.color)} />
             <div>
-              <p className="text-lg font-semibold text-gray-800">{activity.name}</p>
+              <p className="text-lg font-semibold text-gray-800">{extractDomain(activity.name)}</p>
               <p className="text-sm text-purple-600">{activity.email}</p>
             </div>
           </div>

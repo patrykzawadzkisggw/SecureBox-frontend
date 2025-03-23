@@ -92,7 +92,7 @@ export function Chart() {
   }
 
   return (
-    <ChartContainer config={chartConfig}>
+    <ChartContainer config={chartConfig} className="select-none">
       <BarChart
         accessibilityLayer
         data={chartData}

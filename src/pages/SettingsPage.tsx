@@ -13,9 +13,9 @@ export default function SettingsPage() {
     <PageTemplate title="Manager haseł">
       <div className="flex justify-center">
         <div className="flex flex-1 flex-col gap-4 px-4 py-10 max-w-4xl">
-          <h1 className="text-3xl font-bold tracking-tight">Ustawienia</h1>
-          <Tabs defaultValue="2fa">
-            <TabsList>
+          <h1 className="text-3xl font-bold tracking-tight select-none">Ustawienia</h1>
+            <Tabs defaultValue="2fa">
+            <TabsList className="w-full select-none">
               <TabsTrigger value="2fa">2FA</TabsTrigger>
               {/* <TabsTrigger value="trusted">Zaufane urządzenia</TabsTrigger> */}
               <TabsTrigger value="export">Export</TabsTrigger>
@@ -38,13 +38,13 @@ export default function SettingsPage() {
             </TabsContent>
             <TabsContent value="accountSettings">
               <UserProfile />
-              <Button onClick={() => setIsMasterkeyDialogOpen(true)}>Zmień Masterkey</Button>
+              <Button onClick={() => setIsMasterkeyDialogOpen(true)} className="select-none">Zmień Masterkey</Button>
             <UpdateMasterkeyDialog
-        isDialogOpen={isMasterkeyDialogOpen}
-        setIsDialogOpen={setIsMasterkeyDialogOpen}
-      />
+            isDialogOpen={isMasterkeyDialogOpen}
+            setIsDialogOpen={setIsMasterkeyDialogOpen}
+            />
             </TabsContent>
-          </Tabs>
+            </Tabs>
         </div>
       </div>
     </PageTemplate>

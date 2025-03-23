@@ -89,7 +89,7 @@ export default function ExportToJSON() {
     <>
       <Button
         variant="outline"
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 select-none"
         onClick={exportToJSON}
         disabled={isExporting || state.loading || state.passwords.length === 0}
       >

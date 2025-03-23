@@ -319,7 +319,7 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const login = async (login: string, password: string, masterkey: string) => {
     try {
-      const response = await axios.post<{ user: User; token: string }>("http://127.0.0.1:5000/login", {
+      const response = await axios.post<{ user: User; token: string }>(`${import.meta.env.VITE_API_URL}/login`, {
         login,
         password,
       });
@@ -369,7 +369,7 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const token = state.token;
       if (!token) throw new Error("Brak tokenu JWT");
 
-      const response = await axios.get<LoginEntry[]>(`http://127.0.0.1:5000/users/${userId}/logins`, {
+      const response = await axios.get<LoginEntry[]>(`${import.meta.env.VITE_API_URL}/users/${userId}/logins`, {
         headers: { Authorization: `Bearer ${state.token}` },
       });
 
@@ -396,7 +396,7 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   
       try {
         
-        const response = await axios.get<User>("http://127.0.0.1:5000/users/me/get", {
+        const response = await axios.get<User>(`${import.meta.env.VITE_API_URL}/users/me/get`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         dispatch({ type: "UPDATE_USER", payload: response.data });
@@ -418,7 +418,7 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   
         
         if (!state.zip && response.data.id) {
-          const zipResponse = await axios.get(`http://127.0.0.1:5000/users/${response.data.id}/files`, {
+          const zipResponse = await axios.get(`${import.meta.env.VITE_API_URL}/passwords/${response.data.id}/files`, {
             responseType: "blob",
             headers: { Authorization: `Bearer ${token}` },
           });
@@ -467,20 +467,20 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       try {
         const userId = state.currentUser.id;
         const [passwordsResponse, devicesResponse, userResponse, zipResponse, loginsResponse] = await Promise.all([
-          axios.get<PasswordTable[]>("http://127.0.0.1:5000/passwords", {
+          axios.get<PasswordTable[]>(`${import.meta.env.VITE_API_URL}/passwords`, {
             headers: { Authorization: `Bearer ${state.token}` },
           }),
-          axios.get<TrustedDevice[]>(`http://127.0.0.1:5000/users/${userId}/trusted-devices`, {
+          axios.get<TrustedDevice[]>(`${import.meta.env.VITE_API_URL}/users/${userId}/trusted-devices`, {
             headers: { Authorization: `Bearer ${state.token}` },
           }),
-          axios.get<User>(`http://127.0.0.1:5000/users/${userId}`, {
+          axios.get<User>(`${import.meta.env.VITE_API_URL}/users/${userId}`, {
             headers: { Authorization: `Bearer ${state.token}` },
           }),
-          axios.get(`http://127.0.0.1:5000/users/${userId}/files`, {
+          axios.get(`${import.meta.env.VITE_API_URL}/passwords/${userId}/files`, {
             responseType: "blob",
             headers: { Authorization: `Bearer ${state.token}` },
           }),
-          axios.get<LoginEntry[]>(`http://127.0.0.1:5000/users/${userId}/logins`, {
+          axios.get<LoginEntry[]>(`${import.meta.env.VITE_API_URL}/users/${userId}/logins`, {
             headers: { Authorization: `Bearer ${state.token}` },
           }),
         ]);
@@ -556,7 +556,7 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const encryptedPassword = `${encrypted}:${iv}`;
 
       const response = await axios.post<PasswordTable>(
-        `http://127.0.0.1:5000/users/${userId}/files/`,
+        `${import.meta.env.VITE_API_URL}/passwords/${userId}/files/`,
         { password: encryptedPassword, platform, login },
         { headers: { Authorization: `Bearer ${state.token}` } }
       );
@@ -564,7 +564,7 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const strengthResult = zxcvbn(password);
       const strength = (strengthResult.score / 4) * 100;
 
-      const zipResponse = await axios.get(`http://127.0.0.1:5000/users/${userId}/files`, {
+      const zipResponse = await axios.get(`${import.meta.env.VITE_API_URL}/passwords/${userId}/files`, {
         responseType: "blob",
         headers: { Authorization: `Bearer ${state.token}` },
       });
@@ -604,9 +604,10 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
       const { encrypted, iv } = await encryptPassword(newPassword, state.encryptionKey);
       const encryptedPassword = `${encrypted}:${iv}`;
-
+      const platform2 = encodeURIComponent(platform);
+      const login2 = encodeURIComponent(login);
       const response = await axios.put<PasswordTable>(
-        `http://127.0.0.1:5000/users/${userId}/passwords/${platform}/${login}`,
+        `${import.meta.env.VITE_API_URL}/passwords/${userId}/passwords/${platform2}/${login2}`,
         { new_password: encryptedPassword },
         { headers: { Authorization: `Bearer ${state.token}` } }
       );
@@ -614,7 +615,7 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const strengthResult = zxcvbn(newPassword);
       const strength = (strengthResult.score / 4) * 100;
 
-      const zipResponse = await axios.get(`http://127.0.0.1:5000/users/${userId}/files`, {
+      const zipResponse = await axios.get(`${import.meta.env.VITE_API_URL}/passwords/${userId}/files`, {
         responseType: "blob",
         headers: { Authorization: `Bearer ${state.token}` },
       });
@@ -650,15 +651,17 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const deletePassword = async (platform: string, login: string) => {
+    console.log(login);
     try {
       const userId = state.currentUser?.id;
       if (!userId || !state.token) throw new Error("Brak tokenu JWT lub niezalogowany użytkownik");
-
-      await axios.delete(`http://127.0.0.1:5000/users/${userId}/passwords/${platform}/${login}`, {
+      const platform2 = encodeURIComponent(platform);
+      const login2 = encodeURIComponent(login);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/passwords/${userId}/passwords/${platform2}/${login2}`, {
         headers: { Authorization: `Bearer ${state.token}` },
       });
 
-      const zipResponse = await axios.get(`http://127.0.0.1:5000/users/${userId}/files`, {
+      const zipResponse = await axios.get(`${import.meta.env.VITE_API_URL}/passwords/${userId}/files`, {
         responseType: "blob",
         headers: { Authorization: `Bearer ${state.token}` },
       });
@@ -688,7 +691,7 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (!userId || !state.token) throw new Error("Brak tokenu JWT lub niezalogowany użytkownik");
 
       const response = await axios.patch<TrustedDevice>(
-        `http://127.0.0.1:5000/users/${userId}/trusted-devices`,
+        `${import.meta.env.VITE_API_URL}/users/${userId}/trusted-devices`,
         { device_id, user_agent, is_trusted },
         { headers: { Authorization: `Bearer ${state.token}` } }
       );
@@ -710,7 +713,7 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const userId = state.currentUser?.id;
       if (!userId || !state.token) throw new Error("Brak tokenu JWT lub niezalogowany użytkownik");
 
-      await axios.delete(`http://127.0.0.1:5000/users/${userId}/trusted-devices/${device_id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/users/${userId}/trusted-devices/${device_id}`, {
         headers: { Authorization: `Bearer ${state.token}` },
       });
 
@@ -731,7 +734,7 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const token = state.token;
       if (!token) throw new Error("Brak tokenu JWT");
 
-      const response = await axios.get<User>(`http://127.0.0.1:5000/users/${userId}`, {
+      const response = await axios.get<User>(`${import.meta.env.VITE_API_URL}/users/${userId}`, {
         headers: { Authorization: `Bearer ${state.token}` },
       });
       dispatch({ type: "UPDATE_USER", payload: response.data });
@@ -748,7 +751,7 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const addUser = async (first_name: string, last_name: string, login: string, password: string, masterkey: string) => {
     try {
-      const response = await axios.post<User>("http://127.0.0.1:5000/users", {
+      const response = await axios.post<User>(`${import.meta.env.VITE_API_URL}/users`, {
         first_name,
         last_name,
         login,
@@ -787,7 +790,7 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
      
       if (!state.zip) {
-        const zipResponse = await axios.get(`http://127.0.0.1:5000/users/${userId}/files`, {
+        const zipResponse = await axios.get(`${import.meta.env.VITE_API_URL}/passwords/${userId}/files`, {
           responseType: "blob",
           headers: { Authorization: `Bearer ${state.token}` },
         });
@@ -830,21 +833,12 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (!token) throw new Error("Brak tokenu JWT");
 
       const response = await axios.patch<User>(
-        `http://127.0.0.1:5000/users/${userId}`,
+        `${import.meta.env.VITE_API_URL}/users/${userId}`,
         { first_name, last_name, login, password },
         { headers: { Authorization: `Bearer ${state.token}` } }
       );
       dispatch({ type: "UPDATE_USER", payload: response.data });
 
-      if (password) {
-        const encryptedMasterkey = localStorage.getItem(`masterkey`);
-        if (encryptedMasterkey && state.encryptionKey) {
-          const decryptedMasterkey = await decryptMasterkey(encryptedMasterkey, state.currentUser!.password);
-          const newEncryptedMasterkey = await encryptMasterkey(decryptedMasterkey, password);
-          localStorage.setItem(`masterkey`, newEncryptedMasterkey);
-          toast.info("Zaktualizowano masterkey w localStorage po zmianie hasła.", { duration: 3000 });
-        }
-      }
 
       toast.success("Dane użytkownika zaktualizowane!", {
         description: `Zaktualizowano dane dla użytkownika ${response.data.login}`,

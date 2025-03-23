@@ -58,7 +58,7 @@ export default function ImportFromJSON() {
     <label htmlFor="json-import" className="flex">
       <Button
         variant="outline"
-        className="flex items-center gap-2 cursor-pointer"
+        className="flex items-center gap-2 cursor-pointer select-none"
         disabled={isImporting || state.loading}
         asChild
       >
