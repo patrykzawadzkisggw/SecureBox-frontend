@@ -28,16 +28,22 @@ export function Chart() {
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [hasFetched, setHasFetched] = useState(false); // Flaga kontrolująca, czy dane zostały pobrane
 
+  function rotateArray(arr : string[],shift : number) : string[] {
+    const len = arr.length;
+    const offset = shift % len;
+    return [...arr.slice(0,offset),...arr.slice(offset) ]
+  }
+  const days = [
+    "Poniedzialek",
+    "Wtorek",
+    "Sroda",
+    "Czwartek",
+    "Piatek",
+    "Sobota",
+    "Niedziela",
+  ];
   const processLoginData = (logins: { timestamp: string }[]): ChartData[] => {
-    const daysOfWeek = [
-      "Poniedzialek",
-      "Wtorek",
-      "Sroda",
-      "Czwartek",
-      "Piatek",
-      "Sobota",
-      "Niedziela",
-    ];
+    const daysOfWeek = days;
     const loginCounts = new Array(7).fill(0);
 
     logins.forEach((entry) => {

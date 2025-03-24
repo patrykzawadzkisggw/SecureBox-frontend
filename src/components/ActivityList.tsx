@@ -14,18 +14,22 @@ export default function ActivityList() {
   const { state } = usePasswordContext();
 
   const formatActivity = (entry: { timestamp: string; login: string; page: string }): Activity => {
+    
     const date = new Date(entry.timestamp);
+    
     const now = new Date();
     const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
 
     let formattedDate = "";
     if (diffInDays === 0) {
       formattedDate = "Dziś";
+      if(date.getDate() < now.getDate()) formattedDate = "Wczoraj";
     } else if (diffInDays === 1) {
       formattedDate = "1 dzień";
     } else {
       formattedDate = `${diffInDays} dni`;
     }
+   // console.log(`${diffInDays} ${date.getDate()} ${date.getMonth()} ${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}`)
 
     const time = date.toLocaleTimeString("pl-PL", {
       hour: "2-digit",
@@ -46,7 +50,7 @@ export default function ActivityList() {
     ? state.userLogins
         .filter((entry) => state.currentUser && entry.user_id === state.currentUser.id)
         .map(formatActivity)
-        .slice(0, 5) // Limit do 5 ostatnich
+        .slice(-5) // Limit do 5 ostatnich
     : [];
 
   if (!state.currentUser) {

@@ -10,9 +10,15 @@ export default function DashboardCards() {
 
 
   const calculateAverageStrength = () => {
-    if (state.history.length === 0) return 0; // Jeśli brak danych, zwracamy 0%
-    const totalStrength = state.history.reduce((sum, item) => sum + item.strength, 0);
-    return Math.round(totalStrength / state.history.length); // Zaokrąglamy do pełnych procentów
+    if (state.history.length === 0) return 0;
+    const hist=[...state.history]
+    .filter((item) =>
+      state.passwords.some(
+        (p) => p.platform === item.platform && p.login === item.login
+      )
+    )
+    const totalStrength = hist.reduce((sum, item) => sum + item.strength, 0);
+    return Math.round(totalStrength / hist.length);
   };
 
   const averageStrength = calculateAverageStrength();
