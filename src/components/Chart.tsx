@@ -26,13 +26,13 @@ const chartConfig = {
 export function Chart() {
   const { state, getUserLogins } = usePasswordContext();
   const [chartData, setChartData] = useState<ChartData[]>([]);
-  const [hasFetched, setHasFetched] = useState(false); // Flaga kontrolująca, czy dane zostały pobrane
+  const [hasFetched, setHasFetched] = useState(false); 
 
-  function rotateArray(arr : string[],shift : number) : string[] {
+  /*function rotateArray(arr : string[],shift : number) : string[] {
     const len = arr.length;
     const offset = shift % len;
     return [...arr.slice(0,offset),...arr.slice(offset) ]
-  }
+  }*/
   const days = [
     "Poniedzialek",
     "Wtorek",
@@ -46,10 +46,15 @@ export function Chart() {
     const daysOfWeek = days;
     const loginCounts = new Array(7).fill(0);
 
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
     logins.forEach((entry) => {
       const date = new Date(entry.timestamp);
+      if (date >= oneWeekAgo) {
       const dayIndex = date.getDay();
-      loginCounts[(dayIndex + 6) % 7] += 1; // Przesuwamy, aby Poniedziałek był 0
+      loginCounts[(dayIndex + 6) % 7] += 1; 
+      }
     });
 
     return daysOfWeek.map((day, index) => ({
@@ -77,17 +82,17 @@ export function Chart() {
           setChartData(processedData);
           toast.success("Pobrano dane logowań!");
         }
-        setHasFetched(true); // Ustawiamy flagę po pobraniu danych
+        setHasFetched(true); 
       } catch (error) {
         console.error("Błąd pobierania danych:", error);
         toast.error("Nie udało się pobrać danych logowań.");
-        setChartData([]); // Ustawiamy pustą tablicę w przypadku błędu
-        setHasFetched(true); // Ustawiamy flagę nawet w przypadku błędu
+        setChartData([]); 
+        setHasFetched(true); 
       }
     };
 
     fetchLogins();
-  }, [state.currentUser?.id, state.token, hasFetched, getUserLogins]); // Zależności: ID użytkownika, token i flaga pobrania
+  }, [state.currentUser?.id, state.token, hasFetched, getUserLogins]); 
 
   if (!state.currentUser) {
     return <div className="text-center text-gray-500">Zaloguj się, aby zobaczyć wykres.</div>;
