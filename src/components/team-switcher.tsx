@@ -1,6 +1,5 @@
 import * as React from "react"
 import { ChevronDown, LogOut } from "lucide-react"
-// Removed duplicate import
 import {
   DropdownMenu,
   DropdownMenuContent,

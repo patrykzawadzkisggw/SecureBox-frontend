@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RecoverMasterkeyDialog } from "./RecoverMasterkeyDialog";
 import {
   ColumnDef,
@@ -35,28 +35,106 @@ import {
 import { AddPasswordDialog } from "./AddPasswordDialog";
 import { ShowPasswordDialog } from "./ShowPasswordDialog";
 import { usePasswordContext, PasswordTable } from "../data/PasswordContext";
+
+declare module '@tanstack/react-table' {
+  interface TableMeta<TData> {
+    isLoadingIcons?: boolean;
+  }
+}
 import { Toaster } from "sonner";
 import { UpdatePasswordDialog } from "./UpdatePasswordDialog";
 import { DeleteAccountDialog } from "./DeleteAccountDialog";
 import { findIconUrl } from "@/lib/icons";
+import { Skeleton } from "@/components/ui/skeleton";
+
+
+const getRandomColor = (platform: string) => {
+  const colors = [
+    "#4ECDC4",
+    "#45B7D1",
+    "#96CEB4",
+    "#FFEEAD",
+    "#D4A5A5",
+    "#9B59B6",
+    "#3498DB",
+  ];
+ 
+  const hash = platform.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return colors[hash % colors.length];
+};
+
+
+const getInitials = (platform: string) => {
+  const words = platform.split(" ");
+  if (words.length > 1) {
+    return `${words[0][0]}${words[1][0]}`.toUpperCase();
+  }
+  return platform.slice(0, 2).toUpperCase();
+};
 
 export const columns: ColumnDef<PasswordTable>[] = [
   {
     accessorKey: "platform",
     header: "Serwis",
-    cell: ({ row }) => {
-      const iconUrl = findIconUrl(row.getValue("platform"));
-      return iconUrl ? (
-        <img
-          src={iconUrl}
-          alt="Logo"
-          width="40"
-          height="40"
-          style={{ borderRadius: "50%" }}
-          className="select-none"
-        />
-      ) : (
-        <span>{row.getValue("platform")}</span>
+    cell: ({ row, table }) => {
+      const platform: string = row.getValue("platform");
+      const iconUrl = findIconUrl(platform);
+      const isLoading = table.options.meta?.isLoadingIcons;
+
+      return (
+        <div
+          style={{
+            width: "40px",
+            height: "40px",
+            position: "relative",
+            display: "inline-block",
+          }}
+        >
+          {iconUrl ? (
+            <>
+              <Skeleton
+                className="w-[40px] h-[40px] rounded-full absolute top-0 left-0"
+                style={{
+                  opacity: isLoading ? 1 : 0,
+                  transition: "opacity 0.5s ease-in, background 0.2s ease-in",
+                }}
+              />
+              <img
+                src={iconUrl}
+                alt={`${platform} logo`}
+                width="40"
+                height="40"
+                style={{
+                  borderRadius: "50%",
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  opacity: isLoading ? 0 : 1,
+                  transition: "opacity 0.5s ease-in, background 0.2s ease-in",
+                }}
+                className="select-none"
+              />
+            </>
+          ) : (
+            <div
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "50%",
+                backgroundColor: getRandomColor(platform),
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#fff",
+                fontSize: "16px",
+                fontWeight: "bold",
+              }}
+              className="select-none"
+            >
+              {getInitials(platform)}
+            </div>
+          )}
+        </div>
       );
     },
   },
@@ -193,7 +271,38 @@ export function DataTable() {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  
+  const [isLoadingIcons, setIsLoadingIcons] = useState(false);
+
+  useEffect(() => {
+    if (state.passwords.length === 0) return;
+
+    const iconUrls = state.passwords
+      .map((item) => findIconUrl(item.platform))
+      .filter(Boolean) as string[];
+
+    if (iconUrls.length === 0) {
+      setIsLoadingIcons(false);
+      return;
+    }
+
+    setIsLoadingIcons(true);
+    let loadedCount = 0;
+    const totalIcons = iconUrls.length;
+
+    const handleLoad = () => {
+      loadedCount += 1;
+      if (loadedCount === totalIcons) {
+        setIsLoadingIcons(false);
+      }
+    };
+
+    iconUrls.forEach((url) => {
+      const img = new Image();
+      img.src = url;
+      img.onload = handleLoad;
+      img.onerror = handleLoad;
+    });
+  }, [state.passwords]);
 
   const table = useReactTable({
     data: state.passwords,
@@ -212,6 +321,9 @@ export function DataTable() {
       columnVisibility,
       rowSelection,
     },
+    meta: {
+      isLoadingIcons,
+    },
   });
 
   if (state.loading) {
@@ -224,11 +336,20 @@ export function DataTable() {
         <Input
           placeholder="Filtruj konta..."
           value={(table.getColumn("login")?.getFilterValue() as string) ?? ""}
-          onChange={(event) => table.getColumn("login")?.setFilterValue(event.target.value)}
+          onChange={(event) =>
+            table.getColumn("login")?.setFilterValue(event.target.value)
+          }
           className="max-w-sm"
         />
-        <AddPasswordDialog isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} />
-        <Button variant="default" onClick={() => setIsDialogOpen(true)} className="select-none">
+        <AddPasswordDialog
+          isDialogOpen={isDialogOpen}
+          setIsDialogOpen={setIsDialogOpen}
+        />
+        <Button
+          variant="default"
+          onClick={() => setIsDialogOpen(true)}
+          className="select-none"
+        >
           <Plus className="w-5 h-5 mr-2 select-none" />
           Dodaj
         </Button>
@@ -243,7 +364,10 @@ export function DataTable() {
                   <TableHead key={header.id}>
                     {header.isPlaceholder
                       ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -252,7 +376,10 @@ export function DataTable() {
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
