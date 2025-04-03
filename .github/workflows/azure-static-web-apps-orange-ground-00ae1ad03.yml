@@ -19,20 +19,24 @@ jobs:
         with:
           submodules: true
           lfs: false
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '22'
 
       - name: Install pnpm
-        run: npm install -g pnpm
+        run: npm install -g pnpm@10.4.1
 
       - name: Install dependencies
         run: pnpm install
 
       - name: Build
         run: pnpm build
+
+      - name: Verify build output
+        run: ls -la dist || echo "dist folder not found"
 
       - name: Deploy
         id: builddeploy
@@ -41,8 +45,9 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ORANGE_GROUND_00AE1AD03 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "/" # Główny folder repozytorium
-          output_location: "dist" # Folder z zbudowaną aplikacją
+          app_location: "/"
+          output_location: "dist"
+          skip_app_build: true 
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
