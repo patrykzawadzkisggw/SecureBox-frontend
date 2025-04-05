@@ -31,7 +31,6 @@ export function RecoverMasterkeyDialog({
   const handleSubmit = async () => {
     setError("");
 
-    // Walidacja pól
     if (!masterkey || !confirmMasterkey) {
       setError("Oba pola są wymagane.");
       return;

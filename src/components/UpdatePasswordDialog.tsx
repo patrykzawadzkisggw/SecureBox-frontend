@@ -30,7 +30,7 @@ export function UpdatePasswordDialog({
   const [strength, setStrength] = useState(0);
   const { updatePassword } = usePasswordContext();
 
-  // Ocena siły hasła w czasie rzeczywistym
+
   useEffect(() => {
     if (newPassword) {
       const result = zxcvbn(newPassword);

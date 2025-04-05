@@ -31,7 +31,7 @@ export function ShowPasswordDialog({
   const [password, setPassword] = useState("");
   const [strength, setStrength] = useState(0);
   const [isRecoverDialogOpen, setIsRecoverDialogOpen] = useState(false);
-  const [hasAttemptedDecryption, setHasAttemptedDecryption] = useState(false); // Nowa flaga
+  const [hasAttemptedDecryption, setHasAttemptedDecryption] = useState(false);
   const { state } = usePasswordContext();
 
   const fetchPassword = async () => {
@@ -55,26 +55,25 @@ export function ShowPasswordDialog({
       const decryptedPassword = await decryptPassword(encrypted, iv, state.encryptionKey);
       setPassword(decryptedPassword);
       setStrength((zxcvbn(decryptedPassword).score / 4) * 100);
-      setHasAttemptedDecryption(true); // Oznacza, że próba się udała
+      setHasAttemptedDecryption(true); 
     } catch (error) {
       console.error("Błąd odczytu/deszyfrowania hasła:", error);
       setPassword("Błąd deszyfrowania");
       setStrength(0);
       if (!hasAttemptedDecryption) {
-        setIsRecoverDialogOpen(true); // Otwiera dialog tylko przy pierwszej nieudanej próbie
+        setIsRecoverDialogOpen(true); 
         setHasAttemptedDecryption(true);
       }
     }
   };
 
-  // Pobieranie hasła przy otwarciu dialogu
   useEffect(() => {
     if (isDialogOpen) {
       fetchPassword();
     }
   }, [isDialogOpen, state.zip, state.encryptionKey, passwordfile]);
 
-  // Ponowne próby po zamknięciu dialogu odzyskiwania, ale bez pętli
+
   useEffect(() => {
     if (!isRecoverDialogOpen && state.encryptionKey && hasAttemptedDecryption) {
       fetchPassword();

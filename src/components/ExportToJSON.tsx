@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react"; // Dodano useEffect
+import { useState, useEffect } from "react"; 
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { usePasswordContext, decryptPassword } from "../data/PasswordContext";
 import { toast } from "sonner";
-import { RecoverMasterkeyDialog } from "./RecoverMasterkeyDialog"; // Import dialogu
+import { RecoverMasterkeyDialog } from "./RecoverMasterkeyDialog";
 
 export default function ExportToJSON() {
   const { state } = usePasswordContext();
   const [isExporting, setIsExporting] = useState(false);
   const [isRecoverDialogOpen, setIsRecoverDialogOpen] = useState(false);
-  const [hasAttemptedExport, setHasAttemptedExport] = useState(false); // Flaga zapobiegająca pętli
+  const [hasAttemptedExport, setHasAttemptedExport] = useState(false); 
 
   const exportToJSON = async () => {
     setIsExporting(true);
@@ -62,7 +62,7 @@ export default function ExportToJSON() {
         description: "Plik JSON z hasłami został pobrany.",
         duration: 3000,
       });
-      setHasAttemptedExport(true); // Oznacza udaną próbę
+      setHasAttemptedExport(true); 
     } catch (error) {
       console.error("Błąd podczas eksportu do JSON:", error);
       toast.error("Błąd!", {
@@ -70,7 +70,7 @@ export default function ExportToJSON() {
         duration: 3000,
       });
       if (!hasAttemptedExport) {
-        setIsRecoverDialogOpen(true); // Otwiera dialog tylko przy pierwszej nieudanej próbie
+        setIsRecoverDialogOpen(true); 
         setHasAttemptedExport(true);
       }
     } finally {
@@ -78,7 +78,6 @@ export default function ExportToJSON() {
     }
   };
 
-  // Ponowne próby eksportu po zamknięciu dialogu odzyskiwania
   useEffect(() => {
     if (!isRecoverDialogOpen && state.encryptionKey && hasAttemptedExport) {
       exportToJSON();

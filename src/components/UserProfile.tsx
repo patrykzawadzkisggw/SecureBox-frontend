@@ -10,14 +10,12 @@ export default function UserProfile() {
   const { state, updateUser } = usePasswordContext();
   const currentUser = state.currentUser;
     const navigate = useNavigate();
-  // Stan lokalny dla formularza
   const [firstName, setFirstName] = useState(currentUser?.first_name || "");
   const [lastName, setLastName] = useState(currentUser?.last_name || "");
   const [password, setPassword] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Aktualizacja lokalnego stanu przy zmianie currentUser
   React.useEffect(() => {
     if (currentUser) {
       setFirstName(currentUser.first_name);

@@ -49,7 +49,7 @@ export function UpdateMasterkeyDialog({
         throw new Error("Brak danych użytkownika lub tokenu.");
       }
       const [zipResponse] = await Promise.all([
-        axios.get(`${import.meta.env.VITE_API_URL}/passwords/${state.currentUser.id}/files`, {
+        axios.get(`${process.env.VITE_API_URL}/passwords/${state.currentUser.id}/files`, {
           responseType: "blob",
           headers: { Authorization: `Bearer ${state.token}` },
         })
@@ -105,7 +105,7 @@ export function UpdateMasterkeyDialog({
 
       
        await axios.put(
-        `${import.meta.env.VITE_API_URL}/passwords/${state.currentUser.id}/passwords`,
+        `${process.env.VITE_API_URL}/passwords/${state.currentUser.id}/passwords`,
         { passwordsall: encryptedPasswords },
         { headers: { Authorization: `Bearer ${state.token}` } }
       );

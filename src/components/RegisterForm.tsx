@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +15,7 @@ export function RegisterForm({
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [login, setLogin] = useState("");
-  const [password, setPassword] = useState(""); // Hasło logowania
+  const [password, setPassword] = useState(""); 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
@@ -28,24 +26,24 @@ export function RegisterForm({
     setErrorMessage("");
 
     try {
-      // Przekazujemy oba hasła do addUser
+      
       await addUser(firstName, lastName, login, password, "123");
       toast.success("Konto utworzone!", {
         description: `Witaj, ${firstName} ${lastName}! Możesz się teraz zalogować.`,
         duration: 3000,
       });
 
-      // Czyścimy formularz po sukcesie
+      
       setFirstName("");
       setLastName("");
       setLogin("");
       setPassword("");
 
-      navigate("/login"); // Przekierowanie na stronę logowania
+      navigate("/login"); 
     } catch (error) {
       console.error("Błąd rejestracji:", error);
       setErrorMessage("Rejestracja nie powiodła się. Login może już istnieć lub dane są nieprawidłowe.");
-      setPassword(""); // Czyścimy pole hasła przy błędzie
+      setPassword(""); 
       toast.error("Błąd rejestracji!", {
         description: "Nie udało się utworzyć konta. Sprawdź dane i spróbuj ponownie.",
         duration: 3000,

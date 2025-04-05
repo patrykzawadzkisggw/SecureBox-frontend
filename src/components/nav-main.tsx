@@ -16,12 +16,12 @@ export function NavMain({
     icon: LucideIcon;
   }[];
 }) {
-  const location = useLocation(); // Pobiera aktualną ścieżkę
+  const location = useLocation(); 
 
   return (
     <SidebarMenu>
       {items.map((item) => {
-        const isActive = location.pathname === item.url; // Sprawdza, czy ścieżka jest aktywna
+        const isActive = location.pathname === item.url; 
 
         return (
           <SidebarMenuItem key={item.title}>

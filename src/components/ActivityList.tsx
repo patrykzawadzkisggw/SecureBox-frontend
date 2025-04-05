@@ -45,12 +45,11 @@ export default function ActivityList() {
     };
   };
 
-  // Przetwarzamy dane z kontekstu
   const activities = state.currentUser
     ? state.userLogins
         .filter((entry) => state.currentUser && entry.user_id === state.currentUser.id)
         .map(formatActivity)
-        .slice(-5) // Limit do 5 ostatnich
+        .slice(-5) 
     : [];
 
   if (!state.currentUser) {

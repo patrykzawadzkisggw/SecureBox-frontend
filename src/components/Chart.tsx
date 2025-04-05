@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis } from "recharts";
 import {
@@ -26,13 +24,8 @@ const chartConfig = {
 export function Chart() {
   const { state, getUserLogins } = usePasswordContext();
   const [chartData, setChartData] = useState<ChartData[]>([]);
-  const [hasFetched, setHasFetched] = useState(false); 
+  const [hasFetched, setHasFetched] = useState(false);
 
-  /*function rotateArray(arr : string[],shift : number) : string[] {
-    const len = arr.length;
-    const offset = shift % len;
-    return [...arr.slice(0,offset),...arr.slice(offset) ]
-  }*/
   const days = [
     "Poniedzialek",
     "Wtorek",
@@ -42,6 +35,7 @@ export function Chart() {
     "Sobota",
     "Niedziela",
   ];
+
   const processLoginData = (logins: { timestamp: string }[]): ChartData[] => {
     const daysOfWeek = days;
     const loginCounts = new Array(7).fill(0);
@@ -52,8 +46,8 @@ export function Chart() {
     logins.forEach((entry) => {
       const date = new Date(entry.timestamp);
       if (date >= oneWeekAgo) {
-      const dayIndex = date.getDay();
-      loginCounts[(dayIndex + 6) % 7] += 1; 
+        const dayIndex = date.getDay();
+        loginCounts[(dayIndex + 6) % 7] += 1;
       }
     });
 
@@ -66,13 +60,16 @@ export function Chart() {
   useEffect(() => {
     const fetchLogins = async () => {
       if (!state.currentUser?.id || !state.token || hasFetched) {
-        return; // Nie pobieraj, jeśli już raz pobrano dane
+        return; 
       }
 
       try {
         const userId = state.currentUser.id;
 
-        if (state.userLogins.length > 0 && state.userLogins.some((entry) => entry.user_id === userId)) {
+        if (
+          state.userLogins.length > 0 &&
+          state.userLogins.some((entry) => entry.user_id === userId)
+        ) {
           const processedData = processLoginData(state.userLogins);
           setChartData(processedData);
           console.log("Użyto danych z pamięci podręcznej w stanie kontekstu.");
@@ -82,20 +79,24 @@ export function Chart() {
           setChartData(processedData);
           toast.success("Pobrano dane logowań!");
         }
-        setHasFetched(true); 
+        setHasFetched(true);
       } catch (error) {
         console.error("Błąd pobierania danych:", error);
         toast.error("Nie udało się pobrać danych logowań.");
-        setChartData([]); 
-        setHasFetched(true); 
+        setChartData([]);
+        setHasFetched(true);
       }
     };
 
     fetchLogins();
-  }, [state.currentUser?.id, state.token, hasFetched, getUserLogins]); 
+  }, [state.currentUser?.id, state.token, hasFetched, getUserLogins]);
 
   if (!state.currentUser) {
-    return <div className="text-center text-gray-500">Zaloguj się, aby zobaczyć wykres.</div>;
+    return (
+      <div className="text-center text-gray-500">
+        Zaloguj się, aby zobaczyć wykres.
+      </div>
+    );
   }
 
   if (!hasFetched) {
@@ -119,11 +120,13 @@ export function Chart() {
           axisLine={false}
           tickFormatter={(value) => value.slice(0, 3)}
         />
-        <ChartTooltip
-          cursor={false}
-          content={<ChartTooltipContent hideLabel />}
-        />
-        <Bar dataKey="logins" fill="var(--color-desktop)" radius={8}>
+        <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+        <Bar
+          dataKey="logins"
+          fill="var(--color-desktop)"
+          radius={8}
+          isAnimationActive={false}
+        >
           <LabelList
             position="top"
             offset={12}

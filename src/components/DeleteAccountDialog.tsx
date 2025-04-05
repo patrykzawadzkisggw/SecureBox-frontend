@@ -24,7 +24,7 @@ export function DeleteAccountDialog({
   login,
 }: DeleteAccountDialogProps) {
   const { deletePassword } = usePasswordContext();
-  const [isConfirming, setIsConfirming] = useState(false); // Stan do potwierdzenia usunięcia
+  const [isConfirming, setIsConfirming] = useState(false); 
 
   const handleDelete = async () => {
     setIsConfirming(true);

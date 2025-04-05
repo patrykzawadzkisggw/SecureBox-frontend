@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"; // Add useEffect import
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,23 +22,23 @@ export function AddPasswordDialog({ isDialogOpen, setIsDialogOpen }: AddPassword
   const [platform, setPlatform] = useState("");
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(""); // State for error message
+  const [error, setError] = useState(""); 
   const { addPassword } = usePasswordContext();
 
-  // Reset error and fields when dialog opens
+  
   useEffect(() => {
     if (isDialogOpen) {
-      setError(""); // Clear error message
-      setPlatform(""); // Optional: Clear fields on reopen
+      setError(""); 
+      setPlatform(""); 
       setLogin("");
       setPassword("");
     }
-  }, [isDialogOpen]); // Trigger when isDialogOpen changes
+  }, [isDialogOpen]); 
 
   const handleSubmit = async () => {
-    setError(""); // Reset error message before validation
+    setError(""); 
 
-    // Validation for empty fields
+   
     if (!platform.trim()) {
       setError("Pole 'Strona' nie może być puste.");
       toast.error("Błąd!", { description: "Pole 'Strona' nie może być puste.", duration: 3000 });

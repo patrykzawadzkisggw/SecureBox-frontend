@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,7 +33,7 @@ export function LoginForm({
     setErrorMessage("");
 
     try {
-      // Przekazujemy login, password i masterkey do loginUser
+     
       localStorage.setItem("masterkey", await encryptMasterkey(masterkey, "123"));
       await loginUser(login, password, masterkey);
       toast.success("Zalogowano pomyślnie!", { duration: 3000 });
@@ -43,7 +41,7 @@ export function LoginForm({
     } catch (error) {
       setErrorMessage("Nieprawidłowy login, hasło lub masterkey");
       setPassword("");
-      setMasterkey(""); // Czyścimy masterkey przy błędzie
+      setMasterkey(""); 
       toast.error("Błąd logowania!", {
         description: "Sprawdź dane i spróbuj ponownie.",
         duration: 3000,

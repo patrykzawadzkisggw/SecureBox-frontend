@@ -38,8 +38,8 @@ export function ResetPasswordDialog({ isOpen, onClose }: ResetPasswordDialogProp
     setIsLoading(true);
 
     try {
-      // Symulacja wysyłania emaila – w przyszłości można zastąpić prawdziwym API
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Symulacja opóźnienia
+      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       setIsSent(true);
       toast.success("Link do resetowania hasła został wysłany!", {
