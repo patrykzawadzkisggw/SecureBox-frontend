@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"; 
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { usePasswordContext, decryptPassword } from "../data/PasswordContext";
@@ -8,16 +8,28 @@ import { RecoverMasterkeyDialog } from "./RecoverMasterkeyDialog";
 /**
  * Komponent ExportToJSON umożliwia eksportowanie haseł użytkownika do pliku JSON.
  * Korzysta z kontekstu haseł (`usePasswordContext`) oraz biblioteki `toast` do wyświetlania powiadomień.
+ * @function ExportToJSON
+ * @returns {JSX.Element} Przycisk eksportu z opcjonalnym dialogiem odzyskiwania klucza.
+ * @example
+ * ```tsx
+ * import ExportToJSON from './ExportToJSON';
+ * <ExportToJSON />
+ * ```
+ * @see {@link "../data/PasswordContext"} - Kontekst haseł i funkcja decryptPassword
+ * @see {@link "https://www.npmjs.com/package/sonner"} - Biblioteka toast
+ * @see {@link "./RecoverMasterkeyDialog"} - Dialog odzyskiwania klucza
  */
 export default function ExportToJSON() {
   const { state } = usePasswordContext();
   const [isExporting, setIsExporting] = useState(false);
   const [isRecoverDialogOpen, setIsRecoverDialogOpen] = useState(false);
-  const [hasAttemptedExport, setHasAttemptedExport] = useState(false); 
+  const [hasAttemptedExport, setHasAttemptedExport] = useState(false);
 
   /**
    * Funkcja eksportująca hasła do pliku JSON.
    * Sprawdza dostępność danych i klucza szyfrowania, a następnie deszyfruje hasła i zapisuje je do pliku JSON.
+   * @function exportToJSON
+   * @returns {Promise<void>} Obietnica resolves po zakończeniu eksportu lub reject w przypadku błędu.
    */
   const exportToJSON = async () => {
     setIsExporting(true);
@@ -70,7 +82,7 @@ export default function ExportToJSON() {
         description: "Plik JSON z hasłami został pobrany.",
         duration: 3000,
       });
-      setHasAttemptedExport(true); 
+      setHasAttemptedExport(true);
     } catch (error) {
       console.error("Błąd podczas eksportu do JSON:", error);
       toast.error("Błąd!", {
@@ -78,7 +90,7 @@ export default function ExportToJSON() {
         duration: 3000,
       });
       if (!hasAttemptedExport) {
-        setIsRecoverDialogOpen(true); 
+        setIsRecoverDialogOpen(true);
         setHasAttemptedExport(true);
       }
     } finally {

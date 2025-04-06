@@ -8,6 +8,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import RegisterPage from "./pages/RegisterPage";
 import { usePasswordContext } from "./data/PasswordContext";
 import { JSX } from "react";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const { state } = usePasswordContext();
@@ -81,6 +82,13 @@ export default function App() {
             <ProtectedRoute>
               <SettingsPage />
             </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/reset-password/:id"
+          element={
+            <ResetPasswordPage />
           }
         />
         <Route path="*" element={<NotFoundPage />} />

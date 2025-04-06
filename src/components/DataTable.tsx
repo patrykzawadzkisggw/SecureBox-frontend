@@ -42,10 +42,9 @@ import { findIconUrl } from "@/lib/icons";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * Komponent DataTable wyświetla tabelę z danymi haseł użytkownika.
- * Korzysta z kontekstu haseł (`usePasswordContext`) oraz biblioteki `useReactTable` do zarządzania tabelą.
+ * Rozszerzenie meta danych tabeli o flagę ładowania ikon.
+ * @see {@link https://tanstack.com/table/v8/docs/api/core/table#meta}
  */
-
 declare module '@tanstack/react-table' {
   interface TableMeta<TData> {
     isLoadingIcons?: boolean;
@@ -53,11 +52,16 @@ declare module '@tanstack/react-table' {
 }
 
 /**
- * Funkcja getRandomColor generuje losowy kolor na podstawie nazwy platformy.
- * @param platform Nazwa platformy
- * @returns Losowy kolor w formacie HEX
+ * Generuje losowy kolor na podstawie nazwy platformy.
+ * @function getRandomColor
+ * @param {string} platform - Nazwa platformy.
+ * @returns {string} Losowy kolor w formacie HEX.
+ * @example
+ * ```tsx
+ * const color = getRandomColor("Twitter"); // np. "#4ECDC4"
+ * ```
  */
-const getRandomColor = (platform: string) => {
+export const getRandomColor = (platform: string): string => {
   const colors = [
     "#4ECDC4",
     "#45B7D1",
@@ -67,17 +71,22 @@ const getRandomColor = (platform: string) => {
     "#9B59B6",
     "#3498DB",
   ];
- 
   const hash = platform.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return colors[hash % colors.length];
 };
 
 /**
- * Funkcja getInitials generuje inicjały na podstawie nazwy platformy.
- * @param platform Nazwa platformy
- * @returns Inicjały platformy
+ * Generuje inicjały na podstawie nazwy platformy.
+ * @function getInitials
+ * @param {string} platform - Nazwa platformy.
+ * @returns {string} Inicjały platformy (2 znaki).
+ * @example
+ * ```tsx
+ * const initials = getInitials("Twitter"); // "TW"
+ * const initialsMulti = getInitials("Google Chrome"); // "GC"
+ * ```
  */
-const getInitials = (platform: string) => {
+export const getInitials = (platform: string): string => {
   const words = platform.split(" ");
   if (words.length > 1) {
     return `${words[0][0]}${words[1][0]}`.toUpperCase();
@@ -87,6 +96,7 @@ const getInitials = (platform: string) => {
 
 /**
  * Definicja kolumn tabeli dla komponentu DataTable.
+ * @type {ColumnDef<PasswordTable>[]}
  */
 export const columns: ColumnDef<PasswordTable>[] = [
   {
@@ -283,6 +293,18 @@ export const columns: ColumnDef<PasswordTable>[] = [
 /**
  * Komponent DataTable wyświetla tabelę z danymi haseł użytkownika.
  * Korzysta z kontekstu haseł (`usePasswordContext`) oraz biblioteki `useReactTable` do zarządzania tabelą.
+ * @function DataTable
+ * @returns {JSX.Element} Tabela z danymi haseł użytkownika i opcjami zarządzania.
+ * @example
+ * ```tsx
+ * import { DataTable } from './DataTable';
+ * <DataTable />
+ * ```
+ * @see {@link "../data/PasswordContext"} - Kontekst haseł
+ * @see {@link "@tanstack/react-table"} - Biblioteka useReactTable
+ * @see {columns} - Definicja kolumn tabeli
+ * @see {getRandomColor} - Funkcja generująca losowy kolor
+ * @see {getInitials} - Funkcja generująca inicjały
  */
 export function DataTable() {
   const { state } = usePasswordContext();

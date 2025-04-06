@@ -6,6 +6,15 @@ jest.mock('@/data/PasswordContext', () => ({
   usePasswordContext: jest.fn(),
 }));
 
+beforeAll(() => {
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+
+afterAll(() => {
+  jest.restoreAllMocks(); 
+});
+
 describe('DeleteAccountDialog', () => {
   const mockDeletePassword = jest.fn();
 

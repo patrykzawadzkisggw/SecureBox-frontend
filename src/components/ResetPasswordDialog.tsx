@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import axios from "axios";
 
 /**
  * Interfejs reprezentujący właściwości komponentu ResetPasswordDialog.
@@ -54,9 +55,11 @@ export function ResetPasswordDialog({ isOpen, onClose }: ResetPasswordDialogProp
     setIsLoading(true);
 
     try {
-      // Symulacja wysyłania linku resetującego hasło
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      
 
+      await axios.post(`${import.meta.env.VITE_API_URL}/users/reset-password/`,{
+        "login": email
+      });
       setIsSent(true);
       toast.success("Link do resetowania hasła został wysłany!", {
         description: `Sprawdź swoją skrzynkę: ${email}`,

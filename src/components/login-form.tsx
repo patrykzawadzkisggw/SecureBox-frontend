@@ -9,8 +9,80 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast, Toaster } from "sonner";
 
 /**
+ * Obsługuje przesłanie formularza logowania.
+ * Sprawdza poprawność danych i wywołuje funkcję `loginUser` z kontekstu.
+ * @function handleSubmit
+ * @param {React.FormEvent} e - Zdarzenie przesłania formularza.
+ * @param {string} login - Login użytkownika.
+ * @param {string} password - Hasło logowania.
+ * @param {string} masterkey - Klucz główny (masterkey).
+ * @param {string} masterkey2 - Potwierdzenie klucza głównego.
+ * @param {Function} loginUser - Funkcja logowania z kontekstu.
+ * @param {React.Dispatch<React.SetStateAction<boolean>>} setIsLoading - Funkcja ustawiająca stan ładowania.
+ * @param {React.Dispatch<React.SetStateAction<string>>} setErrorMessage - Funkcja ustawiająca komunikat błędu.
+ * @param {React.Dispatch<React.SetStateAction<string>>} setPassword - Funkcja resetująca hasło.
+ * @param {React.Dispatch<React.SetStateAction<string>>} setMasterkey - Funkcja resetująca masterkey.
+ * @param {ReturnType<typeof useNavigate>} navigate - Funkcja nawigacji.
+ * @returns {Promise<void>} Obietnica resolves po zalogowaniu lub reject w przypadku błędu.
+ */
+export const handleSubmit = async (
+  e: React.FormEvent,
+  login: string,
+  password: string,
+  masterkey: string,
+  masterkey2: string,
+  loginUser: (login: string, password: string, masterkey: string) => Promise<void>,
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  setErrorMessage: React.Dispatch<React.SetStateAction<string>>,
+  setPassword: React.Dispatch<React.SetStateAction<string>>,
+  setMasterkey: React.Dispatch<React.SetStateAction<string>>,
+  navigate: ReturnType<typeof useNavigate>
+): Promise<void> => {
+  e.preventDefault();
+  setIsLoading(true);
+  if (masterkey !== masterkey2) {
+    setErrorMessage("Masterkey i jego potwierdzenie muszą być identyczne.");
+    setIsLoading(false);
+    return;
+  }
+  setErrorMessage("");
+
+  try {
+    localStorage.setItem("masterkey", await encryptMasterkey(masterkey, "123"));
+    await loginUser(login, password, masterkey);
+    toast.success("Zalogowano pomyślnie!", { duration: 3000 });
+    navigate("/");
+  } catch (error) {
+    setErrorMessage("Nieprawidłowy login, hasło lub masterkey");
+    setPassword("");
+    setMasterkey("");
+    toast.error("Błąd logowania!", {
+      description: "Sprawdź dane i spróbuj ponownie.",
+      duration: 3000,
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+/**
  * Komponent formularza logowania.
  * Korzysta z kontekstu haseł (`usePasswordContext`) oraz biblioteki `toast` do wyświetlania powiadomień.
+ * @function LoginForm
+ * @param {React.ComponentProps<"form">} props - Właściwości formularza.
+ * @param {string} [props.className] - Dodatkowe klasy CSS dla formularza.
+ * @param {...any} props - Pozostałe właściwości formularza HTML.
+ * @returns {JSX.Element} Formularz logowania z polami i opcjami resetowania hasła.
+ * @example
+ * ```tsx
+ * import { LoginForm } from './LoginForm';
+ * <LoginForm className="my-custom-class" />
+ * ```
+ * @see {@link "../data/PasswordContext"} - Kontekst haseł
+ * @see {@link "https://www.npmjs.com/package/sonner"} - Biblioteka toast
+ * @see {@link "./ResetPasswordDialog"} - Dialog resetowania hasła
+ * @see {@link "react-router-dom"} - Biblioteka routingu
+ * @see {handleSubmit} - Funkcja obsługująca przesłanie formularza
  */
 export function LoginForm({
   className,
@@ -26,43 +98,24 @@ export function LoginForm({
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const navigate = useNavigate();
 
-  /**
-   * Obsługuje przesłanie formularza logowania.
-   * Sprawdza poprawność danych i wywołuje funkcję `loginUser` z kontekstu.
-   */
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    if (masterkey !== masterkey2) {
-      setErrorMessage("Masterkey i jego potwierdzenie muszą być identyczne.");
-      setIsLoading(false);
-      return;
-    }
-    setErrorMessage("");
-
-    try {
-     
-      localStorage.setItem("masterkey", await encryptMasterkey(masterkey, "123"));
-      await loginUser(login, password, masterkey);
-      toast.success("Zalogowano pomyślnie!", { duration: 3000 });
-      navigate("/");
-    } catch (error) {
-      setErrorMessage("Nieprawidłowy login, hasło lub masterkey");
-      setPassword("");
-      setMasterkey(""); 
-      toast.error("Błąd logowania!", {
-        description: "Sprawdź dane i spróbuj ponownie.",
-        duration: 3000,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <>
       <form
-        onSubmit={handleSubmit}
+        onSubmit={(e) =>
+          handleSubmit(
+            e,
+            login,
+            password,
+            masterkey,
+            masterkey2,
+            loginUser,
+            setIsLoading,
+            setErrorMessage,
+            setPassword,
+            setMasterkey,
+            navigate
+          )
+        }
         className={cn("flex flex-col gap-6", className)}
         {...props}
       >
@@ -118,10 +171,9 @@ export function LoginForm({
               required
               disabled={isLoading}
             />
-            
           </div>
           <div className="grid gap-3">
-            <Label htmlFor="masterkey">Masterkey (hasło szyfrowania)</Label>
+            <Label htmlFor="masterkey2">Masterkey (hasło szyfrowania)</Label>
             <Input
               id="masterkey2"
               type="password"

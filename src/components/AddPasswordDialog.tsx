@@ -15,74 +15,109 @@ import { toast } from "sonner";
 
 /**
  * Interfejs reprezentujący właściwości komponentu AddPasswordDialog.
+ * @interface AddPasswordDialogProps
+ * @property {boolean} isDialogOpen - Stan określający, czy dialog jest otwarty.
+ * @property {React.Dispatch<React.SetStateAction<boolean>>} setIsDialogOpen - Funkcja ustawiająca stan otwarcia dialogu.
  */
-interface AddPasswordDialogProps {
+export interface AddPasswordDialogProps {
   isDialogOpen: boolean;
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 /**
+ * Obsługuje przesłanie formularza dodawania hasła.
+ * Sprawdza poprawność danych i wywołuje funkcję `addPassword` z kontekstu.
+ * @function handleSubmit
+ * @param {string} platform - Nazwa platformy/strony.
+ * @param {string} login - Login użytkownika.
+ * @param {string} password - Hasło do dodania.
+ * @param {Function} setError - Funkcja ustawiająca stan błędu.
+ * @param {Function} setPlatform - Funkcja resetująca pole platformy.
+ * @param {Function} setLogin - Funkcja resetująca pole loginu.
+ * @param {Function} setPassword - Funkcja resetująca pole hasła.
+ * @param {Function} setIsDialogOpen - Funkcja zamykająca dialog.
+ * @param {Function} addPassword - Funkcja z kontekstu do dodawania hasła.
+ * @returns {Promise<void>} Obietnica resolves, gdy hasło zostanie dodane lub reject z błędem.
+ */
+export const handleSubmit = async (
+  platform: string,
+  login: string,
+  password: string,
+  setError: React.Dispatch<React.SetStateAction<string>>,
+  setPlatform: React.Dispatch<React.SetStateAction<string>>,
+  setLogin: React.Dispatch<React.SetStateAction<string>>,
+  setPassword: React.Dispatch<React.SetStateAction<string>>,
+  setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>,
+  addPassword: (password: string, platform: string, login: string) => Promise<void>
+) => {
+  setError("");
+
+  if (!platform.trim()) {
+    setError("Pole 'Strona' nie może być puste.");
+    toast.error("Błąd!", { description: "Pole 'Strona' nie może być puste.", duration: 3000 });
+    return;
+  }
+  if (!login.trim()) {
+    setError("Pole 'Login' nie może być puste.");
+    toast.error("Błąd!", { description: "Pole 'Login' nie może być puste.", duration: 3000 });
+    return;
+  }
+  if (!password.trim()) {
+    setError("Pole 'Hasło' nie może być puste.");
+    toast.error("Błąd!", { description: "Pole 'Hasło' nie może być puste.", duration: 3000 });
+    return;
+  }
+
+  try {
+    await addPassword(password, platform, login);
+    toast.success("Sukces!", { description: "Hasło zostało dodane.", duration: 3000 });
+    setPlatform("");
+    setLogin("");
+    setPassword("");
+    setIsDialogOpen(false);
+  } catch (error) {
+    console.error("Błąd podczas dodawania hasła:", error);
+    setError("Wystąpił błąd podczas dodawania hasła.");
+    toast.error("Błąd!", {
+      description: "Nie udało się dodać hasła. Spróbuj ponownie.",
+      duration: 3000,
+    });
+  }
+};
+
+/**
  * Komponent dialogu do dodawania hasła.
  * Korzysta z kontekstu haseł (`usePasswordContext`) oraz biblioteki `toast` do wyświetlania powiadomień.
+ * @function AddPasswordDialog
+ * @param {AddPasswordDialogProps} props - Właściwości komponentu.
+ * @param {boolean} props.isDialogOpen - Stan otwarcia dialogu.
+ * @param {React.Dispatch<React.SetStateAction<boolean>>} props.setIsDialogOpen - Funkcja do zmiany stanu dialogu.
+ * @returns {JSX.Element} Dialog z formularzem do dodawania hasła.
+ * @example
+ * ```tsx
+ * import { AddPasswordDialog } from './AddPasswordDialog';
+ * const [isOpen, setIsOpen] = useState(false);
+ * <AddPasswordDialog isDialogOpen={isOpen} setIsDialogOpen={setIsOpen} />
+ * ```
+ * @see {@link ../data/PasswordContext.tsx} - Kontekst haseł
+ * @see {@link https://www.npmjs.com/package/sonner} - Biblioteka toast
+ * @see {handleSubmit} - Funkcja obsługująca przesłanie formularza
  */
 export function AddPasswordDialog({ isDialogOpen, setIsDialogOpen }: AddPasswordDialogProps) {
   const [platform, setPlatform] = useState("");
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(""); 
+  const [error, setError] = useState("");
   const { addPassword } = usePasswordContext();
 
-  /**
-   * Resetuje pola formularza i błąd po otwarciu dialogu.
-   */
   useEffect(() => {
     if (isDialogOpen) {
-      setError(""); 
-      setPlatform(""); 
-      setLogin("");
-      setPassword("");
-    }
-  }, [isDialogOpen]); 
-
-  /**
-   * Obsługuje przesłanie formularza dodawania hasła.
-   * Sprawdza poprawność danych i wywołuje funkcję `addPassword` z kontekstu.
-   */
-  const handleSubmit = async () => {
-    setError(""); 
-
-    if (!platform.trim()) {
-      setError("Pole 'Strona' nie może być puste.");
-      toast.error("Błąd!", { description: "Pole 'Strona' nie może być puste.", duration: 3000 });
-      return;
-    }
-    if (!login.trim()) {
-      setError("Pole 'Login' nie może być puste.");
-      toast.error("Błąd!", { description: "Pole 'Login' nie może być puste.", duration: 3000 });
-      return;
-    }
-    if (!password.trim()) {
-      setError("Pole 'Hasło' nie może być puste.");
-      toast.error("Błąd!", { description: "Pole 'Hasło' nie może być puste.", duration: 3000 });
-      return;
-    }
-
-    try {
-      await addPassword(password, platform, login);
-      toast.success("Sukces!", { description: "Hasło zostało dodane.", duration: 3000 });
+      setError("");
       setPlatform("");
       setLogin("");
       setPassword("");
-      setIsDialogOpen(false);
-    } catch (error) {
-      console.error("Błąd podczas dodawania hasła:", error);
-      setError("Wystąpił błąd podczas dodawania hasła.");
-      toast.error("Błąd!", {
-        description: "Nie udało się dodać hasła. Spróbuj ponownie.",
-        duration: 3000,
-      });
     }
-  };
+  }, [isDialogOpen]);
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -130,15 +165,30 @@ export function AddPasswordDialog({ isDialogOpen, setIsDialogOpen }: AddPassword
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-          {error && <p className="text-red-500 text-sm col-span-4 text-center">{error}</p>}
+            {error && <p className="text-red-500 text-sm col-span-4 text-center">{error}</p>}
           </div>
-          
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
             Anuluj
           </Button>
-          <Button onClick={handleSubmit}>Dodaj</Button>
+          <Button
+            onClick={() =>
+              handleSubmit(
+                platform,
+                login,
+                password,
+                setError,
+                setPlatform,
+                setLogin,
+                setPassword,
+                setIsDialogOpen,
+                addPassword
+              )
+            }
+          >
+            Dodaj
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

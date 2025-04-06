@@ -4,64 +4,89 @@ import { extractDomain } from "@/lib/functions";
 
 /**
  * Interfejs reprezentujący aktywność użytkownika.
+ * @interface Activity
+ * @property {string} time - Czas aktywności (np. "10:15").
+ * @property {string} date - Data aktywności (np. "Dziś", "1 dzień").
+ * @property {string} name - Nazwa strony lub aplikacji (np. "Twitter").
+ * @property {string} email - Login użytkownika (np. "user123").
+ * @property {string} color - Klasa CSS dla koloru (np. "bg-purple-500").
  */
-interface Activity {
-  time: string; // np. "10:15"
-  date: string; // np. "Dziś" lub "1 dzień"
-  name: string; // np. "Twitter"
-  email: string; // np. "user123"
-  color: string; // np. "bg-purple-500"
+export interface Activity {
+  time: string;
+  date: string;
+  name: string;
+  email: string;
+  color: string;
 }
+
+/**
+ * Formatuje dane aktywności na podstawie wpisu logowania.
+ * @function formatActivity
+ * @param {Object} entry - Wpis logowania.
+ * @param {string} entry.timestamp - Timestamp w formacie ISO (np. "2023-10-01T10:15:00Z").
+ * @param {string} entry.login - Login użytkownika (np. "user123").
+ * @param {string} entry.page - Nazwa strony (np. "Twitter").
+ * @returns {Activity} Sformatowana aktywność zgodna z interfejsem Activity.
+ * @example
+ * ```tsx
+ * const entry = { timestamp: "2023-10-01T10:15:00Z", login: "user123", page: "Twitter" };
+ * const activity = formatActivity(entry);
+ * // Wynik: { time: "10:15", date: "Dziś", name: "Twitter", email: "user123", color: "bg-purple-500" }
+ * ```
+ */
+export const formatActivity = (entry: { timestamp: string; login: string; page: string }): Activity => {
+  const date = new Date(entry.timestamp);
+  
+  const now = new Date();
+  const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+
+  let formattedDate = "";
+  if (diffInDays === 0) {
+    formattedDate = "Dziś";
+    if (date.getDate() < now.getDate()) formattedDate = "Wczoraj";
+  } else if (diffInDays === 1) {
+    formattedDate = "1 dzień";
+  } else {
+    formattedDate = `${diffInDays} dni`;
+  }
+
+  const time = date.toLocaleTimeString("pl-PL", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  return {
+    time,
+    date: formattedDate,
+    name: entry.page,
+    email: entry.login,
+    color: "bg-purple-500",
+  };
+};
 
 /**
  * Komponent wyświetlający listę aktywności użytkownika.
  * Korzysta z kontekstu haseł (`usePasswordContext`) oraz funkcji `extractDomain`.
+ * @function ActivityList
+ * @returns {JSX.Element} Lista ostatnich 5 aktywności użytkownika lub komunikat o stanie.
+ * @example
+ * ```tsx
+ * import ActivityList from './ActivityList';
+ * <ActivityList />
+ * ```
+ * @see {@link ../data/PasswordContext.tsx} - Kontekst haseł
+ * @see {@link "@/lib/functions"} - Funkcja extractDomain
+ * @see {Activity} - Struktura danych aktywności
+ * @see {formatActivity} - Formatowanie aktywności
  */
 export default function ActivityList() {
   const { state } = usePasswordContext();
-
-  /**
-   * Formatuje dane aktywności na podstawie wpisu logowania.
-   * @param entry Wpis logowania zawierający timestamp, login i stronę.
-   * @returns Sformatowana aktywność.
-   */
-  const formatActivity = (entry: { timestamp: string; login: string; page: string }): Activity => {
-    
-    const date = new Date(entry.timestamp);
-    
-    const now = new Date();
-    const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-
-    let formattedDate = "";
-    if (diffInDays === 0) {
-      formattedDate = "Dziś";
-      if(date.getDate() < now.getDate()) formattedDate = "Wczoraj";
-    } else if (diffInDays === 1) {
-      formattedDate = "1 dzień";
-    } else {
-      formattedDate = `${diffInDays} dni`;
-    }
-   // console.log(`${diffInDays} ${date.getDate()} ${date.getMonth()} ${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}`)
-
-    const time = date.toLocaleTimeString("pl-PL", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-
-    return {
-      time,
-      date: formattedDate,
-      name: entry.page,
-      email: entry.login,
-      color: "bg-purple-500",
-    };
-  };
 
   const activities = state.currentUser
     ? state.userLogins
         .filter((entry) => state.currentUser && entry.user_id === state.currentUser.id)
         .map(formatActivity)
-        .slice(-5) 
+        .slice(-5)
     : [];
 
   if (!state.currentUser) {

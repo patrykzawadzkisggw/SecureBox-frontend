@@ -11,16 +11,21 @@ import { toast } from "sonner";
 
 /**
  * Interfejs reprezentujący dane wykresu.
+ * @interface ChartData
+ * @property {string} month - Dzień tygodnia (np. "Poniedzialek").
+ * @property {number} logins - Liczba logowań w danym dniu.
  */
-interface ChartData {
-  month: string; // Dzień tygodnia
-  logins: number; // Liczba logowań
+export interface ChartData {
+  month: string;
+  logins: number;
 }
 
 /**
  * Konfiguracja wykresu.
+ * @type {ChartConfig}
+ * @property {{label: string, color: string}} logins - Konfiguracja dla słupków logowań.
  */
-const chartConfig = {
+export const chartConfig = {
   logins: {
     label: "Logowania",
     color: "hsl(var(--chart-1))",
@@ -30,6 +35,17 @@ const chartConfig = {
 /**
  * Komponent wyświetlający wykres logowań użytkownika.
  * Korzysta z kontekstu haseł (`usePasswordContext`) oraz biblioteki `toast` do wyświetlania powiadomień.
+ * @function Chart
+ * @returns {JSX.Element} Wykres słupkowy z danymi logowań lub komunikaty o stanie (np. "Zaloguj się", "Ładowanie...").
+ * @example
+ * ```tsx
+ * import { Chart } from './components/Chart';
+ * <Chart />
+ * ```
+ * @see {@link https://recharts.org} - Dokumentacja Recharts
+ * @see {@link ../data/PasswordContext.tsx} - Kontekst haseł
+ * @see {ChartData} - Struktura danych wykresu
+ * @see {chartConfig} - Konfiguracja wykresu
  */
 export function Chart() {
   const { state, getUserLogins } = usePasswordContext();
@@ -48,8 +64,9 @@ export function Chart() {
 
   /**
    * Przetwarza dane logowań na dane wykresu.
-   * @param logins Lista logowań zawierająca timestampy.
-   * @returns Przetworzone dane wykresu.
+   * @function processLoginData
+   * @param {Array<{timestamp: string}>} logins - Lista logowań zawierająca timestampy w formacie ISO.
+   * @returns {ChartData[]} Tablica obiektów z danymi wykresu (dzień tygodnia i liczba logowań).
    */
   const processLoginData = (logins: { timestamp: string }[]): ChartData[] => {
     const daysOfWeek = days;
@@ -75,7 +92,7 @@ export function Chart() {
   useEffect(() => {
     const fetchLogins = async () => {
       if (!state.currentUser?.id || !state.token || hasFetched) {
-        return; 
+        return;
       }
 
       try {
