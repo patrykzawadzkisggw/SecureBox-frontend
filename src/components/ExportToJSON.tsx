@@ -5,12 +5,20 @@ import { usePasswordContext, decryptPassword } from "../data/PasswordContext";
 import { toast } from "sonner";
 import { RecoverMasterkeyDialog } from "./RecoverMasterkeyDialog";
 
+/**
+ * Komponent ExportToJSON umożliwia eksportowanie haseł użytkownika do pliku JSON.
+ * Korzysta z kontekstu haseł (`usePasswordContext`) oraz biblioteki `toast` do wyświetlania powiadomień.
+ */
 export default function ExportToJSON() {
   const { state } = usePasswordContext();
   const [isExporting, setIsExporting] = useState(false);
   const [isRecoverDialogOpen, setIsRecoverDialogOpen] = useState(false);
   const [hasAttemptedExport, setHasAttemptedExport] = useState(false); 
 
+  /**
+   * Funkcja eksportująca hasła do pliku JSON.
+   * Sprawdza dostępność danych i klucza szyfrowania, a następnie deszyfruje hasła i zapisuje je do pliku JSON.
+   */
   const exportToJSON = async () => {
     setIsExporting(true);
     try {

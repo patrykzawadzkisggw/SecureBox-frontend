@@ -11,6 +11,10 @@ import {
 } from "@/components/ui/sidebar"
 import { Link } from "react-router-dom"
 
+/**
+ * Komponent nawigacji drugorzędnej.
+ * Korzysta z komponentów `SidebarGroup` i `Link`.
+ */
 export function NavSecondary({
   items,
   ...props

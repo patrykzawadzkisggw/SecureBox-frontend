@@ -11,13 +11,21 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { usePasswordContext, TrustedDevice } from "../data/PasswordContext";
+import { toast } from "sonner";
 
+/**
+ * Interfejs reprezentujący właściwości komponentu UpdateTrustedDeviceDialog.
+ */
 interface UpdateTrustedDeviceDialogProps {
   isDialogOpen: boolean;
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
   device: TrustedDevice;
 }
 
+/**
+ * Komponent dialogu do aktualizacji statusu zaufania urządzenia.
+ * Korzysta z kontekstu haseł (`usePasswordContext`) oraz biblioteki `toast` do wyświetlania powiadomień.
+ */
 export function UpdateTrustedDeviceDialog({
   isDialogOpen,
   setIsDialogOpen,
@@ -27,12 +35,22 @@ export function UpdateTrustedDeviceDialog({
   const [isTrusted, setIsTrusted] = useState(device.is_trusted);
   const [isUpdating, setIsUpdating] = useState(false);
 
+  /**
+   * Obsługuje aktualizację statusu zaufania urządzenia.
+   * Wywołuje funkcję `addOrUpdateTrustedDevice` z kontekstu.
+   */
   const handleUpdate = async () => {
     setIsUpdating(true);
     try {
       await addOrUpdateTrustedDevice(device.device_id, device.user_agent, isTrusted);
+      toast.success("Status zaufania zaktualizowany!", { duration: 3000 });
       setIsDialogOpen(false);
     } catch (error) {
+      console.error("Błąd aktualizacji statusu zaufania:", error);
+      toast.error("Błąd!", {
+        description: "Nie udało się zaktualizować statusu zaufania. Spróbuj ponownie.",
+        duration: 3000,
+      });
     } finally {
       setIsUpdating(false);
     }

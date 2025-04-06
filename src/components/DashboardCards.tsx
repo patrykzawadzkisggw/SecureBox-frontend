@@ -4,11 +4,18 @@ import { AddPasswordDialog } from "./AddPasswordDialog";
 import { useState } from "react";
 import { usePasswordContext } from "../data/PasswordContext";
 
+/**
+ * Komponent wyświetlający karty na pulpicie nawigacyjnym.
+ * Korzysta z kontekstu haseł (`usePasswordContext`) oraz komponentu `AddPasswordDialog`.
+ */
 export default function DashboardCards() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const { state } = usePasswordContext();
 
-
+  /**
+   * Oblicza średnią siłę haseł na podstawie historii haseł.
+   * @returns Średnia siła haseł w procentach.
+   */
   const calculateAverageStrength = () => {
     if (state.history.length === 0) return 0;
     const hist=[...state.history]

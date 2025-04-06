@@ -2,6 +2,9 @@ import { cn } from "@/lib/utils";
 import { usePasswordContext } from "../data/PasswordContext";
 import { extractDomain } from "@/lib/functions";
 
+/**
+ * Interfejs reprezentujący aktywność użytkownika.
+ */
 interface Activity {
   time: string; // np. "10:15"
   date: string; // np. "Dziś" lub "1 dzień"
@@ -10,9 +13,18 @@ interface Activity {
   color: string; // np. "bg-purple-500"
 }
 
+/**
+ * Komponent wyświetlający listę aktywności użytkownika.
+ * Korzysta z kontekstu haseł (`usePasswordContext`) oraz funkcji `extractDomain`.
+ */
 export default function ActivityList() {
   const { state } = usePasswordContext();
 
+  /**
+   * Formatuje dane aktywności na podstawie wpisu logowania.
+   * @param entry Wpis logowania zawierający timestamp, login i stronę.
+   * @returns Sformatowana aktywność.
+   */
   const formatActivity = (entry: { timestamp: string; login: string; page: string }): Activity => {
     
     const date = new Date(entry.timestamp);

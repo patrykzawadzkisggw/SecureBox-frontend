@@ -35,19 +35,28 @@ import {
 import { AddPasswordDialog } from "./AddPasswordDialog";
 import { ShowPasswordDialog } from "./ShowPasswordDialog";
 import { usePasswordContext, PasswordTable } from "../data/PasswordContext";
-
-declare module '@tanstack/react-table' {
-  interface TableMeta<TData> {
-    isLoadingIcons?: boolean;
-  }
-}
 import { Toaster } from "sonner";
 import { UpdatePasswordDialog } from "./UpdatePasswordDialog";
 import { DeleteAccountDialog } from "./DeleteAccountDialog";
 import { findIconUrl } from "@/lib/icons";
 import { Skeleton } from "@/components/ui/skeleton";
 
+/**
+ * Komponent DataTable wyświetla tabelę z danymi haseł użytkownika.
+ * Korzysta z kontekstu haseł (`usePasswordContext`) oraz biblioteki `useReactTable` do zarządzania tabelą.
+ */
 
+declare module '@tanstack/react-table' {
+  interface TableMeta<TData> {
+    isLoadingIcons?: boolean;
+  }
+}
+
+/**
+ * Funkcja getRandomColor generuje losowy kolor na podstawie nazwy platformy.
+ * @param platform Nazwa platformy
+ * @returns Losowy kolor w formacie HEX
+ */
 const getRandomColor = (platform: string) => {
   const colors = [
     "#4ECDC4",
@@ -63,7 +72,11 @@ const getRandomColor = (platform: string) => {
   return colors[hash % colors.length];
 };
 
-
+/**
+ * Funkcja getInitials generuje inicjały na podstawie nazwy platformy.
+ * @param platform Nazwa platformy
+ * @returns Inicjały platformy
+ */
 const getInitials = (platform: string) => {
   const words = platform.split(" ");
   if (words.length > 1) {
@@ -72,6 +85,9 @@ const getInitials = (platform: string) => {
   return platform.slice(0, 2).toUpperCase();
 };
 
+/**
+ * Definicja kolumn tabeli dla komponentu DataTable.
+ */
 export const columns: ColumnDef<PasswordTable>[] = [
   {
     accessorKey: "platform",
@@ -264,6 +280,10 @@ export const columns: ColumnDef<PasswordTable>[] = [
   },
 ];
 
+/**
+ * Komponent DataTable wyświetla tabelę z danymi haseł użytkownika.
+ * Korzysta z kontekstu haseł (`usePasswordContext`) oraz biblioteki `useReactTable` do zarządzania tabelą.
+ */
 export function DataTable() {
   const { state } = usePasswordContext();
   const [sorting, setSorting] = useState<SortingState>([]);

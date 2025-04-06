@@ -16,9 +16,17 @@ import {
 } from "@/components/ui/sidebar";
 import { usePasswordContext } from "@/data/PasswordContext"; 
 
+/**
+ * Komponent bocznego paska nawigacyjnego aplikacji.
+ * Korzysta z kontekstu haseł (`usePasswordContext`) oraz komponentów `TeamSwitcher` i `NavMain`.
+ */
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { state } = usePasswordContext(); 
 
+  /**
+   * Obiekt zawierający dane do wyświetlenia w bocznym pasku nawigacyjnym.
+   * Zawiera informacje o zespołach i głównych elementach nawigacyjnych.
+   */
   const data = {
     teams: [
       {

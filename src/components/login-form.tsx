@@ -8,6 +8,10 @@ import { ResetPasswordDialog } from "./ResetPasswordDialog";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, Toaster } from "sonner";
 
+/**
+ * Komponent formularza logowania.
+ * Korzysta z kontekstu haseł (`usePasswordContext`) oraz biblioteki `toast` do wyświetlania powiadomień.
+ */
 export function LoginForm({
   className,
   ...props
@@ -22,6 +26,10 @@ export function LoginForm({
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const navigate = useNavigate();
 
+  /**
+   * Obsługuje przesłanie formularza logowania.
+   * Sprawdza poprawność danych i wywołuje funkcję `loginUser` z kontekstu.
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);

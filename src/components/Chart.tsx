@@ -9,11 +9,17 @@ import {
 import { usePasswordContext } from "../data/PasswordContext";
 import { toast } from "sonner";
 
+/**
+ * Interfejs reprezentujący dane wykresu.
+ */
 interface ChartData {
   month: string; // Dzień tygodnia
   logins: number; // Liczba logowań
 }
 
+/**
+ * Konfiguracja wykresu.
+ */
 const chartConfig = {
   logins: {
     label: "Logowania",
@@ -21,6 +27,10 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+/**
+ * Komponent wyświetlający wykres logowań użytkownika.
+ * Korzysta z kontekstu haseł (`usePasswordContext`) oraz biblioteki `toast` do wyświetlania powiadomień.
+ */
 export function Chart() {
   const { state, getUserLogins } = usePasswordContext();
   const [chartData, setChartData] = useState<ChartData[]>([]);
@@ -36,6 +46,11 @@ export function Chart() {
     "Niedziela",
   ];
 
+  /**
+   * Przetwarza dane logowań na dane wykresu.
+   * @param logins Lista logowań zawierająca timestampy.
+   * @returns Przetworzone dane wykresu.
+   */
   const processLoginData = (logins: { timestamp: string }[]): ChartData[] => {
     const daysOfWeek = days;
     const loginCounts = new Array(7).fill(0);

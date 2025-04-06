@@ -15,12 +15,19 @@ import { toast } from "sonner";
 import axios from "axios";
 import { decryptPassword, encryptPassword,deriveEncryptionKeyFromMasterkey, encryptMasterkey, decryptMasterkey } from "../data/PasswordContext";
 import JSZip from "jszip";
+
+/**
+ * Interfejs reprezentujący właściwości komponentu UpdateMasterkeyDialog.
+ */
 interface UpdateMasterkeyDialogProps {
   isDialogOpen: boolean;
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-
+/**
+ * Komponent dialogu do aktualizacji masterkey.
+ * Korzysta z kontekstu haseł (`usePasswordContext`) oraz biblioteki `toast` do wyświetlania powiadomień.
+ */
 export function UpdateMasterkeyDialog({
   isDialogOpen,
   setIsDialogOpen,
@@ -31,10 +38,13 @@ export function UpdateMasterkeyDialog({
   const [error, setError] = useState("");
   const { state,  } = usePasswordContext();
 
+  /**
+   * Obsługuje przesłanie formularza aktualizacji masterkey.
+   * Sprawdza poprawność danych i wywołuje funkcje `decryptMasterkey`, `deriveEncryptionKeyFromMasterkey`, `decryptPassword`, `encryptPassword`, `encryptMasterkey` z kontekstu.
+   */
   const handleSubmit = async () => {
     setError("");
 
-   
     if (!oldMasterkey || !newMasterkey || !confirmNewMasterkey) {
       setError("Wszystkie pola są wymagane.");
       return;
@@ -60,7 +70,6 @@ export function UpdateMasterkeyDialog({
             throw new Error("Nie udało się załadować plików z serwera.");
         }
 
-      
       const encryptedMasterkey = localStorage.getItem(`masterkey`);
       if (!encryptedMasterkey) {
         throw new Error("Brak masterkey w localStorage.");
@@ -71,10 +80,8 @@ export function UpdateMasterkeyDialog({
         return;
       }
 
-      
       const oldEncryptionKey = await deriveEncryptionKeyFromMasterkey(oldMasterkey);
 
-     
       const passwordsToUpdate = [];
       for (const passwordEntry of state.passwords) {
         const encryptedData = await loadedZip.file(passwordEntry.passwordfile)?.async("string");
@@ -90,7 +97,6 @@ export function UpdateMasterkeyDialog({
         });
       }
 
-    
       const newEncryptionKey = await deriveEncryptionKeyFromMasterkey(newMasterkey);
       const encryptedPasswords = await Promise.all(
         passwordsToUpdate.map(async (entry) => {
@@ -103,7 +109,6 @@ export function UpdateMasterkeyDialog({
         })
       );
 
-      
        await axios.put(
         `${process.env.VITE_API_URL}/passwords/${state.currentUser.id}/passwords`,
         { passwordsall: encryptedPasswords },
@@ -114,8 +119,6 @@ export function UpdateMasterkeyDialog({
       const newEncryptedMasterkey = await encryptMasterkey(newMasterkey, state.currentUser.password);
       localStorage.setItem(`masterkey`, newEncryptedMasterkey);
 
-      
-      
       setOldMasterkey("");
       setNewMasterkey("");
       setConfirmNewMasterkey("");
@@ -179,4 +182,3 @@ export function UpdateMasterkeyDialog({
     </Dialog>
   );
 }
-

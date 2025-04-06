@@ -13,6 +13,9 @@ import { usePasswordContext, decryptPassword } from "../data/PasswordContext";
 import zxcvbn from "zxcvbn";
 import { RecoverMasterkeyDialog } from "./RecoverMasterkeyDialog";
 
+/**
+ * Interfejs reprezentujący właściwości komponentu ShowPasswordDialog.
+ */
 interface ShowPasswordDialogProps {
   isDialogOpen: boolean;
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -21,6 +24,10 @@ interface ShowPasswordDialogProps {
   login: string;
 }
 
+/**
+ * Komponent dialogu do wyświetlania hasła.
+ * Korzysta z kontekstu haseł (`usePasswordContext`) oraz komponentu `RecoverMasterkeyDialog`.
+ */
 export function ShowPasswordDialog({
   isDialogOpen,
   setIsDialogOpen,
@@ -34,6 +41,10 @@ export function ShowPasswordDialog({
   const [hasAttemptedDecryption, setHasAttemptedDecryption] = useState(false);
   const { state } = usePasswordContext();
 
+  /**
+   * Pobiera i deszyfruje hasło z pliku ZIP.
+   * Sprawdza poprawność danych i wywołuje funkcję `decryptPassword` z kontekstu.
+   */
   const fetchPassword = async () => {
     if (!state.zip || !isDialogOpen) return;
 

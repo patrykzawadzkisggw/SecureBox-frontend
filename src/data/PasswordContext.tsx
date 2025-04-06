@@ -4,6 +4,9 @@ import { toast } from "sonner";
 import JSZip from "jszip";
 import zxcvbn from "zxcvbn";
 
+/**
+ * Typ reprezentujący tabelę haseł.
+ */
 export type PasswordTable = {
   id: string;
   passwordfile: string;
@@ -12,6 +15,9 @@ export type PasswordTable = {
   login: string;
 };
 
+/**
+ * Typ reprezentujący historię haseł.
+ */
 export type PasswordHistory = {
   id: string;
   platform: string;
@@ -20,6 +26,9 @@ export type PasswordHistory = {
   timestamp: string;
 };
 
+/**
+ * Typ reprezentujący zaufane urządzenie.
+ */
 export type TrustedDevice = {
   user_id: string;
   device_id: string;
@@ -27,6 +36,9 @@ export type TrustedDevice = {
   is_trusted: boolean;
 };
 
+/**
+ * Typ reprezentujący użytkownika.
+ */
 export type User = {
   id: string;
   first_name: string;
@@ -35,6 +47,9 @@ export type User = {
   password: string;
 };
 
+/**
+ * Typ reprezentujący wpis logowania.
+ */
 export type LoginEntry = {
   timestamp: string;
   user_id: string;
@@ -42,6 +57,9 @@ export type LoginEntry = {
   page: string;
 };
 
+/**
+ * Typ reprezentujący stan kontekstu haseł.
+ */
 type PasswordState = {
   passwords: PasswordTable[];
   history: PasswordHistory[];
@@ -54,6 +72,9 @@ type PasswordState = {
   encryptionKey?: CryptoKey;
 };
 
+/**
+ * Typ reprezentujący akcje w kontekście haseł.
+ */
 type PasswordAction =
   | { type: "SET_DATA"; payload: { passwords: PasswordTable[]; trustedDevices: TrustedDevice[]; currentUser: User; zip: JSZip } }
   | { type: "SET_LOADING"; payload: boolean }
@@ -73,7 +94,12 @@ type PasswordAction =
   | { type: "SET_ZIP"; payload: JSZip }
   | { type: "SET_ENCRYPTION_KEY"; payload: CryptoKey };
 
-
+/**
+ * Reduktor stanu kontekstu haseł.
+ * @param state Aktualny stan kontekstu haseł.
+ * @param action Akcja do wykonania na stanie.
+ * @returns Zaktualizowany stan kontekstu haseł.
+ */
 const passwordReducer = (state: PasswordState, action: PasswordAction): PasswordState => {
   switch (action.type) {
     case "SET_DATA":
@@ -163,7 +189,12 @@ const passwordReducer = (state: PasswordState, action: PasswordAction): Password
   }
 };
 
-
+/**
+ * Funkcja szyfrująca klucz główny (masterkey) za pomocą hasła.
+ * @param masterkey Klucz główny do zaszyfrowania.
+ * @param password Hasło do szyfrowania.
+ * @returns Zaszyfrowany klucz główny w formacie base64.
+ */
 export const encryptMasterkey = async (masterkey: string, password: string): Promise<string> => {
   const encoder = new TextEncoder();
   const salt = crypto.getRandomValues(new Uint8Array(16));
@@ -189,6 +220,12 @@ export const encryptMasterkey = async (masterkey: string, password: string): Pro
   return arrayBufferToBase64(result.buffer);
 };
 
+/**
+ * Funkcja deszyfrująca klucz główny (masterkey) za pomocą hasła.
+ * @param encryptedMasterkeyBase64 Zaszyfrowany klucz główny w formacie base64.
+ * @param password Hasło do deszyfrowania.
+ * @returns Odszyfrowany klucz główny.
+ */
 export const decryptMasterkey = async (encryptedMasterkeyBase64: string, password: string): Promise<string> => {
   const encryptedData = base64ToArrayBuffer(encryptedMasterkeyBase64);
   const salt = encryptedData.slice(0, 16);
@@ -215,6 +252,11 @@ export const decryptMasterkey = async (encryptedMasterkeyBase64: string, passwor
   return new TextDecoder().decode(decrypted);
 };
 
+/**
+ * Funkcja wyprowadzająca klucz szyfrowania z klucza głównego (masterkey).
+ * @param masterkey Klucz główny.
+ * @returns Klucz szyfrowania.
+ */
 export const deriveEncryptionKeyFromMasterkey = async (masterkey: string): Promise<CryptoKey> => {
   const encoder = new TextEncoder();
   return await crypto.subtle.deriveKey(
@@ -231,6 +273,12 @@ export const deriveEncryptionKeyFromMasterkey = async (masterkey: string): Promi
   );
 };
 
+/**
+ * Funkcja szyfrująca hasło za pomocą klucza szyfrowania.
+ * @param password Hasło do zaszyfrowania.
+ * @param key Klucz szyfrowania.
+ * @returns Zaszyfrowane hasło i wektor inicjalizacyjny (IV).
+ */
 export const encryptPassword = async (password: string, key: CryptoKey): Promise<{ encrypted: string; iv: string }> => {
   const encoder = new TextEncoder();
   const data = encoder.encode(password);
@@ -246,6 +294,13 @@ export const encryptPassword = async (password: string, key: CryptoKey): Promise
   };
 };
 
+/**
+ * Funkcja deszyfrująca hasło za pomocą klucza szyfrowania.
+ * @param encrypted Zaszyfrowane hasło.
+ * @param iv Wektor inicjalizacyjny (IV).
+ * @param key Klucz szyfrowania.
+ * @returns Odszyfrowane hasło.
+ */
 export const decryptPassword = async (encrypted: string, iv: string, key: CryptoKey): Promise<string> => {
   const decoder = new TextDecoder();
   const encryptedData = base64ToArrayBuffer(encrypted);
@@ -258,10 +313,20 @@ export const decryptPassword = async (encrypted: string, iv: string, key: Crypto
   return decoder.decode(decrypted);
 };
 
+/**
+ * Funkcja konwertująca ArrayBuffer na base64.
+ * @param buffer ArrayBuffer do konwersji.
+ * @returns Base64 reprezentacja ArrayBuffer.
+ */
 export const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
   return btoa(String.fromCharCode(...new Uint8Array(buffer)));
 };
 
+/**
+ * Funkcja konwertująca base64 na ArrayBuffer.
+ * @param base64 Base64 do konwersji.
+ * @returns ArrayBuffer reprezentacja base64.
+ */
 export const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
   const binary = atob(base64);
   const len = binary.length;
@@ -272,6 +337,13 @@ export const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
   return bytes.buffer;
 };
 
+/**
+ * Funkcja wyodrębniająca hasło z pliku ZIP.
+ * @param zip Plik ZIP.
+ * @param filename Nazwa pliku.
+ * @param key Klucz szyfrowania.
+ * @returns Odszyfrowane hasło.
+ */
 const extractPasswordFromZip = async (zip: JSZip, filename: string, key: CryptoKey) => {
   const file = zip.file(filename);
   if (!file) throw new Error("Plik nie znaleziony w ZIP");
@@ -280,6 +352,11 @@ const extractPasswordFromZip = async (zip: JSZip, filename: string, key: CryptoK
   return decryptPassword(encrypted, iv, key);
 };
 
+/**
+ * Provider kontekstu haseł.
+ * @param children Dzieci komponentu.
+ * @returns Provider kontekstu haseł.
+ */
 export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(passwordReducer, {
     passwords: [],
@@ -876,6 +953,10 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   );
 };
 
+/**
+ * Hook do korzystania z kontekstu haseł.
+ * @returns Kontekst haseł.
+ */
 export const usePasswordContext = () => {
   const context = useContext(PasswordContext);
   if (!context) {
@@ -884,6 +965,9 @@ export const usePasswordContext = () => {
   return context;
 };
 
+/**
+ * Typ kontekstu haseł.
+ */
 type PasswordContextType = {
   state: PasswordState;
   copyToClipboard: (passwordfile: string, platform: string, login: string, onDecryptionFail?: () => void) => Promise<void>;

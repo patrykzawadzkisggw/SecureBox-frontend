@@ -13,11 +13,18 @@ import { Label } from "@/components/ui/label";
 import { usePasswordContext } from "../data/PasswordContext";
 import { toast } from "sonner";
 
+/**
+ * Interfejs reprezentujący właściwości komponentu AddPasswordDialog.
+ */
 interface AddPasswordDialogProps {
   isDialogOpen: boolean;
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+/**
+ * Komponent dialogu do dodawania hasła.
+ * Korzysta z kontekstu haseł (`usePasswordContext`) oraz biblioteki `toast` do wyświetlania powiadomień.
+ */
 export function AddPasswordDialog({ isDialogOpen, setIsDialogOpen }: AddPasswordDialogProps) {
   const [platform, setPlatform] = useState("");
   const [login, setLogin] = useState("");
@@ -25,7 +32,9 @@ export function AddPasswordDialog({ isDialogOpen, setIsDialogOpen }: AddPassword
   const [error, setError] = useState(""); 
   const { addPassword } = usePasswordContext();
 
-  
+  /**
+   * Resetuje pola formularza i błąd po otwarciu dialogu.
+   */
   useEffect(() => {
     if (isDialogOpen) {
       setError(""); 
@@ -35,10 +44,13 @@ export function AddPasswordDialog({ isDialogOpen, setIsDialogOpen }: AddPassword
     }
   }, [isDialogOpen]); 
 
+  /**
+   * Obsługuje przesłanie formularza dodawania hasła.
+   * Sprawdza poprawność danych i wywołuje funkcję `addPassword` z kontekstu.
+   */
   const handleSubmit = async () => {
     setError(""); 
 
-   
     if (!platform.trim()) {
       setError("Pole 'Strona' nie może być puste.");
       toast.error("Błąd!", { description: "Pole 'Strona' nie może być puste.", duration: 3000 });

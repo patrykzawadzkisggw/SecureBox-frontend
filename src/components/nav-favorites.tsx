@@ -23,6 +23,10 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
+/**
+ * Komponent nawigacji ulubionych elementów.
+ * Korzysta z komponentów `DropdownMenu` i `SidebarGroup`.
+ */
 export function NavFavorites({
   favorites,
 }: {

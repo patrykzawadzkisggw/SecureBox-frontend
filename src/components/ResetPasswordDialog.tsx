@@ -12,22 +12,38 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
+/**
+ * Interfejs reprezentujący właściwości komponentu ResetPasswordDialog.
+ */
 interface ResetPasswordDialogProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+/**
+ * Komponent dialogu do resetowania hasła.
+ * Korzysta z biblioteki `toast` do wyświetlania powiadomień.
+ */
 export function ResetPasswordDialog({ isOpen, onClose }: ResetPasswordDialogProps) {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
 
+  /**
+   * Waliduje adres email.
+   * @param email Adres email do walidacji.
+   * @returns `true` jeśli email jest poprawny, w przeciwnym razie `false`.
+   */
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
+  /**
+   * Obsługuje przesłanie formularza resetowania hasła.
+   * Sprawdza poprawność adresu email i wywołuje funkcję wysyłania linku resetującego.
+   */
   const handleSubmit = async () => {
     if (!validateEmail(email)) {
       setEmailError("Proszę wprowadzić poprawny adres email.");
@@ -38,7 +54,7 @@ export function ResetPasswordDialog({ isOpen, onClose }: ResetPasswordDialogProp
     setIsLoading(true);
 
     try {
-      
+      // Symulacja wysyłania linku resetującego hasło
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       setIsSent(true);
@@ -57,6 +73,10 @@ export function ResetPasswordDialog({ isOpen, onClose }: ResetPasswordDialogProp
     }
   };
 
+  /**
+   * Obsługuje zamknięcie dialogu.
+   * Resetuje stan komponentu.
+   */
   const handleClose = () => {
     setEmail("");
     setEmailError("");

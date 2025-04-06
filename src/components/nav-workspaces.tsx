@@ -18,6 +18,10 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 
+/**
+ * Komponent nawigacji przestrzeni roboczych.
+ * Korzysta z komponentów `Collapsible` i `SidebarGroup`.
+ */
 export function NavWorkspaces({
   workspaces,
 }: {

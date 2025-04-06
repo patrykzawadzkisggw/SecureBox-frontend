@@ -7,6 +7,10 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
+/**
+ * Komponent nawigacji głównej.
+ * Korzysta z `useLocation` i `Link` z `react-router-dom`.
+ */
 export function NavMain({
   items,
 }: {

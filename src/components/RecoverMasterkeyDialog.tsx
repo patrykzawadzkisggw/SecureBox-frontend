@@ -10,15 +10,21 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {   usePasswordContext } from "../data/PasswordContext";
+import { usePasswordContext } from "../data/PasswordContext";
 import { toast } from "sonner";
 
-
+/**
+ * Interfejs reprezentujący właściwości komponentu RecoverMasterkeyDialog.
+ */
 interface RecoverMasterkeyDialogProps {
   isDialogOpen: boolean;
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+/**
+ * Komponent dialogu do odzyskiwania masterkey.
+ * Korzysta z kontekstu haseł (`usePasswordContext`) oraz biblioteki `toast` do wyświetlania powiadomień.
+ */
 export function RecoverMasterkeyDialog({
   isDialogOpen,
   setIsDialogOpen,
@@ -28,6 +34,10 @@ export function RecoverMasterkeyDialog({
   const [error, setError] = useState("");
   const { setMasterkey } = usePasswordContext();
 
+  /**
+   * Obsługuje przesłanie formularza odzyskiwania masterkey.
+   * Sprawdza poprawność danych i wywołuje funkcję `setMasterkey` z kontekstu.
+   */
   const handleSubmit = async () => {
     setError("");
 
@@ -39,10 +49,8 @@ export function RecoverMasterkeyDialog({
       setError("Masterkey i jego potwierdzenie muszą być identyczne.");
       return;
     }
-    
 
     try {
-      
       await setMasterkey(masterkey);
 
       toast.info("Masterkey ustawiony!", {
@@ -100,7 +108,7 @@ export function RecoverMasterkeyDialog({
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-          {error && <p className="text-red-500 text-sm col-span-4 text-center">{error}</p>}
+            {error && <p className="text-red-500 text-sm col-span-4 text-center">{error}</p>}
           </div>
         </div>
         <DialogFooter>
