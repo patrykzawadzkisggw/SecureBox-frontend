@@ -1,13 +1,19 @@
 import React from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import ActivityList from '../components/ActivityList';
+import { PasswordProvider } from '../data/PasswordContext';
+import '../index.css';
 
 export default {
   title: 'Komponenty/ActivityList',
   component: ActivityList,
 } as ComponentMeta<typeof ActivityList>;
 
-const Template: ComponentStory<typeof ActivityList> = (args) => <ActivityList {...args} />;
+const Template: ComponentStory<typeof ActivityList> = (args) => (
+  <PasswordProvider>
+    <ActivityList {...args} />
+  </PasswordProvider>
+);
 
 export const Default = Template.bind({});
 Default.args = {};

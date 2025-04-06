@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Meta, Story } from "@storybook/react";
 import { ResetPasswordDialog, ResetPasswordDialogProps } from "../components/ResetPasswordDialog";
+import { PasswordProvider } from "../data/PasswordContext";
+import "../index.css";
 
 export default {
   title: "Komponenty/ResetPasswordDialog",
@@ -19,7 +21,11 @@ const Template: Story<ResetPasswordDialogProps> = (args) => {
     args.onClose();
   };
 
-  return <ResetPasswordDialog {...args} isOpen={isOpen} onClose={handleClose} />;
+  return (
+    <PasswordProvider>
+      <ResetPasswordDialog {...args} isOpen={isOpen} onClose={handleClose} />
+    </PasswordProvider>
+  );
 };
 
 export const Default = Template.bind({});

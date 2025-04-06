@@ -1,13 +1,19 @@
 import React from 'react';
 import { Meta, Story } from '@storybook/react';
 import { NavWorkspaces } from '../components/nav-workspaces';
+import { PasswordProvider } from '../data/PasswordContext';
+import '../index.css';
 
 export default {
   title: 'Komponenty/NavWorkspaces',
   component: NavWorkspaces,
 } as Meta;
 
-const Template: Story = (args) => <NavWorkspaces {...args} />;
+const Template: Story = (args) => (
+  <PasswordProvider>
+    <NavWorkspaces {...args} />
+  </PasswordProvider>
+);
 
 export const Default = Template.bind({});
 Default.args = {

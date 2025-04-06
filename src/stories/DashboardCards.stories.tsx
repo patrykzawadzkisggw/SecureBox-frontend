@@ -1,13 +1,19 @@
 import React from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import DashboardCards from '../components/DashboardCards';
+import { PasswordProvider } from '../data/PasswordContext';
+import '../index.css';
 
 export default {
   title: 'Komponenty/DashboardCards',
   component: DashboardCards,
 } as ComponentMeta<typeof DashboardCards>;
 
-const Template: ComponentStory<typeof DashboardCards> = (args) => <DashboardCards {...args} />;
+const Template: ComponentStory<typeof DashboardCards> = (args) => (
+  <PasswordProvider>
+    <DashboardCards {...args} />
+  </PasswordProvider>
+);
 
 export const Default = Template.bind({});
 Default.args = {};

@@ -1,13 +1,19 @@
 import React from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { AppSidebar } from '../components/app-sidebar';
+import { PasswordProvider } from '../data/PasswordContext';
+import '../index.css';
 
 export default {
   title: 'Komponenty/AppSidebar',
   component: AppSidebar,
 } as ComponentMeta<typeof AppSidebar>;
 
-const Template: ComponentStory<typeof AppSidebar> = (args) => <AppSidebar {...args} />;
+const Template: ComponentStory<typeof AppSidebar> = (args) => (
+  <PasswordProvider>
+    <AppSidebar {...args} />
+  </PasswordProvider>
+);
 
 export const Default = Template.bind({});
 Default.args = {};

@@ -1,13 +1,19 @@
 import React from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { NavFavorites } from '../components/nav-favorites';
+import { PasswordProvider } from '../data/PasswordContext';
+import '../index.css';
 
 export default {
   title: 'Komponenty/NavFavorites',
   component: NavFavorites,
 } as ComponentMeta<typeof NavFavorites>;
 
-const Template: ComponentStory<typeof NavFavorites> = (args) => <NavFavorites {...args} />;
+const Template: ComponentStory<typeof NavFavorites> = (args) => (
+  <PasswordProvider>
+    <NavFavorites {...args} />
+  </PasswordProvider>
+);
 
 export const Default = Template.bind({});
 Default.args = {

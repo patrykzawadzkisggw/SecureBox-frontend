@@ -3,6 +3,8 @@ import { Meta, Story } from "@storybook/react";
 import { NavSecondary } from "../components/nav-secondary";
 import { LucideIcon } from "lucide-react";
 import { BrowserRouter as Router } from "react-router-dom";
+import { PasswordProvider } from "../data/PasswordContext";
+import "../index.css";
 
 export default {
   title: "Komponenty/NavSecondary",
@@ -18,7 +20,9 @@ const Template: Story<{
   }[];
 }> = (args) => (
   <Router>
-    <NavSecondary {...args} />
+    <PasswordProvider>
+      <NavSecondary {...args} />
+    </PasswordProvider>
   </Router>
 );
 

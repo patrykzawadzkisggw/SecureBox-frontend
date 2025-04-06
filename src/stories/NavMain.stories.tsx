@@ -2,13 +2,19 @@ import React from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { NavMain } from '../components/nav-main';
 import { Home, Settings, User } from 'lucide-react';
+import { PasswordProvider } from '../data/PasswordContext';
+import '../index.css';
 
 export default {
   title: 'Komponenty/NavMain',
   component: NavMain,
 } as ComponentMeta<typeof NavMain>;
 
-const Template: ComponentStory<typeof NavMain> = (args) => <NavMain {...args} />;
+const Template: ComponentStory<typeof NavMain> = (args) => (
+  <PasswordProvider>
+    <NavMain {...args} />
+  </PasswordProvider>
+);
 
 export const Default = Template.bind({});
 Default.args = {

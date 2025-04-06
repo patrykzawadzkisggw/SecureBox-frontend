@@ -3,6 +3,7 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { UpdateTrustedDeviceDialog, UpdateTrustedDeviceDialogProps } from '../components/UpdateTrustedDeviceDialog';
 import { PasswordProvider } from '../data/PasswordContext';
 import { toast } from 'react-toastify';
+import '../index.css';
 
 export default {
   title: 'Komponenty/UpdateTrustedDeviceDialog',

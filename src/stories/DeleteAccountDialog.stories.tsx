@@ -1,24 +1,32 @@
 import React from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { DeleteAccountDialog } from '../components/DeleteAccountDialog';
+import { PasswordProvider } from '../data/PasswordContext';
+import '../index.css';
 
 export default {
   title: 'Komponenty/DeleteAccountDialog',
   component: DeleteAccountDialog,
 } as ComponentMeta<typeof DeleteAccountDialog>;
 
-const Template: ComponentStory<typeof DeleteAccountDialog> = (args) => <DeleteAccountDialog {...args} />;
+const Template: ComponentStory<typeof DeleteAccountDialog> = (args) => (
+  <PasswordProvider>
+    <DeleteAccountDialog {...args} />
+  </PasswordProvider>
+);
 
 export const Default = Template.bind({});
 Default.args = {
-  isOpen: true,
-  onClose: () => console.log('Dialog zamknięty'),
-  onDelete: () => console.log('Konto usunięte'),
+  isDialogOpen: true,
+  setIsDialogOpen: () => console.log('Dialog zamknięty'),
+  platform: 'example.com',
+  login: 'user@example.com',
 };
 
 export const Closed = Template.bind({});
 Closed.args = {
-  isOpen: false,
-  onClose: () => console.log('Dialog zamknięty'),
-  onDelete: () => console.log('Konto usunięte'),
+  isDialogOpen: false,
+  setIsDialogOpen: () => console.log('Dialog zamknięty'),
+  platform: 'example.com',
+  login: 'user@example.com',
 };

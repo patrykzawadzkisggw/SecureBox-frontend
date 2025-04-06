@@ -1,13 +1,19 @@
 import React from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { ShowPasswordDialog } from '../components/ShowPasswordDialog';
+import { PasswordProvider } from '../data/PasswordContext';
+import '../index.css';
 
 export default {
   title: 'Komponenty/ShowPasswordDialog',
   component: ShowPasswordDialog,
 } as ComponentMeta<typeof ShowPasswordDialog>;
 
-const Template: ComponentStory<typeof ShowPasswordDialog> = (args) => <ShowPasswordDialog {...args} />;
+const Template: ComponentStory<typeof ShowPasswordDialog> = (args) => (
+  <PasswordProvider>
+    <ShowPasswordDialog {...args} />
+  </PasswordProvider>
+);
 
 export const Default = Template.bind({});
 Default.args = {

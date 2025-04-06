@@ -3,6 +3,7 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import ExportToJSON from '../components/ExportToJSON';
 import { PasswordProvider } from '../data/PasswordContext';
 import { ToastProvider } from 'sonner';
+import '../index.css';
 
 export default {
   title: 'Komponenty/ExportToJSON',

@@ -1,13 +1,19 @@
 import React from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { RecoverMasterkeyDialog } from '../components/RecoverMasterkeyDialog';
+import { PasswordProvider } from '../data/PasswordContext';
+import '../index.css';
 
 export default {
   title: 'Przykłady/RecoverMasterkeyDialog',
   component: RecoverMasterkeyDialog,
 } as ComponentMeta<typeof RecoverMasterkeyDialog>;
 
-const Template: ComponentStory<typeof RecoverMasterkeyDialog> = (args) => <RecoverMasterkeyDialog {...args} />;
+const Template: ComponentStory<typeof RecoverMasterkeyDialog> = (args) => (
+  <PasswordProvider>
+    <RecoverMasterkeyDialog {...args} />
+  </PasswordProvider>
+);
 
 export const Default = Template.bind({});
 Default.args = {

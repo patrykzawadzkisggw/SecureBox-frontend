@@ -1,13 +1,19 @@
 import React from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { DataTable } from '../components/DataTable';
+import { PasswordProvider } from '../data/PasswordContext';
+import '../index.css';
 
 export default {
   title: 'Komponenty/DataTable',
   component: DataTable,
 } as ComponentMeta<typeof DataTable>;
 
-const Template: ComponentStory<typeof DataTable> = (args) => <DataTable {...args} />;
+const Template: ComponentStory<typeof DataTable> = (args) => (
+  <PasswordProvider>
+    <DataTable {...args} />
+  </PasswordProvider>
+);
 
 export const Default = Template.bind({});
 Default.args = {};

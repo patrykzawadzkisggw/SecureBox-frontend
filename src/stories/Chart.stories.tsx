@@ -1,13 +1,19 @@
 import React from 'react';
 import { Story, Meta } from '@storybook/react';
 import { Chart, ChartProps } from '../components/Chart';
+import { PasswordProvider } from '../data/PasswordContext';
+import '../index.css';
 
 export default {
   title: 'Komponenty/Chart',
   component: Chart,
 } as Meta;
 
-const Template: Story<ChartProps> = (args) => <Chart {...args} />;
+const Template: Story<ChartProps> = (args) => (
+  <PasswordProvider>
+    <Chart {...args} />
+  </PasswordProvider>
+);
 
 export const Default = Template.bind({});
 Default.args = {
