@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { usePasswordContext } from "../data/PasswordContext";
 import { toast } from "sonner";
 
 /**
@@ -18,26 +17,48 @@ import { toast } from "sonner";
  * @interface AddPasswordDialogProps
  * @property {boolean} isDialogOpen - Stan określający, czy dialog jest otwarty.
  * @property {React.Dispatch<React.SetStateAction<boolean>>} setIsDialogOpen - Funkcja ustawiająca stan otwarcia dialogu.
+ * @property {(password: string, platform: string, login: string) => Promise<void>} onSubmit - Funkcja wywoływana po przesłaniu formularza, zapisująca hasło.
  */
 export interface AddPasswordDialogProps {
   isDialogOpen: boolean;
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onSubmit: (password: string, platform: string, login: string) => Promise<void>;
 }
 
 /**
  * Obsługuje przesłanie formularza dodawania hasła.
- * Sprawdza poprawność danych i wywołuje funkcję `addPassword` z kontekstu.
+ * Sprawdza poprawność danych wejściowych i wywołuje funkcję `addPassword` przekazaną w propsach.
+ * Wyświetla powiadomienia za pomocą biblioteki `toast` w przypadku sukcesu lub błędu.
+ * 
  * @function handleSubmit
- * @param {string} platform - Nazwa platformy/strony.
- * @param {string} login - Login użytkownika.
- * @param {string} password - Hasło do dodania.
- * @param {Function} setError - Funkcja ustawiająca stan błędu.
- * @param {Function} setPlatform - Funkcja resetująca pole platformy.
- * @param {Function} setLogin - Funkcja resetująca pole loginu.
- * @param {Function} setPassword - Funkcja resetująca pole hasła.
- * @param {Function} setIsDialogOpen - Funkcja zamykająca dialog.
- * @param {Function} addPassword - Funkcja z kontekstu do dodawania hasła.
- * @returns {Promise<void>} Obietnica resolves, gdy hasło zostanie dodane lub reject z błędem.
+ * @param {string} platform - Nazwa platformy lub strony (np. "example.com").
+ * @param {string} login - Login użytkownika (np. "user@example.com").
+ * @param {string} password - Hasło do zapisania.
+ * @param {React.Dispatch<React.SetStateAction<string>>} setError - Funkcja ustawiająca komunikat błędu.
+ * @param {React.Dispatch<React.SetStateAction<string>>} setPlatform - Funkcja resetująca pole platformy.
+ * @param {React.Dispatch<React.SetStateAction<string>>} setLogin - Funkcja resetująca pole loginu.
+ * @param {React.Dispatch<React.SetStateAction<string>>} setPassword - Funkcja resetująca pole hasła.
+ * @param {React.Dispatch<React.SetStateAction<boolean>>} setIsDialogOpen - Funkcja zamykająca dialog.
+ * @param {(password: string, platform: string, login: string) => Promise<void>} addPassword - Funkcja zapisująca hasło.
+ * @returns {Promise<void>} Obietnica
+ * 
+ * @example
+ * ```tsx
+ * await handleSubmit(
+ *   "example.com",
+ *   "user@example.com",
+ *   "password123",
+ *   setError,
+ *   setPlatform,
+ *   setLogin,
+ *   setPassword,
+ *   setIsDialogOpen,
+ *   async (password, platform, login) => {
+ *     // Logika zapisu hasła
+ *     console.log({ password, platform, login });
+ *   }
+ * );
+ * ```
  */
 export const handleSubmit = async (
   platform: string,
@@ -86,29 +107,49 @@ export const handleSubmit = async (
 };
 
 /**
- * Komponent dialogu do dodawania hasła.
- * Korzysta z kontekstu haseł (`usePasswordContext`) oraz biblioteki `toast` do wyświetlania powiadomień.
+ * Komponent dialogowy do dodawania nowego hasła do managera haseł.
+ * Zawiera formularz z polami dla strony, loginu i hasła, z walidacją i powiadomieniami.
+ * 
  * @function AddPasswordDialog
  * @param {AddPasswordDialogProps} props - Właściwości komponentu.
- * @param {boolean} props.isDialogOpen - Stan otwarcia dialogu.
- * @param {React.Dispatch<React.SetStateAction<boolean>>} props.setIsDialogOpen - Funkcja do zmiany stanu dialogu.
+ * @param {boolean} props.isDialogOpen - Stan określający, czy dialog jest otwarty.
+ * @param {React.Dispatch<React.SetStateAction<boolean>>} props.setIsDialogOpen - Funkcja ustawiająca stan otwarcia dialogu.
+ * @param {(password: string, platform: string, login: string) => Promise<void>} props.onSubmit - Funkcja zapisująca hasło.
  * @returns {JSX.Element} Dialog z formularzem do dodawania hasła.
+ * 
  * @example
  * ```tsx
- * import { AddPasswordDialog } from './AddPasswordDialog';
+ * import { AddPasswordDialog } from '@/components/AddPasswordDialog';
+ * 
  * const [isOpen, setIsOpen] = useState(false);
- * <AddPasswordDialog isDialogOpen={isOpen} setIsDialogOpen={setIsOpen} />
+ * const handleSubmit = async (password: string, platform: string, login: string) => {
+ *   // Logika zapisu hasła, np. wysyłka do API
+ *   console.log({ password, platform, login });
+ * };
+ * 
+ * <AddPasswordDialog
+ *   isDialogOpen={isOpen}
+ *   setIsDialogOpen={setIsOpen}
+ *   onSubmit={handleSubmit}
+ * />
  * ```
- * @see {@link ../data/PasswordContext.tsx} - Kontekst haseł
- * @see {@link https://www.npmjs.com/package/sonner} - Biblioteka toast
- * @see {handleSubmit} - Funkcja obsługująca przesłanie formularza
+ * 
+ * @remarks
+ * - Komponent resetuje pola formularza i komunikat błędu przy każdym otwarciu dialogu (za pomocą `useEffect`).
+ * - Walidacja sprawdza, czy pola `platform`, `login` i `password` nie są puste.
+ * - Powiadomienia są wyświetlane za pomocą biblioteki `sonner` (sukces lub błąd).
+ * - Funkcja `onSubmit` powinna obsługiwać zapis hasła, np. poprzez wywołanie API.
+ * 
+ * @see {@link https://www.npmjs.com/package/sonner} - Dokumentacja biblioteki `sonner` dla powiadomień.
+ * @see {@link AddPasswordDialogProps} - Interfejs właściwości komponentu.
+ * @see {@link handleSubmit} - Funkcja obsługująca przesłanie formularza.
  */
-export function AddPasswordDialog({ isDialogOpen, setIsDialogOpen }: AddPasswordDialogProps) {
+export function AddPasswordDialog({ isDialogOpen, setIsDialogOpen, onSubmit }: AddPasswordDialogProps) {
   const [platform, setPlatform] = useState("");
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const { addPassword } = usePasswordContext();
+
 
   useEffect(() => {
     if (isDialogOpen) {
@@ -183,7 +224,7 @@ export function AddPasswordDialog({ isDialogOpen, setIsDialogOpen }: AddPassword
                 setLogin,
                 setPassword,
                 setIsDialogOpen,
-                addPassword
+                onSubmit
               )
             }
           >

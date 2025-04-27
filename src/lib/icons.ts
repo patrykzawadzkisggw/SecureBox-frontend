@@ -1,12 +1,47 @@
 import { extractDomain } from "./functions";
 
-type Platform = {
-    name: string; // Nazwa strony/platformy
-    url: string; // Adres strony
-    logo: string; // Ścieżka do logo lub URL favicon
+/**
+ * Interfejs opisujący strukturę obiektu platformy, zawierającego informacje o nazwie, adresie URL i logo.
+ *
+ * @interface Platform
+ * @property {string} name - Nazwa strony lub platformy (np. "Google", "YouTube").
+ * @property {string} url - Adres URL platformy (np. "google.pl", "youtube.com").
+ * @property {string} logo - Ścieżka do logo platformy lub URL favicon (np. "https://www.google.com/favicon.ico").
+ *
+ * @example
+ * ```typescript
+ * const platform: Platform = {
+ *   name: "Google",
+ *   url: "google.pl",
+ *   logo: "https://www.google.com/favicon.ico"
+ * };
+ * ```
+ */
+export type Platform = {
+    name: string; 
+    url: string; 
+    logo: string; 
   };
   
-  const platforms: Platform[] = [
+  /**
+ * Tablica obiektów typu `Platform`, zawierająca listę popularnych platform i serwisów internetowych,
+ * zarówno polskich, jak i globalnych, wraz z ich nazwami, adresami URL i faviconami.
+ *
+ * @type {Platform[]}
+ *
+ * @remarks
+ * - Tablica zawiera predefiniowaną listę platform, takich jak Google, YouTube, Allegro, Amazon itp.
+ * - Każdy obiekt w tablicy jest zgodny z interfejsem `Platform`.
+ * - Lista jest wykorzystywana przez funkcję `findIconUrl` do wyszukiwania favicon na podstawie nazwy lub URL.
+ *
+ * @example
+ * ```typescript
+ * import { platforms } from '@/lib/icons';
+ *
+ * console.log(platforms[0]); // { name: "Google", url: "google.pl", logo: "https://www.google.com/favicon.ico" }
+ * ```
+ */
+  export const platforms: Platform[] = [
     // Polska - popularne serwisy
     { name: "Google", url: "google.pl", logo: "https://www.google.com/favicon.ico" },
     { name: "YouTube", url: "youtube.com", logo: "https://www.youtube.com/favicon.ico" },
@@ -113,6 +148,32 @@ type Platform = {
     { name: "int", url: "int.pl", logo: "https://poczta.iplsc.com/n/public/images/skins/int/favicons/favicon.ico" },
   ];
 
+
+  /**
+ * Funkcja wyszukująca URL ikony (favicon) dla podanej platformy na podstawie nazwy lub adresu URL.
+ * Wykorzystuje tablicę `platforms` oraz funkcję `extractDomain` do normalizacji danych.
+ *
+ * @function findIconUrl
+ * @param {string} input - Ciąg znaków reprezentujący nazwę platformy lub jej URL (np. "Google", "google.pl").
+ * @returns {string} URL ikony (favicon) dla dopasowanej platformy lub pusty ciąg, jeśli nie znaleziono dopasowania.
+ *
+ * @example
+ * ```typescript
+ * import { findIconUrl } from '@/lib/icons';
+ *
+ * console.log(findIconUrl("Google")); // "https://www.google.com/favicon.ico"
+ * console.log(findIconUrl("youtube.com")); // "https://www.youtube.com/favicon.ico"
+ * console.log(findIconUrl("Unknown")); // ""
+ * ```
+ *
+ * @remarks
+ * - Funkcja jest niewrażliwa na wielkość liter i usuwa spacje z ciągu wejściowego.
+ * - Wyszukiwanie jest oparte na częściowym dopasowaniu nazwy lub URL platformy z tablicy `platforms`.
+ * - Funkcja zależy od zewnętrznej funkcji `extractDomain`, która normalizuje adresy URL.
+ * - Jeśli nie znaleziono dopasowania, zwracany jest pusty ciąg (`""`).
+ *
+ * @see {@link extractDomain} - Moduł zawierający funkcję `extractDomain`.
+ */
   export const findIconUrl = (input: string): string => {
     // Usuń spacje i zmień na małe litery dla niewrażliwości na wielkość liter
     const normalizedInput = extractDomain(input.replace(/\s+/g, "").toLowerCase());

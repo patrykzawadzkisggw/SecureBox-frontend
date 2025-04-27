@@ -3,92 +3,134 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import React, { useState } from "react";
-import { encryptMasterkey, usePasswordContext } from "../data/PasswordContext";
+import { encryptMasterkey } from "../data/PasswordContext";
 import { ResetPasswordDialog } from "./ResetPasswordDialog";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, Toaster } from "sonner";
+import { getFailedLogins, getRemainingLockoutTime, isEmailLockedOut, recordFailedAttempt, saveFailedLogins } from "@/lib/functions";
+import { validateEmail, validatePassword } from "@/lib/validators";
 
 /**
- * Obsługuje przesłanie formularza logowania.
- * Sprawdza poprawność danych i wywołuje funkcję `loginUser` z kontekstu.
- * @function handleSubmit
- * @param {React.FormEvent} e - Zdarzenie przesłania formularza.
- * @param {string} login - Login użytkownika.
- * @param {string} password - Hasło logowania.
- * @param {string} masterkey - Klucz główny (masterkey).
- * @param {string} masterkey2 - Potwierdzenie klucza głównego.
- * @param {Function} loginUser - Funkcja logowania z kontekstu.
- * @param {React.Dispatch<React.SetStateAction<boolean>>} setIsLoading - Funkcja ustawiająca stan ładowania.
- * @param {React.Dispatch<React.SetStateAction<string>>} setErrorMessage - Funkcja ustawiająca komunikat błędu.
- * @param {React.Dispatch<React.SetStateAction<string>>} setPassword - Funkcja resetująca hasło.
- * @param {React.Dispatch<React.SetStateAction<string>>} setMasterkey - Funkcja resetująca masterkey.
- * @param {ReturnType<typeof useNavigate>} navigate - Funkcja nawigacji.
- * @returns {Promise<void>} Obietnica resolves po zalogowaniu lub reject w przypadku błędu.
+ * Interfejs definiujący właściwości komponentu `LoginForm`.
+ * Określa propsy wymagane do obsługi logowania, resetowania hasła oraz walidacji danych wejściowych.
+ *
+ *
+ * @example
+ * ```tsx
+ * import { LoginForm } from '@/components/LoginForm';
+ *
+ * const loginUser = async (login: string, password: string, masterkey: string) => {
+ *   console.log('Logowanie:', login, password, masterkey);
+ * };
+ * const resetPasswordSubmit = async (email: string) => {
+ *   console.log('Wysłano link resetowania dla:', email);
+ * };
+ *
+ * <LoginForm
+ *   loginUser={loginUser}
+ *   resetPasswordSubmit={resetPasswordSubmit}
+ *   className="my-custom-class"
+ * />
+ * ```
+ *
+ * @remarks
+ * - Interfejs rozszerza standardowe właściwości formularza HTML (`React.ComponentProps<"form">`).
+ * - Właściwość `loginUser` jest funkcją asynchroniczną odpowiedzialną za logowanie użytkownika.
+ * - Właściwość `resetPasswordSubmit` jest funkcją asynchroniczną wysyłającą żądanie resetowania hasła.
+ * - Właściwość `className` pozwala na dodanie niestandardowych klas CSS do formularza.
+ * - Wszystkie właściwości są wymagane, z wyjątkiem `className` i innych opcjonalnych propsów formularza.
+ *
+ * @see {@link LoginForm} - Komponent korzystający z tego interfejsu.
  */
-export const handleSubmit = async (
-  e: React.FormEvent,
-  login: string,
-  password: string,
-  masterkey: string,
-  masterkey2: string,
-  loginUser: (login: string, password: string, masterkey: string) => Promise<void>,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  setErrorMessage: React.Dispatch<React.SetStateAction<string>>,
-  setPassword: React.Dispatch<React.SetStateAction<string>>,
-  setMasterkey: React.Dispatch<React.SetStateAction<string>>,
-  navigate: ReturnType<typeof useNavigate>
-): Promise<void> => {
-  e.preventDefault();
-  setIsLoading(true);
-  if (masterkey !== masterkey2) {
-    setErrorMessage("Masterkey i jego potwierdzenie muszą być identyczne.");
-    setIsLoading(false);
-    return;
-  }
-  setErrorMessage("");
+interface LoginFormProps extends React.ComponentProps<"form"> {
 
-  try {
-    localStorage.setItem("masterkey", await encryptMasterkey(masterkey, "123"));
-    await loginUser(login, password, masterkey);
-    toast.success("Zalogowano pomyślnie!", { duration: 3000 });
-    navigate("/");
-  } catch (error) {
-    setErrorMessage("Nieprawidłowy login, hasło lub masterkey");
-    setPassword("");
-    setMasterkey("");
-    toast.error("Błąd logowania!", {
-      description: "Sprawdź dane i spróbuj ponownie.",
-      duration: 3000,
-    });
-  } finally {
-    setIsLoading(false);
-  }
-};
+  /**
+   * Asynchroniczna funkcja obsługująca logowanie użytkownika.
+   * @param {string} login - Adres email lub login użytkownika.
+   * @param {string} password - Hasło logowania.
+   * @param {string} masterkey - Klucz główny (hasło szyfrowania).
+   * @returns {Promise<void>} Obietnica oznaczająca zakończenie operacji logowania.
+   */
+  loginUser: (login: string, password: string, masterkey: string) => Promise<void>;
+
+  /**
+   * Asynchroniczna funkcja wysyłająca żądanie resetowania hasła dla podanego adresu email.
+   * @param {string} email - Adres email użytkownika.
+   * @returns {Promise<void>} Obietnica oznaczająca zakończenie operacji.
+   */
+  resetPasswordSubmit: (email: string) => Promise<void>;
+}
+
 
 /**
  * Komponent formularza logowania.
- * Korzysta z kontekstu haseł (`usePasswordContext`) oraz biblioteki `toast` do wyświetlania powiadomień.
+ * Umożliwia logowanie użytkownika, walidację danych wejściowych oraz resetowanie hasła.
+ * Liczy nieudane próby logowania dla danego emaila i blokuje możliwość logowania po 5 nieudanych próbach na 10 minut.
+ *
  * @function LoginForm
- * @param {React.ComponentProps<"form">} props - Właściwości formularza.
- * @param {string} [props.className] - Dodatkowe klasy CSS dla formularza.
- * @param {...any} props - Pozostałe właściwości formularza HTML.
+ * @param {LoginFormProps} props - Właściwości komponentu.
  * @returns {JSX.Element} Formularz logowania z polami i opcjami resetowania hasła.
+ *
  * @example
  * ```tsx
- * import { LoginForm } from './LoginForm';
- * <LoginForm className="my-custom-class" />
+ * import { LoginForm } from '@/components/LoginForm';
+ *
+ * const loginUser = async (login: string, password: string, masterkey: string) => {
+ *   console.log('Logowanie:', login, password, masterkey);
+ * };
+ * const resetPasswordSubmit = async (email: string) => {
+ *   console.log('Wysłano link resetowania dla:', email);
+ * };
+ *
+ * <LoginForm
+ *   loginUser={loginUser}
+ *   resetPasswordSubmit={resetPasswordSubmit}
+ *   className="my-custom-class"
+ * />
  * ```
- * @see {@link "../data/PasswordContext"} - Kontekst haseł
- * @see {@link "https://www.npmjs.com/package/sonner"} - Biblioteka toast
- * @see {@link "./ResetPasswordDialog"} - Dialog resetowania hasła
- * @see {@link "react-router-dom"} - Biblioteka routingu
- * @see {handleSubmit} - Funkcja obsługująca przesłanie formularza
+ *
+ * @remarks
+ * - **Walidacja danych**:
+ *   - Pole `login` jest walidowane za pomocą `validateEmail` z `@/lib/validators`.
+ *   - Pole `password` jest walidowane za pomocą `validatePassword` z `@/lib/validators`.
+ *   - Pola `masterkey` i `masterkey2` muszą być identyczne.
+ * - **Blokada logowania**:
+ *   - Po 5 nieudanych próbach logowania dla danego emaila, logowanie jest blokowane na 10 minut.
+ *   - Nieudane próby i czasy blokady są przechowywane w `localStorage` pod kluczem `failedLogins`.
+ *   - Funkcje `getFailedLogins`, `saveFailedLogins`, `isEmailLockedOut`, `getRemainingLockoutTime` i `recordFailedAttempt` z `@/lib/functions` zarządzają logiką blokady.
+ *   - Po udanym logowaniu rekordy nieudanych prób dla danego emaila są usuwane.
+ * - **Powiadomienia**:
+ *   - Wykorzystuje bibliotekę `sonner` do wyświetlania powiadomień o sukcesie (`toast.success`) lub błędzie (`toast.error`) z czasem trwania 3000ms (5000ms dla blokady).
+ * - **Stany**:
+ *   - `login`: Wartość pola login/email.
+ *   - `password`: Wartość pola hasła.
+ *   - `masterkey` i `masterkey2`: Wartości pól klucza głównego.
+ *   - `isLoading`: Stan ładowania podczas wysyłania formularza.
+ *   - `errorMessage`: Komunikat błędu wyświetlany pod formularzem.
+ *   - `isResetDialogOpen`: Stan otwarcia dialogu resetowania hasła.
+ * - **Zachowanie**:
+ *   - Przy błędach walidacji lub logowania wyświetlane są komunikaty błędu i powiadomienia.
+ *   - Po udanym logowaniu użytkownik jest przekierowywany na stronę główną (`/`).
+ *   - Klucz główny (`masterkey`) jest szyfrowany za pomocą `encryptMasterkey` i zapisywany w `localStorage`.
+ * - **Zewnętrzne zależności**:
+ *   - Komponent używa `react-router-dom` do nawigacji i linków.
+ *   - Integruje `ResetPasswordDialog` do obsługi resetowania hasła.
+ *   - Używa komponentów UI z `@/components/ui` (np. `Button`, `Input`, `Label`).
+ * - **Uwagi dotyczące bezpieczeństwa**:
+ *   - Przechowywanie nieudanych prób w `localStorage` jest podatne na manipulacje; w produkcji należy używać backendu.
+ *   - Szyfrowanie klucza głównego powinno być bezpieczne i zgodne z najlepszymi praktykami.
+ *
+ * @see {@link encryptMasterkey} - Funkcja szyfrowania klucza (`encryptMasterkey`).
+ * @see {@link ResetPasswordDialog} - Dialog resetowania hasła.
+ * @see {@link validateEmail} - Funkcja walidacji `validateEmail`.
+ * @see {@link validatePassword} - Funkcja walidacji `validatePassword`.
  */
 export function LoginForm({
+  loginUser,
+  resetPasswordSubmit,
   className,
   ...props
-}: React.ComponentProps<"form">) {
-  const { login: loginUser } = usePasswordContext();
+}: LoginFormProps) {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [masterkey, setMasterkey] = useState("");
@@ -98,25 +140,92 @@ export function LoginForm({
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const navigate = useNavigate();
 
+ 
+
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+    e.preventDefault();
+    setIsLoading(true);
+    const emValidation = validateEmail(login);
+    if(emValidation) {
+      setErrorMessage(emValidation);
+      setIsLoading(false);
+      toast.error("Błąd walidacji!", {
+        description: emValidation,
+        duration: 3000,
+      });
+      return;
+    }
+    const passwordValidation = validatePassword(password);
+    if(passwordValidation) {
+      setErrorMessage(passwordValidation);
+      setIsLoading(false);
+      toast.error("Błąd walidacji!", {
+        description: passwordValidation,
+        duration: 3000,
+      });
+      return;
+    }
+
+    // Check if email is locked out
+    if (isEmailLockedOut(login)) {
+      const remainingTime = getRemainingLockoutTime(login);
+      setErrorMessage(
+        `Zbyt wiele nieudanych prób logowania. Spróbuj ponownie za ${Math.ceil(
+          remainingTime / 60
+        )} minut.`
+      );
+      setIsLoading(false);
+      toast.error("Konto zablokowane!", {
+        description: `Spróbuj ponownie za ${Math.ceil(remainingTime / 60)} minut.`,
+        duration: 5000,
+      });
+      return;
+    }
+
+    // Validate masterkey
+    if (masterkey !== masterkey2) {
+      setErrorMessage("Masterkey i jego potwierdzenie muszą być identyczne.");
+      setIsLoading(false);
+      recordFailedAttempt(login); // Record failed attempt
+      toast.error("Błąd walidacji!", {
+        description: "Masterkey i jego potwierdzenie muszą być identyczne.",
+        duration: 3000,
+      });
+      return;
+    }
+
+    setErrorMessage("");
+
+    try {
+      localStorage.setItem("masterkey", await encryptMasterkey(masterkey, "123"));
+      await loginUser(login, password, masterkey);
+      toast.success("Zalogowano pomyślnie!", { duration: 3000 });
+      navigate("/");
+      // Clear failed attempts on successful login
+      const failedLogins = getFailedLogins();
+      delete failedLogins[login];
+      saveFailedLogins(failedLogins);
+    } catch (error) {
+      recordFailedAttempt(login); // Record failed attempt
+      setErrorMessage("Nieprawidłowy login, hasło lub masterkey");
+      setPassword("");
+      setMasterkey("");
+      setMasterkey2("");
+      toast.error("Błąd logowania!", {
+        description: "Sprawdź dane i spróbuj ponownie.",
+        duration: 3000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <>
       <form
-        onSubmit={(e) =>
-          handleSubmit(
-            e,
-            login,
-            password,
-            masterkey,
-            masterkey2,
-            loginUser,
-            setIsLoading,
-            setErrorMessage,
-            setPassword,
-            setMasterkey,
-            navigate
-          )
-        }
+        onSubmit={handleSubmit}
         className={cn("flex flex-col gap-6", className)}
+        noValidate
         {...props}
       >
         <div className="flex flex-col items-center gap-2 text-center">
@@ -131,7 +240,7 @@ export function LoginForm({
             <Input
               id="login"
               type="text"
-              placeholder="user123"
+              placeholder="user123@example.pl"
               value={login}
               onChange={(e) => setLogin(e.target.value)}
               required
@@ -214,6 +323,7 @@ export function LoginForm({
       <ResetPasswordDialog
         isOpen={isResetDialogOpen}
         onClose={() => setIsResetDialogOpen(false)}
+        resetPasswordSubmit={resetPasswordSubmit}
       />
       <Toaster />
     </>

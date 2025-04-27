@@ -1,8 +1,7 @@
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -13,36 +12,72 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
+import { isTokenExpired2, isValidToken, ResetPasswordFormValues, resetPasswordSchema } from "@/lib/validators";
 
 
-const resetPasswordSchema = z
-  .object({
-    newPassword: z
-      .string()
-      .min(8, "Hasło musi mieć co najmniej 8 znaków")
-      .regex(/[A-Z]/, "Hasło musi zawierać co najmniej jedną wielką literę")
-      .regex(/[0-9]/, "Hasło musi zawierać co najmniej jedną cyfrę"),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Hasła muszą się zgadzać",
-    path: ["confirmPassword"],
-  });
 
-type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
-
-export const ResetPasswordPage = () => {
+/**
+ * Strona resetowania hasła.
+ * Umożliwia użytkownikowi zmianę hasła za pomocą tokena resetowania (`resetToken`) i opcjonalnego parametru wygaśnięcia (`exp`) przesłanych przez URL.
+ * Wykorzystuje formularz z walidacją (zod) do wprowadzenia nowego hasła i jego potwierdzenia.
+ * Sprawdza ważność tokena i jego wygaśnięcie, wyświetla komunikaty o błędach lub sukcesie.
+ * Po udanej zmianie hasła umożliwia przekierowanie do strony logowania.
+ *
+ * @function ResetPasswordPage
+ * @param {Object} props - Właściwości komponentu.
+ * @param {Function} props.resetPasswordFn - Funkcja wysyłająca żądanie API do zmiany hasła. Przyjmuje token resetowania i nowe hasło, zwraca odpowiedź Axios.
+ * @returns {JSX.Element} Strona resetowania hasła z formularzem lub komunikatami o sukcesie/błędzie.
+ *
+ * @example
+ * ```tsx
+ * import { BrowserRouter, Route, Routes } from "react-router-dom";
+ * import { ResetPasswordPage } from "@/pages/ResetPasswordPage";
+ * import axios from "axios";
+ *
+ * const resetPasswordFn = async (resetToken, newPassword) => {
+ *   return axios.post("/api/reset-password", { resetToken, newPassword });
+ * };
+ *
+ * const App = () => (
+ *   <BrowserRouter>
+ *     <Routes>
+ *       <Route
+ *         path="/reset-password/:id"
+ *         element={<ResetPasswordPage resetPasswordFn={resetPasswordFn} />}
+ *       />
+ *     </Routes>
+ *   </BrowserRouter>
+ * );
+ *
+ * export default App;
+ * ```
+ *
+ * @remarks
+ * - **Zależności**: Wymaga `react-router-dom` (`useParams`, `useSearchParams`), `react-hook-form`, `@hookform/resolvers/zod`, `zod`, `axios` oraz komponentów UI (`Button`, `Form`, `Input`).
+ * - **Routing**: Oczekuje ścieżki `/reset-password/:id` z `id` jako `resetToken`. Parametr `exp` (ISO 8601, np. `2025-04-27T12:34:56.789Z`) jest opcjonalny i przesyłany jako query string (`?exp=`).
+ * - **Walidacja**: Schemat `resetPasswordSchema` wymaga hasła (min. 8 znaków, wielka litera, mała litera, cyfra, znak specjalny) i zgodnego potwierdzenia hasła.
+ * - **API**: `resetPasswordFn` musi zwracać odpowiedź Axios z kodem 200 dla sukcesu lub błędami (np. 401 dla wygasłego tokena). Komponent obsługuje błędy Axios i generyczne.
+ * - **Stylizacja**: Używa Tailwind CSS (np. `min-h-screen`, `bg-gray-100`, `rounded-lg`) dla responsywnego układu.
+ * - **Dostępność**: Formularz zawiera etykiety (`FormLabel`) i komunikaty błędów (`FormMessage`). Zaleca się dodanie `aria-live="polite"` do komunikatów błędów dla czytników ekranu.
+ * - **Bezpieczeństwo**: Token jest walidowany przez `isValidToken` (klient) i `resetPasswordFn` (serwer). Wygaśnięcie tokena sprawdzane przez `isTokenExpired2` (klient) i serwer (401). Zawsze weryfikuj token po stronie serwera.
+ * - **Przekierowanie**: Używa `window.location.href` dla przekierowań. Rozważ `useNavigate` z `react-router-dom` dla płynniejszej nawigacji.
+ * - **Testowanie**: Komponent jest testowalny z `@testing-library/react`. Mockuj `resetPasswordFn`, `isValidToken`, `isTokenExpired2` i komponenty UI. Zobacz `tests/pages/ResetPasswordPage.test.tsx`.
+ */
+export const ResetPasswordPage = ({resetPasswordFn} : {resetPasswordFn: (resetToken: string | undefined, newPassword: any) => Promise<AxiosResponse<any, any>>}) => {
   const { id: resetToken } = useParams<{ id: string }>();
+
+  const [searchParams] = useSearchParams();
+  const exp = searchParams.get("exp");
+
+
+
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isTokenExpired, setIsTokenExpired] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const isValidToken = (token: string) => {
-    const regex = /^[a-f0-9]{64}$/;
-    return regex.test(token);
-  };
+
 
   const form = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(resetPasswordSchema),
@@ -58,14 +93,9 @@ export const ResetPasswordPage = () => {
     setIsTokenExpired(false); 
 
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/users/reset-password/confirm`,
-        {
-          resetToken,
-          newPassword: data.newPassword,
-        }
-      );
 
+      const response = await resetPasswordFn(resetToken, data.newPassword);
+      
       if (response.status === 200) {
         setIsSuccess(true);
         console.log("Hasło zostało zaktualizowane pomyślnie.");
@@ -115,7 +145,7 @@ export const ResetPasswordPage = () => {
     );
   }
 
-  if (isTokenExpired) {
+  if (isTokenExpired || isTokenExpired2(exp)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="max-w-md w-full mx-auto p-6 bg-white rounded-lg shadow-md text-center">

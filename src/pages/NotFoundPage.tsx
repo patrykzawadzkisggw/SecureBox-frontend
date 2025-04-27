@@ -2,6 +2,24 @@ import { Button } from "@/components/ui/button";
 import { Ghost } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+/**
+ * Strona błędu 404 (Strona nie znaleziona).
+ * Wyświetla użytkownikowi komunikat o nieistniejącej stronie z ikoną ducha, nagłówkiem, opisem i przyciskiem przekierowującym na stronę główną.
+ * Używa hooka `useNavigate` z `react-router-dom` do nawigacji po kliknięciu przycisku.
+ *
+ * @function NotFoundPage
+ * @returns {JSX.Element} Strona błędu 404.
+ *
+ * @example
+ * ```tsx
+ * import { NotFoundPage } from "@/pages/NotFoundPage";
+ * import { BrowserRouter } from "react-router-dom";
+ *
+ * <BrowserRouter>
+ *   <NotFoundPage />
+ * </BrowserRouter>
+ * ```
+ */
 export default function NotFoundPage() {
     const navigate = useNavigate();
 

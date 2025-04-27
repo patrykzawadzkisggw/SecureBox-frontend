@@ -34,12 +34,14 @@ import {
 } from "@/components/ui/table";
 import { AddPasswordDialog } from "./AddPasswordDialog";
 import { ShowPasswordDialog } from "./ShowPasswordDialog";
-import { usePasswordContext, PasswordTable } from "../data/PasswordContext";
+import {  PasswordTable } from "../data/PasswordContext";
 import { Toaster } from "sonner";
 import { UpdatePasswordDialog } from "./UpdatePasswordDialog";
 import { DeleteAccountDialog } from "./DeleteAccountDialog";
 import { findIconUrl } from "@/lib/icons";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getInitials, getRandomColor } from "@/lib/functions";
+import JSZip from "jszip";
 
 /**
  * Rozszerzenie meta danych tabeli o flagę ładowania ikon.
@@ -51,54 +53,52 @@ declare module '@tanstack/react-table' {
   }
 }
 
-/**
- * Generuje losowy kolor na podstawie nazwy platformy.
- * @function getRandomColor
- * @param {string} platform - Nazwa platformy.
- * @returns {string} Losowy kolor w formacie HEX.
- * @example
- * ```tsx
- * const color = getRandomColor("Twitter"); // np. "#4ECDC4"
- * ```
- */
-export const getRandomColor = (platform: string): string => {
-  const colors = [
-    "#4ECDC4",
-    "#45B7D1",
-    "#96CEB4",
-    "#FFEEAD",
-    "#D4A5A5",
-    "#9B59B6",
-    "#3498DB",
-  ];
-  const hash = platform.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return colors[hash % colors.length];
-};
+
+interface ColumnProps {
+  copyToClipboard: (passwordfile: string, platform: string, login: string, onDecryptionFail?: () => void) => Promise<void>;
+  setMasterkey: (masterkey: string) => Promise<void>;
+  updatePassword: (newPassword: string, platform: string, login: string) => Promise<void>;
+  deletePassword: (platform: string, login: string) => Promise<void>;
+  state: { zip: JSZip | null; encryptionKey?: CryptoKey | undefined };
+}
 
 /**
- * Generuje inicjały na podstawie nazwy platformy.
- * @function getInitials
- * @param {string} platform - Nazwa platformy.
- * @returns {string} Inicjały platformy (2 znaki).
- * @example
- * ```tsx
- * const initials = getInitials("Twitter"); // "TW"
- * const initialsMulti = getInitials("Google Chrome"); // "GC"
- * ```
+ * Interfejs propsów dla komponentu DataTable.
+ * @interface DataTableProps
+ * @property {PasswordTable[]} passwords - Lista haseł do wyświetlenia w tabeli.
+ * @property {boolean} loading - Flaga wskazująca, czy dane są w trakcie ładowania.
+ * @property {Function} addPassword - Funkcja do dodawania nowego hasła.
+ * @property {Function} copyToClipboard - Funkcja do kopiowania hasła do schowka.
+ * @property {Function} setMasterkey - Funkcja do ustawiania klucza głównego.
+ * @property {Function} updatePassword - Funkcja do aktualizacji hasła.
+ * @property {Function} deletePassword - Funkcja do usuwania hasła.
+ * @property {{ zip: JSZip | null; encryptionKey?: CryptoKey | undefined }} state - Stan zawierający obiekt zip i klucz szyfrowania.
  */
-export const getInitials = (platform: string): string => {
-  const words = platform.split(" ");
-  if (words.length > 1) {
-    return `${words[0][0]}${words[1][0]}`.toUpperCase();
-  }
-  return platform.slice(0, 2).toUpperCase();
-};
+interface DataTableProps {
+  passwords: PasswordTable[];
+  loading: boolean;
+  addPassword: (password: string, platform: string, login: string) => Promise<void>;
+  copyToClipboard: (passwordfile: string, platform: string, login: string, onDecryptionFail?: () => void) => Promise<void>;
+  setMasterkey: (masterkey: string) => Promise<void>;
+  updatePassword: (newPassword: string, platform: string, login: string) => Promise<void>;
+  deletePassword: (platform: string, login: string) => Promise<void>;
+  state: { zip: JSZip | null; encryptionKey?: CryptoKey | undefined };
+}
+
 
 /**
  * Definicja kolumn tabeli dla komponentu DataTable.
+ * @param props - Obiekt zawierający funkcje i stan do obsługi akcji w kolumnach.
+ * @returns Tablica definicji kolumn dla tabeli.
  * @type {ColumnDef<PasswordTable>[]}
  */
-export const columns: ColumnDef<PasswordTable>[] = [
+export const columns = ({
+  copyToClipboard,
+  setMasterkey,
+  updatePassword,
+  deletePassword,
+  state,
+}: ColumnProps): ColumnDef<PasswordTable>[] => [
   {
     accessorKey: "platform",
     header: "Serwis",
@@ -181,7 +181,6 @@ export const columns: ColumnDef<PasswordTable>[] = [
     accessorKey: "passwordfile",
     header: () => <div className="text-right">Kopiuj</div>,
     cell: ({ row }) => {
-      const { copyToClipboard } = usePasswordContext();
       const platform = row.original.platform;
       const login = row.original.login;
       const [isRecoverDialogOpen, setIsRecoverDialogOpen] = useState(false);
@@ -202,12 +201,15 @@ export const columns: ColumnDef<PasswordTable>[] = [
                 handleDecryptionFail
               )
             }
+            data-testid="copy-button"
           >
             <ClipboardCopy className="w-5 h-5" />
           </Button>
           <RecoverMasterkeyDialog
             isDialogOpen={isRecoverDialogOpen}
             setIsDialogOpen={setIsRecoverDialogOpen}
+            setMasterkey={setMasterkey}
+
           />
         </div>
       );
@@ -217,8 +219,7 @@ export const columns: ColumnDef<PasswordTable>[] = [
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const payment = row.original;
-      const { copyToClipboard } = usePasswordContext();
+      const rowData = row.original;
       const [isShowDialogOpen, setIsShowDialogOpen] = useState(false);
       const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
       const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -231,6 +232,7 @@ export const columns: ColumnDef<PasswordTable>[] = [
           <RecoverMasterkeyDialog
             isDialogOpen={isRecoverDialogOpen}
             setIsDialogOpen={setIsRecoverDialogOpen}
+            setMasterkey={setMasterkey}
           />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -244,9 +246,9 @@ export const columns: ColumnDef<PasswordTable>[] = [
               <DropdownMenuItem
                 onClick={() =>
                   copyToClipboard(
-                    payment.passwordfile,
-                    payment.platform,
-                    payment.login,
+                    rowData.passwordfile,
+                    rowData.platform,
+                    rowData.login,
                     handleDecryptionFail
                   )
                 }
@@ -268,21 +270,26 @@ export const columns: ColumnDef<PasswordTable>[] = [
           <ShowPasswordDialog
             isDialogOpen={isShowDialogOpen}
             setIsDialogOpen={setIsShowDialogOpen}
-            passwordfile={payment.passwordfile}
-            platform={payment.platform}
-            login={payment.login}
+            passwordfile={rowData.passwordfile}
+            platform={rowData.platform}
+            login={rowData.login}
+            zip={state.zip}
+            encryptionKey={state.encryptionKey}
+            setMasterkey={setMasterkey}
           />
           <UpdatePasswordDialog
             isDialogOpen={isUpdateDialogOpen}
             setIsDialogOpen={setIsUpdateDialogOpen}
-            platform={payment.platform}
-            login={payment.login}
+            platform={rowData.platform}
+            login={rowData.login}
+            updatePassword={updatePassword}
           />
           <DeleteAccountDialog
             isDialogOpen={isDeleteDialogOpen}
             setIsDialogOpen={setIsDeleteDialogOpen}
-            platform={payment.platform}
-            login={payment.login}
+            platform={rowData.platform}
+            login={rowData.login}
+            deletePassword={deletePassword}
           />
         </>
       );
@@ -292,22 +299,47 @@ export const columns: ColumnDef<PasswordTable>[] = [
 
 /**
  * Komponent DataTable wyświetla tabelę z danymi haseł użytkownika.
- * Korzysta z kontekstu haseł (`usePasswordContext`) oraz biblioteki `useReactTable` do zarządzania tabelą.
- * @function DataTable
+ * Umożliwia filtrowanie, sortowanie, paginację oraz zarządzanie hasłami (dodawanie, kopiowanie, aktualizacja, usuwanie).
+ * Wykorzystuje bibliotekę `@tanstack/react-table` do zarządzania tabelą.
+ * @param props - Propsy komponentu.
  * @returns {JSX.Element} Tabela z danymi haseł użytkownika i opcjami zarządzania.
  * @example
  * ```tsx
- * import { DataTable } from './DataTable';
- * <DataTable />
+ * import { DataTable } from '@/components/DataTable';
+ * import { usePasswordContext } from '@/data/PasswordContext';
+ *
+ * function ParentComponent() {
+ *   const { passwords, addPassword, copyToClipboard, setMasterkey, updatePassword, deletePassword, state } = usePasswordContext();
+ *   return (
+ *     <DataTable
+ *       passwords={passwords}
+ *       loading={false}
+ *       addPassword={addPassword}
+ *       copyToClipboard={copyToClipboard}
+ *       setMasterkey={setMasterkey}
+ *       updatePassword={updatePassword}
+ *       deletePassword={deletePassword}
+ *       state={{ zip: state.zip, encryptionKey: state.encryptionKey }}
+ *     />
+ *   );
+ * }
  * ```
- * @see {@link "../data/PasswordContext"} - Kontekst haseł
- * @see {@link "@tanstack/react-table"} - Biblioteka useReactTable
- * @see {columns} - Definicja kolumn tabeli
- * @see {getRandomColor} - Funkcja generująca losowy kolor
- * @see {getInitials} - Funkcja generująca inicjały
+ * @see {@link DataTable} - Tabela haseł
+ * @see {@link https://tanstack.com/table/v8/docs} - Biblioteka useReactTable
+ * @see {@link columns} - Definicja kolumn tabeli
+ * @see {@link getRandomColor} - Funkcja generująca losowy kolor
+ * @see {@link getInitials} - Funkcja generująca inicjały
  */
-export function DataTable() {
-  const { state } = usePasswordContext();
+export function DataTable({
+  passwords,
+  loading,
+  addPassword,
+  copyToClipboard,
+  setMasterkey,
+  updatePassword,
+  deletePassword,
+  state,
+}: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -316,9 +348,9 @@ export function DataTable() {
   const [isLoadingIcons, setIsLoadingIcons] = useState(false);
 
   useEffect(() => {
-    if (state.passwords.length === 0) return;
+    if (passwords.length === 0) return;
 
-    const iconUrls = state.passwords
+    const iconUrls = passwords
       .map((item) => findIconUrl(item.platform))
       .filter(Boolean) as string[];
 
@@ -344,11 +376,11 @@ export function DataTable() {
       img.onload = handleLoad;
       img.onerror = handleLoad;
     });
-  }, [state.passwords]);
+  }, [passwords]);
 
   const table = useReactTable({
-    data: state.passwords,
-    columns,
+    data: passwords,
+    columns: columns({ copyToClipboard, setMasterkey, updatePassword, deletePassword, state }),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -368,7 +400,7 @@ export function DataTable() {
     },
   });
 
-  if (state.loading) {
+  if (loading) {
     return <div className="text-center">Ładowanie...</div>;
   }
 
@@ -386,6 +418,7 @@ export function DataTable() {
         <AddPasswordDialog
           isDialogOpen={isDialogOpen}
           setIsDialogOpen={setIsDialogOpen}
+          onSubmit={addPassword}
         />
         <Button
           variant="default"

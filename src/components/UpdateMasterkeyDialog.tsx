@@ -10,38 +10,89 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {  usePasswordContext } from "../data/PasswordContext";
+import {  PasswordTable, User } from "../data/PasswordContext";
 import { toast } from "sonner";
-import axios from "axios";
-import { decryptPassword, encryptPassword,deriveEncryptionKeyFromMasterkey, encryptMasterkey, decryptMasterkey } from "../data/PasswordContext";
-import JSZip from "jszip";
 
 /**
  * Interfejs reprezentujący właściwości komponentu UpdateMasterkeyDialog.
+ *
+ * @interface UpdateMasterkeyDialogProps
+ * @property {boolean} isDialogOpen - Flaga wskazująca, czy dialog jest otwarty.
+ * @property {React.Dispatch<React.SetStateAction<boolean>>} setIsDialogOpen - Funkcja do ustawiania stanu otwarcia dialogu.
+ * @property {(oldMasterkey: string, newMasterkey: string, token: string | null, currentUser: User | null, passwords: PasswordTable[]) => Promise<void>} updatefn - Funkcja aktualizująca masterkey.
+ * @property {string | null} token - Token autoryzacyjny użytkownika lub null, jeśli brak.
+ * @property {User | null} currentUser - Obiekt bieżącego użytkownika lub null, jeśli brak danych.
+ * @property {PasswordTable[]} passwords - Lista haseł użytkownika do aktualizacji.
  */
 interface UpdateMasterkeyDialogProps {
   isDialogOpen: boolean;
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  updatefn: (oldMasterkey: string, newMasterkey: string, token: string | null, currentUser : User | null, passwords : PasswordTable[]) => Promise<void>;
+  token: string | null;
+  currentUser: User | null;
+  passwords : PasswordTable[];
 }
 
 /**
- * Komponent dialogu do aktualizacji masterkey.
- * Korzysta z kontekstu haseł (`usePasswordContext`) oraz biblioteki `toast` do wyświetlania powiadomień.
+ * Komponent dialogu do aktualizacji hasła szyfrowania (masterkey).
+ * Umożliwia użytkownikowi wprowadzenie starego masterkey, nowego masterkey oraz potwierdzenie nowego masterkey.
+ * Zawiera walidację danych wejściowych i integrację z powiadomieniami.
+ *
+ * @function UpdateMasterkeyDialog
+ * @param {UpdateMasterkeyDialogProps} props - Właściwości komponentu.
+ * @param {boolean} props.isDialogOpen - Flaga wskazująca, czy dialog jest otwarty.
+ * @param {React.Dispatch<React.SetStateAction<boolean>>} props.setIsDialogOpen - Funkcja do ustawiania stanu otwarcia dialogu.
+ * @param {(oldMasterkey: string, newMasterkey: string, token: string | null, currentUser: User | null, passwords: PasswordTable[]) => Promise<void>} props.updatefn - Funkcja aktualizująca masterkey.
+ * @param {string | null} props.token - Token autoryzacyjny użytkownika lub null.
+ * @param {User | null} props.currentUser - Obiekt bieżącego użytkownika lub null, jeśli brak danych.
+ * @param {PasswordTable[]} props.passwords - Lista haseł użytkownika do aktualizacji.
+ * @returns {JSX.Element} Dialog z formularzem do aktualizacji masterkey.
+ *
+ * @example
+ * ```tsx
+ * import { UpdateMasterkeyDialog } from '@/components/UpdateMasterkeyDialog';
+ *
+ * const updateMasterkey = async (oldMasterkey, newMasterkey, token, currentUser, passwords) => {
+ *   console.log('Zaktualizowano masterkey:', { oldMasterkey, newMasterkey });
+ * };
+ * const currentUser = { id: '1', login: 'user@example.com', first_name: 'Jan', last_name: 'Kowalski', password: 'pass' };
+ * const passwords = [{ id: '1', passwordfile: 'encrypted', logo: '', platform: 'example', login: 'user' }];
+ *
+ * <UpdateMasterkeyDialog
+ *   isDialogOpen={true}
+ *   setIsDialogOpen={setIsOpen}
+ *   updatefn={updateMasterkey}
+ *   token="abc123"
+ *   currentUser={currentUser}
+ *   passwords={passwords}
+ * />
+ * ```
+ *
+ * @remarks
+ * - Komponent używa `Dialog`, `Input`, `Button` i `Label` z biblioteki UI do renderowania formularza w oknie dialogowym.
+ * - Walidacja obejmuje:
+ *   - Wszystkie pola (stare masterkey, nowe masterkey, potwierdzenie) muszą być wypełnione.
+ *   - Nowe masterkey i jego potwierdzenie muszą być identyczne.
+ * - Błędy walidacji lub aktualizacji są wyświetlane w centrum dialogu z czerwonym tekstem.
+ * - Funkcja `updatefn` jest wywoływana tylko po pomyślnej walidacji.
+ * - Powiadomienia (`toast`) informują o sukcesie lub błędach podczas aktualizacji.
+ * - Po pomyślnej aktualizacji dialog jest zamykany, a pola formularza są resetowane.
+ * - Przycisk „Anuluj” zamyka dialog bez zapisywania zmian.
+ *
+ * @see {@link User,PasswordTable} - Definicja typu `User`.
+ * @see {@link PasswordTable} - Definicja typu  `PasswordTable`.
  */
 export function UpdateMasterkeyDialog({
   isDialogOpen,
   setIsDialogOpen,
+  updatefn, token, currentUser, passwords
 }: UpdateMasterkeyDialogProps) {
   const [oldMasterkey, setOldMasterkey] = useState("");
   const [newMasterkey, setNewMasterkey] = useState("");
   const [confirmNewMasterkey, setConfirmNewMasterkey] = useState("");
   const [error, setError] = useState("");
-  const { state,  } = usePasswordContext();
 
-  /**
-   * Obsługuje przesłanie formularza aktualizacji masterkey.
-   * Sprawdza poprawność danych i wywołuje funkcje `decryptMasterkey`, `deriveEncryptionKeyFromMasterkey`, `decryptPassword`, `encryptPassword`, `encryptMasterkey` z kontekstu.
-   */
+
   const handleSubmit = async () => {
     setError("");
 
@@ -55,70 +106,9 @@ export function UpdateMasterkeyDialog({
     }
 
     try {
-      if (!state.currentUser ||  !state.token) {
-        throw new Error("Brak danych użytkownika lub tokenu.");
-      }
-      const [zipResponse] = await Promise.all([
-        axios.get(`${import.meta.env.VITE_API_URL}/passwords/${state.currentUser.id}/files`, {
-          responseType: "blob",
-          headers: { Authorization: `Bearer ${state.token}` },
-        })
-      ]);
-
-      const loadedZip = await JSZip.loadAsync(zipResponse.data);
-        if (!loadedZip) {
-            throw new Error("Nie udało się załadować plików z serwera.");
-        }
-
-      const encryptedMasterkey = localStorage.getItem(`masterkey`);
-      if (!encryptedMasterkey) {
-        throw new Error("Brak masterkey w localStorage.");
-      }
-      const decryptedOldMasterkey = await decryptMasterkey(encryptedMasterkey, "123");
-      if (decryptedOldMasterkey !== oldMasterkey) {
-        setError("Podane stare masterkey jest nieprawidłowe.");
-        return;
-      }
-
-      const oldEncryptionKey = await deriveEncryptionKeyFromMasterkey(oldMasterkey);
-
-      const passwordsToUpdate = [];
-      for (const passwordEntry of state.passwords) {
-        const encryptedData = await loadedZip.file(passwordEntry.passwordfile)?.async("string");
-        if (!encryptedData) {
-          throw new Error(`Nie znaleziono pliku ${passwordEntry.passwordfile} w ZIP-ie`);
-        }
-        const [encrypted, iv] = encryptedData.split(":");
-        const decryptedPassword = await decryptPassword(encrypted, iv, oldEncryptionKey);
-        passwordsToUpdate.push({
-          platform: passwordEntry.platform,
-          login: passwordEntry.login,
-          new_password: decryptedPassword,
-        });
-      }
-
-      const newEncryptionKey = await deriveEncryptionKeyFromMasterkey(newMasterkey);
-      const encryptedPasswords = await Promise.all(
-        passwordsToUpdate.map(async (entry) => {
-          const { encrypted, iv } = await encryptPassword(entry.new_password, newEncryptionKey);
-          return {
-            platform: entry.platform,
-            login: entry.login,
-            new_password: `${encrypted}:${iv}`,
-          };
-        })
-      );
-
-       await axios.put(
-        `${import.meta.env.VITE_API_URL}/passwords/${state.currentUser.id}/passwords`,
-        { passwordsall: encryptedPasswords },
-        { headers: { Authorization: `Bearer ${state.token}` } }
-      );
+      await updatefn(oldMasterkey, newMasterkey, token, currentUser, passwords);
       toast.success("Masterkey zaktualizowany pomyślnie!", { duration: 3000 });
       setIsDialogOpen(false);
-      const newEncryptedMasterkey = await encryptMasterkey(newMasterkey, state.currentUser.password);
-      localStorage.setItem(`masterkey`, newEncryptedMasterkey);
-
       setOldMasterkey("");
       setNewMasterkey("");
       setConfirmNewMasterkey("");

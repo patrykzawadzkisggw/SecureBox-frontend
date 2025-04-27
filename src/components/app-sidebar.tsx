@@ -31,22 +31,16 @@ import { usePasswordContext } from "@/data/PasswordContext";
  * @returns {JSX.Element} Boczny pasek nawigacyjny z przełącznikiem zespołów i główną nawigacją.
  * @example
  * ```tsx
- * import { AppSidebar } from './AppSidebar';
+ * import { AppSidebar } from '@/components/AppSidebar';
  * <AppSidebar collapsible="icon" />
  * ```
- * @see {@link "@/data/PasswordContext"} - Kontekst haseł
- * @see {@link "@/components/team-switcher"} - Komponent TeamSwitcher
- * @see {@link "@/components/nav-main"} - Komponent NavMain
- * @see {SidebarData} - Struktura danych nawigacyjnych
+ * @see {@link usePasswordContext} - Kontekst haseł
+ * @see {@link TeamSwitcher} - Komponent TeamSwitcher
+ * @see {@link NavMain} - Komponent NavMain
  */
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { state } = usePasswordContext();
+  const { state, logout } = usePasswordContext();
 
-  /**
-   * Obiekt zawierający dane do wyświetlenia w bocznym pasku nawigacyjnym.
-   * Zawiera informacje o zespołach i głównych elementach nawigacyjnych.
-   * @type {SidebarData}
-   */
   const data = {
     teams: [
       {
@@ -54,7 +48,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           ? `${state.currentUser.first_name} ${state.currentUser.last_name}`
           : "Brak użytkownika",
         logo: Command,
-        plan: "Enterprise",
       },
     ],
     navMain: [
@@ -78,7 +71,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Ustawienia",
         url: "/settings",
         icon: Settings2,
-        badge: "10",
       },
     ],
   };
@@ -86,7 +78,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar className="border-r-0 select-none" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <TeamSwitcher teams={data.teams} logout={logout} currentUser={state.currentUser}/>
         <NavMain items={data.navMain} />
       </SidebarHeader>
       <SidebarContent></SidebarContent>

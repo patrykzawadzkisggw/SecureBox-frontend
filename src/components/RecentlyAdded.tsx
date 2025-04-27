@@ -3,43 +3,66 @@ import { Progress } from "@/components/ui/progress";
 import { Plus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { AddPasswordDialog } from "./AddPasswordDialog";
-import { usePasswordContext } from "../data/PasswordContext";
-import { extractDomain } from "@/lib/functions";
+import { PasswordHistory, PasswordTable } from "../data/PasswordContext";
+import { extractDomain, getInitials, getRandomColor, getStrengthInfo, getTimeDifference } from "@/lib/functions";
 import { findIconUrl } from "@/lib/icons";
 import { Skeleton } from "@/components/ui/skeleton";
 
-
-const getRandomColor = (platform: string) => {
-  const colors = [
-    "#FF6B6B",
-    "#4ECDC4",
-    "#45B7D1",
-    "#96CEB4",
-    "#FFEEAD",
-    "#D4A5A5",
-    "#9B59B6",
-    "#3498DB",
-  ];
-  const hash = platform.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return colors[hash % colors.length];
-};
-
-const getInitials = (platform: string) => {
-  const words = platform.split(" ");
-  if (words.length > 1) {
-    return `${words[0][0]}${words[1][0]}`.toUpperCase();
-  }
-  return platform.slice(0, 2).toUpperCase();
-};
-
-export default function RecentlyAdded() {
+/**
+ * Komponent wyświetlający listę ostatnio użytych haseł użytkownika.
+ * Pokazuje do 5 najnowszych haseł z informacjami o platformie, loginie, sile hasła i czasie użycia.
+ * Umożliwia dodanie nowego hasła poprzez dialog `AddPasswordDialog`.
+ * 
+ * @function RecentlyAdded
+ * @param {Object} props - Właściwości komponentu.
+ * @param {PasswordHistory[]} props.data - Tablica historii haseł użytkownika.
+ * @param {(password: string, platform: string, login: string) => Promise<void>} props.addPassword - Funkcja zapisująca nowe hasło.
+ * @param {PasswordTable[]} props.passwords - Tablica haseł użytkownika.
+ * @returns {JSX.Element} Lista ostatnio użytych haseł lub komunikat o braku danych.
+ * 
+ * @example
+ * ```tsx
+ * import RecentlyAdded from '@/components/RecentlyAdded';
+ * 
+ * const data = [
+ *   {
+ *     id: 1,
+ *     platform: "https://example.com",
+ *     login: "user@example.com",
+ *     strength: 80,
+ *     timestamp: "2025-04-25T13:24:47.961Z",
+ *   },
+ * ];
+ * const passwords = [{id: 5;passwordfile: "plik.txt";logo: "logo.png";platform: "https://example.com";login: "user@example.com"}]
+ * const addPassword = async (password: string, platform: string, login: string) => {
+ *   console.log({ password, platform, login });
+ * };
+ * 
+ * <RecentlyAdded data={data} addPassword={addPassword} passwords={passwords}/>
+ * ```
+ * 
+ * @remarks
+ * - Komponent sortuje hasła według daty (od najnowszych) i wyświetla maksymalnie 5.
+ * - Dla każdej platformy próbuje załadować ikonę za pomocą `findIconUrl`. Jeśli ikona nie istnieje, wyświetla inicjały platformy na losowym tle (`getInitials`, `getRandomColor`).
+ * - Siła hasła jest wyświetlana jako pasek postępu (`Progress`) z etykietą i kolorem zależnym od wartości (`getStrengthInfo`).
+ * - Pole `platform` jest formatowane za pomocą `extractDomain` (np. "example.com" z "https://example.com").
+ * - Czas użycia jest obliczany względem bieżącej daty (`getTimeDifference`).
+ * - Podczas ładowania ikon wyświetlane są szkielety (`Skeleton`) dla płynnego UX.
+ * - Komponent używa ikony `Plus` z biblioteki `lucide-react` dla przycisku dodawania hasła.
+ * 
+ * @see {@link AddPasswordDialog} - Komponent dialogu dodawania hasła.
+ * @see {@link PasswordHistory} - Interfejs `PasswordHistory`.
+ * @see {@link extractDomain} - Funkcja `extractDomain`.
+ * @see {@link findIconUrl} - Funkcja `findIconUrl`.
+ * @see {@link https://lucide.dev} - Dokumentacja biblioteki `lucide-react` dla ikon.
+ */
+export default function RecentlyAdded({ data, addPassword, passwords}: { data: PasswordHistory[], addPassword : (password: string, platform: string, login: string) => Promise<void>, passwords: PasswordTable[] }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { state } = usePasswordContext();
   const [isLoadingIcons, setIsLoadingIcons] = useState(false);
 
 
   useEffect(() => {
-    const iconUrls = state.history
+    const iconUrls = data
       .map((item) => findIconUrl(item.platform))
       .filter(Boolean) as string[];
 
@@ -65,37 +88,23 @@ export default function RecentlyAdded() {
       img.onload = handleLoad;
       img.onerror = handleLoad; 
     });
-  }, [state.history]);
+  }, [data]);
 
 
-  const sortedHistory = [...state.history]
+  const sortedHistory = [...data]
     .filter((item) =>
-      state.passwords.some(
+      passwords.some(
         (p) => p.platform === item.platform && p.login === item.login
       )
     )
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
     .slice(0, 5);
 
-  const getTimeDifference = (timestamp: string) => {
-    const now = new Date();
-    const diffMs = now.getTime() - new Date(timestamp).getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    return diffDays === 0 ? "Dzisiaj" : `${diffDays} dni`;
-  };
-
-  const getStrengthInfo = (strength: number) => {
-    if (strength >= 80) return { text: "Silna", color: "text-purple-700" };
-    if (strength >= 60) return { text: "Dobra", color: "text-purple-500" };
-    if (strength >= 40) return { text: "Średnia", color: "text-purple-400" };
-    return { text: "Słaba", color: "text-purple-300" };
-  };
-
   return (
     <div className="p-6 pt-0">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">Ostatnio użyte</h2>
-        <AddPasswordDialog isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} />
+        <AddPasswordDialog isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} onSubmit={addPassword}/>
         <Button
           variant="outline"
           className="flex items-center gap-2"

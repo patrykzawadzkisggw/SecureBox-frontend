@@ -10,34 +10,67 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { usePasswordContext } from "../data/PasswordContext";
 import { toast } from "sonner";
 
 /**
  * Interfejs reprezentujący właściwości komponentu RecoverMasterkeyDialog.
+ *
+ * @property {boolean} isDialogOpen - Flaga wskazująca, czy dialog jest otwarty.
+ * @property {React.Dispatch<React.SetStateAction<boolean>>} setIsDialogOpen - Funkcja do ustawiania stanu otwarcia dialogu.
+ * @property {(masterkey: string) => Promise<void>} setMasterkey - Funkcja weryfikująca i ustawiająca masterkey.
  */
 interface RecoverMasterkeyDialogProps {
   isDialogOpen: boolean;
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setMasterkey: (masterkey: string) => Promise<void>;
 }
 
 /**
- * Komponent dialogu do odzyskiwania masterkey.
- * Korzysta z kontekstu haseł (`usePasswordContext`) oraz biblioteki `toast` do wyświetlania powiadomień.
+ * Komponent dialogu do odzyskiwania hasła szyfrowania (masterkey).
+ * Umożliwia użytkownikowi wprowadzenie masterkey oraz jego potwierdzenie w celu odzyskania dostępu do zaszyfrowanych haseł.
+ * Zawiera walidację danych wejściowych i integrację z powiadomieniami.
+ *
+ * @function RecoverMasterkeyDialog
+ * @param {RecoverMasterkeyDialogProps} props - Właściwości komponentu.
+ * @returns {JSX.Element} Dialog z formularzem do weryfikacji masterkey.
+ *
+ * @example
+ * ```tsx
+ * import { RecoverMasterkeyDialog } from '@/components/RecoverMasterkeyDialog';
+ *
+ * const setMasterkey = async (masterkey: string) => {
+ *   console.log('Zweryfikowano masterkey:', masterkey);
+ * };
+ *
+ * <RecoverMasterkeyDialog
+ *   isDialogOpen={true}
+ *   setIsDialogOpen={setIsOpen}
+ *   setMasterkey={setMasterkey}
+ * />
+ * ```
+ *
+ * @remarks
+ * - Komponent używa `Dialog`, `Input`, `Button` i `Label` z biblioteki UI do renderowania formularza w oknie dialogowym.
+ * - Walidacja obejmuje:
+ *   - Oba pola (masterkey i potwierdzenie) muszą być wypełnione.
+ *   - Masterkey i jego potwierdzenie muszą być identyczne.
+ * - Błędy walidacji lub weryfikacji są wyświetlane w centrum dialogu z czerwonym tekstem.
+ * - Funkcja `setMasterkey` jest wywoływana tylko po pomyślnej walidacji.
+ * - Powiadomienia (`toast`) informują o sukcesie lub błędach podczas weryfikacji.
+ * - Po pomyślnej weryfikacji dialog jest zamykany, a pola formularza są resetowane.
+ * - Przycisk „Anuluj” zamyka dialog bez weryfikacji.
+ * - Komponent operuje na dostarczonej funkcji `setMasterkey`.
+ *
  */
 export function RecoverMasterkeyDialog({
   isDialogOpen,
   setIsDialogOpen,
+  setMasterkey
 }: RecoverMasterkeyDialogProps) {
   const [masterkey, setMasterkey2] = useState("");
   const [confirmMasterkey, setConfirmMasterkey] = useState("");
   const [error, setError] = useState("");
-  const { setMasterkey } = usePasswordContext();
 
-  /**
-   * Obsługuje przesłanie formularza odzyskiwania masterkey.
-   * Sprawdza poprawność danych i wywołuje funkcję `setMasterkey` z kontekstu.
-   */
   const handleSubmit = async () => {
     setError("");
 

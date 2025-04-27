@@ -54,9 +54,9 @@ describe('AppSidebar', () => {
     jest.clearAllMocks();
   });
 
-  it('renders with current user data', () => {
+it('renderuje z danymi bieżącego użytkownika', () => {
     (usePasswordContext as jest.Mock).mockReturnValue({
-      state: { currentUser: mockUser },
+        state: { currentUser: mockUser },
     });
 
     render(<AppSidebar />);
@@ -74,9 +74,9 @@ describe('AppSidebar', () => {
     expect(screen.getByText('Hasła')).toBeInTheDocument();
     expect(screen.getByText('Generuj hasło')).toBeInTheDocument();
     expect(screen.getByText('Ustawienia')).toBeInTheDocument();
-  });
+});
 
-  it('renders with fallback when user is not available', () => {
+  it('renderuje z domyślną wartością, gdy użytkownik nie jest dostępny', () => {
     (usePasswordContext as jest.Mock).mockReturnValue({
       state: { currentUser: null },
     });

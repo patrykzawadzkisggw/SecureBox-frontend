@@ -11,42 +11,90 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import axios from "axios";
+import { validateEmail } from "@/lib/validators";
+
 
 /**
  * Interfejs reprezentujący właściwości komponentu ResetPasswordDialog.
  */
 interface ResetPasswordDialogProps {
+  /**
+   * Określa, czy dialog jest otwarty.
+   * @type {boolean}
+   */
   isOpen: boolean;
+
+  /**
+   * Funkcja wywoływana przy zamykaniu dialogu.
+   * Resetuje stan komponentu i zamyka modal.
+   * @type {() => void}
+   */
   onClose: () => void;
+
+  /**
+   * Asynchroniczna funkcja wysyłająca żądanie resetowania hasła dla podanego adresu email.
+   * @param {string} email - Adres email użytkownika.
+   * @returns {Promise<void>} Obietnica oznaczająca zakończenie operacji.
+   */
+  resetPasswordSubmit: (email: string) => Promise<void>;
 }
 
 /**
  * Komponent dialogu do resetowania hasła.
- * Korzysta z biblioteki `toast` do wyświetlania powiadomień.
+ * Umożliwia użytkownikowi wprowadzenie adresu email, walidację tego adresu oraz wysłanie linku do resetowania hasła.
+ * Wykorzystuje bibliotekę `sonner` do wyświetlania powiadomień o sukcesie lub błędzie.
+ *
+ * @param {ResetPasswordDialogProps} props - Właściwości komponentu.
+ * @returns {JSX.Element} Dialog z polem do wprowadzenia adresu email oraz przyciskami akcji.
+ *
+ * @example
+ * ```tsx
+ * import { ResetPasswordDialog } from '@/components/ResetPasswordDialog';
+ *
+ * const resetPasswordSubmit = async (email: string) => {
+ *   console.log('Wysłano link resetowania dla:', email);
+ * };
+ *
+ * <ResetPasswordDialog
+ *   isOpen={true}
+ *   onClose={() => console.log('Zamknięto dialog')}
+ *   resetPasswordSubmit={resetPasswordSubmit}
+ * />
+ * ```
+ *
+ * @remarks
+ * - Komponent korzysta z funkcji `validateEmail` z `@/lib/validators` do walidacji adresu email.
+ * - Wyświetla dynamiczne komunikaty w zależności od stanu:
+ *   - Przed wysłaniem: prośba o podanie adresu email.
+ *   - Po wysłaniu: potwierdzenie wysłania linku.
+ * - Obsługuje stany:
+ *   - `email`: Wartość wprowadzonego adresu email.
+ *   - `emailError`: Komunikat błędu walidacji email.
+ *   - `isLoading`: Stan ładowania podczas wysyłania żądania.
+ *   - `isSent`: Potwierdzenie wysłania linku.
+ * - Powiadomienia (`toast`) są wyświetlane za pomocą biblioteki `sonner` z czasem trwania 3 sekundy.
+ * - Walidacja email:
+ *   - Jeśli `validateEmail` zwraca błąd, wyświetla komunikat `"Proszę wprowadzić poprawny adres email."`.
+ * - W przypadku błędu wysyłania linku (np. problem z serwerem), wyświetla powiadomienie o niepowodzeniu.
+ * - Funkcja `resetPasswordSubmit` jest wywoływana asynchronicznie i oczekuje adresu email jako argumentu.
+ * - Przy zamykaniu dialogu resetowane są wszystkie stany lokalne (`email`, `emailError`, `isSent`).
+ * - Komponent używa komponentów UI z `@/components/ui` (np. `Dialog`, `Input`, `Button`) do renderowania interfejsu.
+ *
+ * @see {@link validateEmail} - Funkcja walidacji email (`validateEmail`).
  */
-export function ResetPasswordDialog({ isOpen, onClose }: ResetPasswordDialogProps) {
+export function ResetPasswordDialog({ isOpen, onClose, resetPasswordSubmit }: ResetPasswordDialogProps) {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
 
-  /**
-   * Waliduje adres email.
-   * @param email Adres email do walidacji.
-   * @returns `true` jeśli email jest poprawny, w przeciwnym razie `false`.
-   */
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
 
-  /**
-   * Obsługuje przesłanie formularza resetowania hasła.
-   * Sprawdza poprawność adresu email i wywołuje funkcję wysyłania linku resetującego.
-   */
+ 
+
+  
   const handleSubmit = async () => {
-    if (!validateEmail(email)) {
+    const valRes = validateEmail(email);
+    if (valRes) {
       setEmailError("Proszę wprowadzić poprawny adres email.");
       return;
     }
@@ -57,9 +105,7 @@ export function ResetPasswordDialog({ isOpen, onClose }: ResetPasswordDialogProp
     try {
       
 
-      await axios.post(`${import.meta.env.VITE_API_URL}/users/reset-password/`,{
-        "login": email
-      });
+      await resetPasswordSubmit(email);
       setIsSent(true);
       toast.success("Link do resetowania hasła został wysłany!", {
         description: `Sprawdź swoją skrzynkę: ${email}`,
@@ -76,10 +122,7 @@ export function ResetPasswordDialog({ isOpen, onClose }: ResetPasswordDialogProp
     }
   };
 
-  /**
-   * Obsługuje zamknięcie dialogu.
-   * Resetuje stan komponentu.
-   */
+
   const handleClose = () => {
     setEmail("");
     setEmailError("");
@@ -109,7 +152,7 @@ export function ResetPasswordDialog({ isOpen, onClose }: ResetPasswordDialogProp
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="m@example.com"
+                placeholder="email@example.pl"
                 className="col-span-3"
                 disabled={isLoading}
               />

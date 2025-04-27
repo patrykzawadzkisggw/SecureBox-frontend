@@ -1,32 +1,37 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
-import { usePasswordContext } from "../data/PasswordContext";
+import { PasswordTable } from "../data/PasswordContext";
 import { toast } from "sonner";
 
 /**
- * Obsługuje zmianę pliku JSON.
- * Sprawdza poprawność danych i wywołuje funkcje `addPassword` oraz `updatePassword` z kontekstu.
+ * Obsługuje zmianę pliku JSON w celu importu haseł.
+ * Sprawdza poprawność danych w pliku JSON i wywołuje funkcje `addPassword` lub `updatePassword` w zależności od tego, czy hasło już istnieje.
+ * Wyświetla powiadomienia o sukcesie lub błędzie za pomocą biblioteki `sonner`.
  * @function handleFileChange
- * @param {React.ChangeEvent<HTMLInputElement>} event - Zdarzenie zmiany pliku.
- * @param {ReturnType<typeof usePasswordContext>["state"]} state - Stan kontekstu haseł.
- * @param {Function} addPassword - Funkcja z kontekstu do dodawania hasła.
- * @param {Function} updatePassword - Funkcja z kontekstu do aktualizacji hasła.
+ * @param {React.ChangeEvent<HTMLInputElement>} event - Zdarzenie zmiany pliku w elemencie input.
+ * @param {PasswordTable[]} passwords - Lista istniejących haseł z kontekstu.
+ * @param {(password: string, platform: string, login: string) => Promise<void>} addPassword - Funkcja do dodawania nowego hasła.
+ * @param {(password: string, platform: string, login: string) => Promise<void>} updatePassword - Funkcja do aktualizacji istniejącego hasła.
  * @param {React.Dispatch<React.SetStateAction<boolean>>} setIsImporting - Funkcja ustawiająca stan importowania.
+ * @param {() => Promise<void>} [fetchPasswords] - Opcjonalna funkcja do pobrania haseł po zakończeniu importu.
  * @returns {Promise<void>} Obietnica resolves po zakończeniu importu lub reject w przypadku błędu.
+ * @throws {Error} Jeśli plik JSON nie zawiera tablicy obiektów.
  * @example
  * ```tsx
  * const fileInput = document.createElement("input");
  * fileInput.type = "file";
- * fileInput.onchange = (e) => handleFileChange(e, state, addPassword, updatePassword, setIsImporting);
+ * fileInput.onchange = (e) => handleFileChange(e, passwords, addPassword, updatePassword, setIsImporting);
+ * fileInput.click();
  * ```
  */
 export const handleFileChange = async (
   event: React.ChangeEvent<HTMLInputElement>,
-  state: ReturnType<typeof usePasswordContext>["state"],
+  passwords: PasswordTable[],
   addPassword: (password: string, platform: string, login: string) => Promise<void>,
   updatePassword: (password: string, platform: string, login: string) => Promise<void>,
-  setIsImporting: React.Dispatch<React.SetStateAction<boolean>>
+  setIsImporting: React.Dispatch<React.SetStateAction<boolean>>,
+  fetchPasswords?: () => Promise<void>
 ): Promise<void> => {
   const file = event.target.files?.[0];
   if (!file) return;
@@ -46,7 +51,7 @@ export const handleFileChange = async (
         continue;
       }
 
-      const existingEntry = state.passwords.find(
+      const existingEntry = passwords.find(
         (p) => p.platform === entry.platform && p.login === entry.login
       );
 
@@ -56,7 +61,7 @@ export const handleFileChange = async (
         await addPassword(entry.password, entry.platform, entry.login);
       }
     }
-
+    if(fetchPasswords) await fetchPasswords();
     toast.success("Import zakończony!", {
       description: "Hasła zostały zaimportowane z pliku JSON.",
       duration: 3000,
@@ -74,21 +79,27 @@ export const handleFileChange = async (
 };
 
 /**
- * Komponent ImportFromJSON umożliwia importowanie haseł użytkownika z pliku JSON.
- * Korzysta z kontekstu haseł (`usePasswordContext`) oraz biblioteki `toast` do wyświetlania powiadomień.
+ * Komponent umożliwiający importowanie haseł użytkownika z pliku JSON.
+ * Renderuje przycisk z ikoną, który otwiera okno wyboru pliku JSON. Po wybraniu pliku wywołuje funkcję `handleFileChange` do przetworzenia danych.
+ * Wyświetla powiadomienia o sukcesie lub błędzie za pomocą biblioteki `sonner`.
  * @function ImportFromJSON
- * @returns {JSX.Element} Przycisk do importowania haseł z pliku JSON.
+ * @param {Object} props - Właściwości komponentu.
+ * @param {(password: string, platform: string, login: string) => Promise<void>} props.addPassword - Funkcja do dodawania nowego hasła.
+ * @param {(newPassword: string, platform: string, login: string) => Promise<void>} props.updatePassword - Funkcja do aktualizacji istniejącego hasła.
+ * @param {boolean} props.loading - Stan wskazujący, czy trwa ładowanie danych.
+ * @param {PasswordTable[]} props.passwords - Lista istniejących haseł.
+ * @returns {JSX.Element} Przycisk z ukrytym inputem do importowania haseł z pliku JSON.
  * @example
  * ```tsx
- * import ImportFromJSON from './ImportFromJSON';
- * <ImportFromJSON />
+ * import ImportFromJSON from '@/components/ImportFromJSON';
+ * const passwords = [{ id: "1", platform: "example", login: "user", passwordfile: "pass1.txt", logo: "" }];
+ * const addPassword = async (password, platform, login) => { ... };
+ * const updatePassword = async (password, platform, login) => { ... };
+ * <ImportFromJSON addPassword={addPassword} updatePassword={updatePassword} loading={false} passwords={passwords} />
  * ```
- * @see {@link "../data/PasswordContext"} - Kontekst haseł
- * @see {@link "https://www.npmjs.com/package/sonner"} - Biblioteka toast
  * @see {handleFileChange} - Funkcja obsługująca import
  */
-export default function ImportFromJSON() {
-  const { state, addPassword, updatePassword } = usePasswordContext();
+export default function ImportFromJSON({addPassword, updatePassword, loading, passwords, fetchPasswords} : {addPassword: (password: string, platform: string, login: string) => Promise<void>, updatePassword: (newPassword: string, platform: string, login: string) => Promise<void>, loading: boolean, passwords: PasswordTable[], fetchPasswords?: () => Promise<void>}) {
   const [isImporting, setIsImporting] = useState(false);
 
   return (
@@ -96,7 +107,7 @@ export default function ImportFromJSON() {
       <Button
         variant="outline"
         className="flex items-center gap-2 cursor-pointer select-none"
-        disabled={isImporting || state.loading}
+        disabled={isImporting || loading}
         asChild
       >
         <div>
@@ -109,8 +120,9 @@ export default function ImportFromJSON() {
         type="file"
         accept=".json"
         className="hidden"
-        onChange={(event) => handleFileChange(event, state, addPassword, updatePassword, setIsImporting)}
-        disabled={isImporting || state.loading}
+        onChange={(event) => handleFileChange(event, passwords, addPassword, updatePassword, setIsImporting, fetchPasswords)}
+        disabled={isImporting || loading}
+        data-testid="json-import-input"
       />
     </label>
   );

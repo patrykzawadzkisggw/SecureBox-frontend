@@ -12,8 +12,27 @@ import {
 import { Link } from "react-router-dom"
 
 /**
- * Komponent nawigacji drugorzędnej.
- * Korzysta z komponentów `SidebarGroup` i `Link`.
+ * Komponent nawigacji drugorzędnej aplikacji.
+ * Renderuje grupę elementów menu bocznego z opcjonalnymi odznakami (badges), korzystając z komponentów `SidebarGroup` i `Link` z `react-router-dom`.
+ * Każdy element menu zawiera ikonę, tytuł oraz opcjonalną odznakę, a nawigacja jest realizowana poprzez linki.
+ *
+ * @function NavSecondary
+ * @param {React.ReactNode} [props.items[].badge] - Opcjonalna odznaka wyświetlana obok elementu menu.
+ * @param {React.ComponentPropsWithoutRef<typeof SidebarGroup>} [props] - Dodatkowe właściwości przekazywane do komponentu `SidebarGroup`.
+ * @returns {JSX.Element} Komponent grupy menu bocznego z elementami nawigacyjnymi.
+ *
+ * @example
+ * ```tsx
+ * import { Calendar, Mail } from "lucide-react";
+ * import { NavSecondary } from "@/components/NavSecondary";
+ *
+ * const navItems = [
+ *   { title: "Kalendarz", url: "/calendar", icon: Calendar, badge: 5 },
+ *   { title: "Poczta", url: "/mail", icon: Mail },
+ * ];
+ *
+ * <NavSecondary items={navItems} className="mt-4" />
+ * ```
  */
 export function NavSecondary({
   items,

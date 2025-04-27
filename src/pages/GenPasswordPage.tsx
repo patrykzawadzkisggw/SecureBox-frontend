@@ -9,6 +9,22 @@ import { toast, Toaster } from "sonner";
 import { useState } from "react";
 import PageTemplate from "./PageTemplate"; 
 
+/**
+ * Strona generatora haseł.
+ * Umożliwia użytkownikowi generowanie losowych haseł o wybranej długości, z opcjami włączenia cyfr i znaków specjalnych.
+ * Wygenerowane hasło można skopiować do schowka. Wyświetla powiadomienia o sukcesie lub błędzie za pomocą komponentu `Toaster`.
+ * Komponent jest osadzony w szablonie `PageTemplate` i korzysta z biblioteki `generate-password-browser` do generowania haseł.
+ *
+ * @function GenPasswordPage
+ * @returns {JSX.Element} Strona generatora haseł.
+ *
+ * @example
+ * ```tsx
+ * import GenPasswordPage from "@/pages/GenPasswordPage";
+ *
+ * <GenPasswordPage />
+ * ```
+ */
 export default function GenPasswordPage() {
   const [password, setPassword] = useState<string>("");
   const [length, setLength] = useState(12);

@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis } from "recharts";
 import {
   ChartConfig,
@@ -6,24 +5,15 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { usePasswordContext } from "../data/PasswordContext";
-import { toast } from "sonner";
+import { ChartData } from "@/lib/interfaces";
+import { User } from "@/data/PasswordContext";
 
 /**
- * Interfejs reprezentujący dane wykresu.
- * @interface ChartData
- * @property {string} month - Dzień tygodnia (np. "Poniedzialek").
- * @property {number} logins - Liczba logowań w danym dniu.
- */
-export interface ChartData {
-  month: string;
-  logins: number;
-}
-
-/**
- * Konfiguracja wykresu.
+ * Konfiguracja wykresu słupkowego dla logowań użytkownika.
  * @type {ChartConfig}
- * @property {{label: string, color: string}} logins - Konfiguracja dla słupków logowań.
+ * @property {Object} logins - Konfiguracja słupków reprezentujących logowania.
+ * @property {string} logins.label - Etykieta dla słupków (np. "Logowania").
+ * @property {string} logins.color - Kolor słupków w formacie HSL (np. "hsl(var(--chart-1))").
  */
 export const chartConfig = {
   logins: {
@@ -33,97 +23,41 @@ export const chartConfig = {
 } satisfies ChartConfig;
 
 /**
- * Komponent wyświetlający wykres logowań użytkownika.
- * Korzysta z kontekstu haseł (`usePasswordContext`) oraz biblioteki `toast` do wyświetlania powiadomień.
+ * Komponent wyświetlający wykres słupkowy liczby logowań użytkownika w podziale na dni tygodnia.
+ * Wykorzystuje bibliotekę Recharts do renderowania wykresu oraz komponenty UI z `@/components/ui/chart`.
+ * 
  * @function Chart
- * @returns {JSX.Element} Wykres słupkowy z danymi logowań lub komunikaty o stanie (np. "Zaloguj się", "Ładowanie...").
+ * @param {Object} props - Właściwości komponentu.
+ * @param {User[]|null} props.user - Obiekt użytkownika, określający, czy użytkownik jest zalogowany.
+ * @param {ChartData[]} props.chartData - Dane do wykresu, zawierające informacje o logowaniach w poszczególnych dniach tygodnia.
+ * @param {boolean} props.hasFetched - Flaga wskazująca, czy dane zostały pobrane.
+ * @returns {JSX.Element} Wykres słupkowy z liczbą logowań lub komunikat o stanie (np. "Zaloguj się", "Ładowanie...").
+ * 
  * @example
  * ```tsx
- * import { Chart } from './components/Chart';
- * <Chart />
+ * import { Chart } from '@/components/Chart';
+ * 
+ * const user = { first_name: "patryk", id: "67eb5b5d-4b18-482c-a338-f761e5086811", last_name: "zawadzki", login: "user123@gmail.com" };
+ * const chartData = [
+ *   { month: "Poniedziałek", logins: 5 },
+ *   { month: "Wtorek", logins: 10 },
+ * ];
+ * const hasFetched = true;
+ * 
+ * <Chart user={user} chartData={chartData} hasFetched={hasFetched} />
  * ```
- * @see {@link https://recharts.org} - Dokumentacja Recharts
- * @see {@link ../data/PasswordContext.tsx} - Kontekst haseł
- * @see {ChartData} - Struktura danych wykresu
- * @see {chartConfig} - Konfiguracja wykresu
+ * 
+ * @remarks
+ * - Komponent wymaga, aby `user` był obiektem (lub `null`), aby określić, czy wyświetlić wykres czy komunikat o logowaniu.
+ * - `chartData` powinno być zgodne z interfejsem `ChartData` (np. `{ month: string, logins: number }`).
+ * - Jeśli `hasFetched` jest `false`, wyświetlany jest komunikat "Ładowanie...".
+ * 
+ * @see {@link https://recharts.org} - Dokumentacja biblioteki Recharts.
+ * @see {@link ChartData} - Definicja interfejsu `ChartData`.
  */
-export function Chart() {
-  const { state, getUserLogins } = usePasswordContext();
-  const [chartData, setChartData] = useState<ChartData[]>([]);
-  const [hasFetched, setHasFetched] = useState(false);
+export function Chart({user, chartData, hasFetched}: {user: User | null, chartData: ChartData[], hasFetched: boolean}) {
 
-  const days = [
-    "Poniedzialek",
-    "Wtorek",
-    "Sroda",
-    "Czwartek",
-    "Piatek",
-    "Sobota",
-    "Niedziela",
-  ];
-
-  /**
-   * Przetwarza dane logowań na dane wykresu.
-   * @function processLoginData
-   * @param {Array<{timestamp: string}>} logins - Lista logowań zawierająca timestampy w formacie ISO.
-   * @returns {ChartData[]} Tablica obiektów z danymi wykresu (dzień tygodnia i liczba logowań).
-   */
-  const processLoginData = (logins: { timestamp: string }[]): ChartData[] => {
-    const daysOfWeek = days;
-    const loginCounts = new Array(7).fill(0);
-
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-    logins.forEach((entry) => {
-      const date = new Date(entry.timestamp);
-      if (date >= oneWeekAgo) {
-        const dayIndex = date.getDay();
-        loginCounts[(dayIndex + 6) % 7] += 1;
-      }
-    });
-
-    return daysOfWeek.map((day, index) => ({
-      month: day,
-      logins: loginCounts[index],
-    }));
-  };
-
-  useEffect(() => {
-    const fetchLogins = async () => {
-      if (!state.currentUser?.id || !state.token || hasFetched) {
-        return;
-      }
-
-      try {
-        const userId = state.currentUser.id;
-
-        if (
-          state.userLogins.length > 0 &&
-          state.userLogins.some((entry) => entry.user_id === userId)
-        ) {
-          const processedData = processLoginData(state.userLogins);
-          setChartData(processedData);
-          console.log("Użyto danych z pamięci podręcznej w stanie kontekstu.");
-        } else {
-          const logins = await getUserLogins(userId);
-          const processedData = processLoginData(logins);
-          setChartData(processedData);
-          toast.success("Pobrano dane logowań!");
-        }
-        setHasFetched(true);
-      } catch (error) {
-        console.error("Błąd pobierania danych:", error);
-        toast.error("Nie udało się pobrać danych logowań.");
-        setChartData([]);
-        setHasFetched(true);
-      }
-    };
-
-    fetchLogins();
-  }, [state.currentUser?.id, state.token, hasFetched, getUserLogins]);
-
-  if (!state.currentUser) {
+  if (!user) {
     return (
       <div className="text-center text-gray-500">
         Zaloguj się, aby zobaczyć wykres.

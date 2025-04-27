@@ -13,19 +13,52 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { usePasswordContext } from "@/data/PasswordContext"
 
+/**
+ * Komponent przełącznika zespołów w bocznym pasku nawigacyjnym.
+ * Wyświetla menu rozwijane z listą zespołów, umożliwiając wybór aktywnego zespołu oraz wylogowanie.
+ * 
+ * @function TeamSwitcher
+ * @param {TeamSwitcherProps} props - Właściwości komponentu.
+ * @param {{name: string, logo: React.ElementType}[]} props.teams - Lista zespołów do wyświetlenia w menu.
+ * @param {() => void} props.logout - Funkcja wywoływana przy wylogowaniu.
+ * @param {any} props.currentUser - Obiekt użytkownika, zawierający dane takie jak imię i nazwisko.
+ * @returns {JSX.Element | null} Menu rozwijane z przełącznikiem zespołów lub null, jeśli brak aktywnych zespołów.
+ * 
+ * @example
+ * ```tsx
+ * import { TeamSwitcher } from '@/components/TeamSwitcher';
+ * import { Command } from 'lucide-react';
+ * 
+ * const teams = [
+ *   { name: 'Abc Xyz', logo: Command },
+ * ];
+ * const logout = () => console.log('Wylogowano');
+ * const currentUser = { first_name: 'Abc', last_name: 'Xyz' };
+ * 
+ * <TeamSwitcher teams={teams} logout={logout} currentUser={currentUser} />
+ * ```
+ * 
+ * @remarks
+ * - Komponent używa `DropdownMenu` z biblioteki UI do renderowania menu rozwijanego.
+ * - Aktywny zespół jest przechowywany w stanie lokalnym za pomocą `useState`.
+ * - Jeśli lista `teams` jest pusta lub brak aktywnego zespołu, komponent zwraca `null`.
+ * - Ikony zespołów (`logo`) są renderowane jako komponenty React (np. ikony z `lucide-react`).
+ * - Nazwa użytkownika (`currentUser.first_name` i `currentUser.last_name`) jest wyświetlana w przycisku menu, jeśli użytkownik istnieje.
+ * - Funkcja `logout` jest wywoływana po kliknięciu opcji "Wyloguj".
+ * - Komponent integruje się z `SidebarMenu` i `SidebarMenuButton` dla spójnego wyglądu w bocznym pasku.
+ * 
+ * @see {@link https://lucide.dev} - Biblioteka ikon `lucide-react` dla ikon `ChevronDown` i `LogOut`.
+ */
 export function TeamSwitcher({
-  teams,
+  teams,logout, currentUser
 }: {
   teams: {
     name: string
     logo: React.ElementType
-    plan: string
-  }[]
+  }[], logout: () => void, currentUser: any
 }) {
-  const { state } = usePasswordContext();
-  const { logout } = usePasswordContext();
+  
   const [activeTeam, setActiveTeam] = React.useState(teams[0])
   if (!activeTeam) {
     return null
@@ -39,7 +72,7 @@ export function TeamSwitcher({
               <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-5 items-center justify-center rounded-md">
                 <activeTeam.logo className="size-3" />
               </div>
-              <span className="truncate font-medium">{state.currentUser?.first_name + " "+ state.currentUser?.last_name}</span>
+              <span className="truncate font-medium">{currentUser?.first_name + " "+ currentUser?.last_name}</span>
               <ChevronDown className="opacity-50" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>

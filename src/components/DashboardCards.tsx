@@ -2,53 +2,55 @@ import { Link } from "react-router-dom";
 import { Lock, CircleGauge, Wand } from "lucide-react";
 import { AddPasswordDialog } from "./AddPasswordDialog";
 import { useState } from "react";
-import { usePasswordContext } from "../data/PasswordContext";
+import { PasswordHistory, PasswordTable } from "../data/PasswordContext";
+import { calculateAverageStrength } from "@/lib/functions";
+
+
 
 /**
- * Oblicza średnią siłę haseł na podstawie historii haseł.
- * @function calculateAverageStrength
- * @param {ReturnType<typeof usePasswordContext>["state"]} state - Stan kontekstu haseł.
- * @returns {number} Średnia siła haseł w procentach (0-100).
- * @example
- * ```tsx
- * const state = { history: [{ platform: "test", login: "user", strength: 80 }], passwords: [{ platform: "test", login: "user" }] };
- * const strength = calculateAverageStrength(state); // Wynik: 80
- * ```
- */
-export const calculateAverageStrength = (state: ReturnType<typeof usePasswordContext>["state"]): number => {
-  if (state.history.length === 0) return 0;
-  const hist = [...state.history].filter((item) =>
-    state.passwords.some(
-      (p) => p.platform === item.platform && p.login === item.login
-    )
-  );
-  const totalStrength = hist.reduce((sum, item) => sum + item.strength, 0);
-  return Math.round(totalStrength / hist.length);
-};
-
-/**
- * Komponent wyświetlający karty na pulpicie nawigacyjnym.
- * Korzysta z kontekstu haseł (`usePasswordContext`) oraz komponentu `AddPasswordDialog`.
+ * Komponent wyświetlający zestaw kart nawigacyjnych na pulpicie nawigacyjnym.
+ * Zawiera karty do dodawania hasła, generowania hasła oraz wyświetlania średniej jakości haseł.
+ * 
  * @function DashboardCards
- * @returns {JSX.Element} Zestaw kart nawigacyjnych na pulpicie.
+ * @param {Object} props - Właściwości komponentu.
+ * @param {(password: string, platform: string, login: string) => Promise<void>} props.addPassword - Funkcja zapisująca nowe hasło.
+ * @param {PasswordHistory[]} props.history - Tablica historii haseł użytkownika.
+ * @param {PasswordTable[]} props.passwords - Tablica zapisanych haseł użytkownika.
+ * @returns {JSX.Element} Zestaw trzech kart nawigacyjnych na pulpicie.
+ * 
  * @example
  * ```tsx
- * import DashboardCards from './DashboardCards';
- * <DashboardCards />
+ * import DashboardCards from '@/components/DashboardCards';
+ * 
+ * const addPassword = async (password: string, platform: string, login: string) => {
+ *   console.log({ password, platform, login });
+ * };
+ * const history = [{ "id": "https://int.pl/#/login-clear-mail@int.pl","platform": "https://int.pl/#/login-clear","login": "mail@int.pl","strength": 100,"timestamp": "2025-04-25T15:07:10.160Z" }];
+ * const passwords = [{ "id": "12402267-23f4-471d-b4a8-665b42951af6","passwordfile": "2c1983cb.txt","logo": "https://img.freepik.com/darmowe-wektory/nowy-projekt-ikony-x-logo-twittera-2023_1017-45418.jpg?semt=ais_hybrid","platform": "https://int.pl/#/login-clear","login": "mail@int.pl","userId": "67eb5b5d-4b18-482c-a338-f761e5086811"}];
+ * 
+ * <DashboardCards addPassword={addPassword} history={history} passwords={passwords} />
  * ```
- * @see {@link "../data/PasswordContext"} - Kontekst haseł
- * @see {@link "./AddPasswordDialog"} - Komponent dialogu dodawania hasła
- * @see {@link "react-router-dom"} - Biblioteka routingu
- * @see {calculateAverageStrength} - Funkcja obliczająca średnią siłę haseł
+ * 
+ * @remarks
+ * - Karta "Dodaj nowe hasło" otwiera dialog `AddPasswordDialog` po kliknięciu.
+ * - Karta "Generuj hasło" jest linkiem do `/genpass` (używa `react-router-dom`).
+ * - Karta "Średnia jakość hasła" wyświetla wartość procentową obliczoną przez `calculateAverageStrength`.
+ * - Komponent używa ikon z biblioteki `lucide-react` dla elementów wizualnych.
+ * - Stylizacja kart obejmuje efekty przejścia i cieniowania przy najechaniu kursorem.
+ * 
+ * @see {@link AddPasswordDialog} - Komponent dialogu dodawania hasła.
+ * @see {@link https://reactrouter.com} - Dokumentacja biblioteki `react-router-dom`.
+ * @see {@link https://lucide.dev} - Dokumentacja biblioteki `lucide-react` dla ikon.
+ * @see {@link PasswordHistory} - Interfejs `PasswordHistory`.
+ * @see {@link PasswordTable} - Interfejs `PasswordTable`.
+ * @see {@link calculateAverageStrength} - Funkcja `calculateAverageStrength`.
  */
-export default function DashboardCards() {
+export default function DashboardCards({addPassword, history, passwords} : {addPassword: (password: string, platform: string, login: string) => Promise<void>, history: PasswordHistory[], passwords: PasswordTable[]}) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { state } = usePasswordContext();
-
-  const averageStrength = calculateAverageStrength(state);
+  const averageStrength = calculateAverageStrength(history, passwords);
   return (
     <div className="grid md:grid-cols-3 gap-6 p-6 grid-cols-1 select-none">
-      <AddPasswordDialog isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} />
+      <AddPasswordDialog isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} onSubmit={addPassword}/>
       <div
         onClick={() => setIsDialogOpen(true)}
         className="bg-purple-50 p-6 rounded-xl flex flex-col items-center justify-between h-48 transition hover:shadow-lg cursor-pointer"

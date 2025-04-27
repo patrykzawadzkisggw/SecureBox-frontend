@@ -1,0 +1,13 @@
+{
+    "entryPoints": ["src/**/*.{ts,tsx}"],
+    "out": "docs",
+    "exclude": ["**/*.test.ts", "**/*.spec.ts", "node_modules/**"],
+    "tsconfig": "tsconfig.json",
+    "readme": "README.md",
+    "name": "My Project Documentation",
+    "theme": "default",
+    "includeVersion": true,
+    "excludePrivate": true,
+    "excludeProtected": true,
+    "excludeExternals": true
+  }

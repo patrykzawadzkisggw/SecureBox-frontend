@@ -1,11 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TeamSwitcher } from '@/components/team-switcher';
-import { usePasswordContext } from '@/data/PasswordContext';
-
-jest.mock('@/data/PasswordContext', () => ({
-  usePasswordContext: jest.fn(),
-}));
 
 jest.mock('@/components/ui/dropdown-menu', () => ({
   DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -55,56 +50,56 @@ jest.mock('lucide-react', () => ({
 const MockLogo1: React.FC = () => <svg data-testid="active-team-logo-1" />;
 const MockLogo2: React.FC = () => <svg data-testid="active-team-logo-2" />;
 
-describe('TeamSwitcher', () => {
+describe('TeamSwitcher – Przełącznik zespołów', () => {
   const mockLogout = jest.fn();
+  const currentUser = { first_name: 'Abc', last_name: 'Xyz' };
+
   const teams = [
-    { name: 'Team 1', logo: MockLogo1, plan: 'Basic' },
-    { name: 'Team 2', logo: MockLogo2, plan: 'Pro' },
+    { name: 'Team 1', logo: MockLogo1 },
+    { name: 'Team 2', logo: MockLogo2 },
   ];
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (usePasswordContext as jest.Mock).mockReturnValue({
-      state: {
-        currentUser: { first_name: 'Abc', last_name: 'Xyz' },
-      },
-      logout: mockLogout,
-    });
   });
 
   afterEach(() => {
-    document.body.innerHTML = ''; 
+    document.body.innerHTML = '';
   });
 
-  it('renders nothing when no active team is provided', () => {
-    (usePasswordContext as jest.Mock).mockReturnValue({
-      state: { currentUser: null },
-      logout: mockLogout,
-    });
-    const { container } = render(<TeamSwitcher teams={[]} />);
+  it('nie renderuje nic, jeśli lista zespołów jest pusta', () => {
+    const { container } = render(
+      <TeamSwitcher teams={[]} logout={mockLogout} currentUser={currentUser} />
+    );
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('renders user name and active team logo', () => {
-    render(<TeamSwitcher teams={teams} />);
+  it('renderuje nazwę użytkownika i ikonę zespołu', () => {
+    render(
+      <TeamSwitcher teams={teams} logout={mockLogout} currentUser={currentUser} />
+    );
     expect(screen.getByText('Abc Xyz')).toBeInTheDocument();
     expect(screen.getByTestId('chevron-down')).toBeInTheDocument();
   });
 
-  it('opens dropdown menu and displays teams', () => {
-    render(<TeamSwitcher teams={teams} />);
+  it('otwiera menu rozwijane i wyświetla zespoły oraz opcję wylogowania', () => {
+    render(
+      <TeamSwitcher teams={teams} logout={mockLogout} currentUser={currentUser} />
+    );
     fireEvent.click(screen.getByTestId('sidebar-button'));
     expect(screen.getByTestId('dropdown-content')).toBeInTheDocument();
     expect(screen.getByTestId('dropdown-label')).toHaveTextContent('Konto');
-    expect(screen.getAllByTestId('dropdown-item').length).toBe(3);
+    expect(screen.getAllByTestId('dropdown-item').length).toBe(3); // 2 zespoły + wylogowanie
     expect(screen.getByText('Team 1')).toBeInTheDocument();
     expect(screen.getByText('Team 2')).toBeInTheDocument();
     expect(screen.getByText('Wyloguj')).toBeInTheDocument();
     expect(screen.getByTestId('dropdown-separator')).toBeInTheDocument();
   });
 
-  it('calls logout when "Wyloguj" is clicked', () => {
-    render(<TeamSwitcher teams={teams} />);
+  it('wywołuje funkcję logout po kliknięciu opcji "Wyloguj"', () => {
+    render(
+      <TeamSwitcher teams={teams} logout={mockLogout} currentUser={currentUser} />
+    );
     fireEvent.click(screen.getByTestId('sidebar-button'));
     const logoutItem = screen.getAllByTestId('dropdown-item').find((item) =>
       item.textContent?.includes('Wyloguj')
@@ -113,10 +108,11 @@ describe('TeamSwitcher', () => {
     expect(mockLogout).toHaveBeenCalledTimes(1);
   });
 
-  it('displays logout icon in the dropdown', () => {
-    render(<TeamSwitcher teams={teams} />);
+  it('wyświetla ikonę wylogowania w menu', () => {
+    render(
+      <TeamSwitcher teams={teams} logout={mockLogout} currentUser={currentUser} />
+    );
     fireEvent.click(screen.getByTestId('sidebar-button'));
     expect(screen.getByTestId('logout-icon')).toBeInTheDocument();
   });
-
 });

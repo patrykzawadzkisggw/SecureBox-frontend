@@ -8,8 +8,27 @@ import {
 } from "@/components/ui/sidebar";
 
 /**
- * Komponent nawigacji głównej.
- * Korzysta z `useLocation` i `Link` z `react-router-dom`.
+ * Komponent nawigacji głównej aplikacji.
+ * Renderuje menu boczne z elementami nawigacyjnymi, korzystając z `react-router-dom` do zarządzania routingiem.
+ * Każdy element menu zawiera ikonę i tytuł, a aktywny element jest wyróżniany na podstawie aktualnej ścieżki URL.
+ *
+ * @function NavMain
+ * @param {Object} props - Właściwości komponentu.
+ * @param {Array<Object>} props.items - Lista elementów nawigacyjnych.
+ * @returns {JSX.Element} Komponent menu bocznego z elementami nawigacyjnymi.
+ *
+ * @example
+ * ```tsx
+ * import { Home, Settings } from "lucide-react";
+ * import { NavMain } from "@/components/NavMain";
+ *
+ * const navItems = [
+ *   { title: "Strona główna", url: "/", icon: Home },
+ *   { title: "Ustawienia", url: "/settings", icon: Settings },
+ * ];
+ *
+ * <NavMain items={navItems} />
+ * ```
  */
 export function NavMain({
   items,

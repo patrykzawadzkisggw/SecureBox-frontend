@@ -702,7 +702,9 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         type: "SET_DATA",
         payload: {
           passwords: state.passwords.map((p) =>
-            p.platform === platform && p.login === login ? response.data : p
+            {
+              if(p.platform === platform && p.login === login) console.log("Zaktualizowane hasło:", response.data);
+              return p.platform === platform && p.login === login ? response.data : p}
           ),
           trustedDevices: state.trustedDevices,
           currentUser: state.currentUser!,
@@ -928,6 +930,31 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  const fetchPasswords = async () => {
+    if (!state.token) {
+      toast.error("Błąd!", { description: "Brak tokenu autoryzacyjnego. Zaloguj się ponownie.", duration: 3000 });
+      return;
+    }
+    console.log("Fetching passwords from API...");
+    dispatch({ type: "SET_LOADING", payload: true });
+    try {
+      const response = await axios.get<PasswordTable[]>(`${import.meta.env.VITE_API_URL}/passwords`, {
+        headers: { Authorization: `Bearer ${state.token}` },
+      });
+      const passwords = response.data || [];
+      dispatch({ type: "SET_PASSWORDS", payload: passwords });
+      sessionStorage.setItem("passwords", JSON.stringify(passwords)); // Optionally update session storage
+      console.log("Passwords fetched and set successfully.");
+      // Optional: Add a success toast if needed, though it might be noisy if called often
+      // toast.success("Lista haseł zaktualizowana!", { duration: 2000 });
+    } catch (error) {
+      console.error("Błąd pobierania listy haseł:", error);
+      toast.error("Błąd!", { description: "Nie udało się pobrać listy haseł z API.", duration: 3000 });
+    } finally {
+      dispatch({ type: "SET_LOADING", payload: false });
+    }
+  };
+
   return (
     <PasswordContext.Provider
       value={{
@@ -946,6 +973,7 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         getUserLogins,
         login,
         setMasterkey,
+        fetchPasswords
       }}
     >
       {children}
@@ -984,6 +1012,7 @@ type PasswordContextType = {
   getUserLogins: (userId: string) => Promise<LoginEntry[]>;
   login: (login: string, password: string, masterkey: string) => Promise<void>;
   setMasterkey: (masterkey: string) => Promise<void>;
+  fetchPasswords: () => Promise<void>;
 };
 
 const PasswordContext = createContext<PasswordContextType | undefined>(undefined);

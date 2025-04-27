@@ -9,8 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "jest",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "sqtorybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "doc": "typedoc --options typedoc.json"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
@@ -50,6 +51,11 @@
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
+    "@babel/core": "^7.26.10",
+    "@babel/plugin-syntax-import-meta": "^7.10.4",
+    "@babel/preset-env": "^7.26.9",
+    "@babel/preset-react": "^7.26.3",
+    "@babel/preset-typescript": "^7.27.0",
     "@chromatic-com/storybook": "3",
     "@eslint/js": "^9.21.0",
     "@storybook/addon-essentials": "8.6.12",
@@ -61,6 +67,7 @@
     "@storybook/test": "8.6.12",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/axios": "^0.14.4",
     "@types/jest": "^29.5.14",
     "@types/jsdom": "^21.1.7",
@@ -71,6 +78,7 @@
     "@vitejs/plugin-react": "^4.3.4",
     "@vitest/browser": "^3.1.1",
     "@vitest/coverage-v8": "^3.1.1",
+    "babel-jest": "^29.7.0",
     "eslint": "^9.21.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.19",

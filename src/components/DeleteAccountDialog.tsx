@@ -8,7 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { usePasswordContext } from "../data/PasswordContext";
 import { toast } from "sonner";
 
 /**
@@ -18,24 +17,35 @@ import { toast } from "sonner";
  * @property {React.Dispatch<React.SetStateAction<boolean>>} setIsDialogOpen - Funkcja ustawiająca stan otwarcia dialogu.
  * @property {string} platform - Nazwa platformy, której dotyczy konto.
  * @property {string} login - Login użytkownika dla danej platformy.
+ * @property {(platform: string, login: string) => Promise<void>} deletePassword - Funkcja do usuwania hasła.
  */
-interface DeleteAccountDialogProps {
+export interface DeleteAccountDialogProps {
   isDialogOpen: boolean;
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
   platform: string;
   login: string;
+  deletePassword: (platform: string, login: string) => Promise<void>;
 }
 
 /**
- * Obsługuje usunięcie konta.
- * Wywołuje funkcję `deletePassword` z kontekstu i wyświetla powiadomienia o wyniku operacji.
+ * Funkcja obsługująca proces usuwania konta.
+ * Wywołuje funkcję `deletePassword`, wyświetla powiadomienia o wyniku operacji i zarządza stanem dialogu.
+ *
  * @function handleDelete
  * @param {string} platform - Nazwa platformy.
  * @param {string} login - Login użytkownika.
- * @param {Function} deletePassword - Funkcja z kontekstu do usuwania hasła.
- * @param {React.Dispatch<React.SetStateAction<boolean>>} setIsConfirming - Funkcja ustawiająca stan potwierdzenia.
+ * @param {(platform: string, login: string) => Promise<void>} deletePassword - Funkcja usuwająca hasło.
+ * @param {React.Dispatch<React.SetStateAction<boolean>>} setIsConfirming - Funkcja ustawiająca stan potwierdzenia usuwania.
  * @param {React.Dispatch<React.SetStateAction<boolean>>} setIsDialogOpen - Funkcja zamykająca dialog.
- * @returns {Promise<void>} Obietnica resolves po usunięciu konta lub reject w przypadku błędu.
+ * @returns {Promise<void>} Obietnica 
+ *
+ * @remarks
+ * - Ustawia stan `isConfirming` na `true` podczas usuwania, aby dezaktywować przyciski.
+ * - W przypadku sukcesu wyświetla powiadomienie `toast.success` i zamyka dialog.
+ * - W przypadku błędu wyświetla powiadomienie `toast.error` i loguje błąd do konsoli.
+ * - Zawsze resetuje stan `isConfirming` na `false` po zakończeniu operacji.
+ *
+ * @see {toast} - Biblioteka powiadomień (`toast`).
  */
 export const handleDelete = async (
   platform: string,
@@ -61,32 +71,51 @@ export const handleDelete = async (
 };
 
 /**
- * Komponent dialogu do usuwania konta.
- * Korzysta z kontekstu haseł (`usePasswordContext`) oraz biblioteki `toast` do wyświetlania powiadomień.
+ * Komponent dialogu do potwierdzania usunięcia konta użytkownika dla określonej platformy i loginu.
+ * Wyświetla ostrzeżenie o nieodwracalności akcji i umożliwia usunięcie konta za pomocą funkcji `deletePassword`.
+ * Wykorzystuje bibliotekę `sonner` do wyświetlania powiadomień o wyniku operacji.
+ *
  * @function DeleteAccountDialog
  * @param {DeleteAccountDialogProps} props - Właściwości komponentu.
- * @param {boolean} props.isDialogOpen - Stan otwarcia dialogu.
- * @param {React.Dispatch<React.SetStateAction<boolean>>} props.setIsDialogOpen - Funkcja do zmiany stanu dialogu.
- * @param {string} props.platform - Nazwa platformy.
- * @param {string} props.login - Login użytkownika.
  * @returns {JSX.Element} Dialog potwierdzający usunięcie konta.
+ *
  * @example
  * ```tsx
- * import { DeleteAccountDialog } from './DeleteAccountDialog';
- * const [isOpen, setIsOpen] = useState(false);
- * <DeleteAccountDialog isDialogOpen={isOpen} setIsDialogOpen={setIsOpen} platform="Twitter" login="user123" />
+ * import { DeleteAccountDialog } from '@/components/DeleteAccountDialog';
+ *
+ * const [isOpen, setIsOpen] = React.useState(false);
+ * const deletePassword = async (platform: string, login: string) => {
+ *   console.log(`Usunięto konto dla ${platform}/${login}`);
+ * };
+ *
+ * <DeleteAccountDialog
+ *   isDialogOpen={isOpen}
+ *   setIsDialogOpen={setIsOpen}
+ *   platform="Twitter"
+ *   login="user123"
+ *   deletePassword={deletePassword}
+ * />
  * ```
- * @see {@link "../data/PasswordContext"} - Kontekst haseł
- * @see {@link "https://www.npmjs.com/package/sonner"} - Biblioteka toast
- * @see {handleDelete} - Funkcja obsługująca usunięcie konta
+ *
+ * @remarks
+ * - Komponent używa `Button` z wariantami `outline` (anulowanie) i `destructive` (usuwanie) z biblioteki UI.
+ * - Funkcja `deletePassword` jest wywoływana asynchronicznie i musi być dostarczona jako prop.
+ * - Powiadomienia są wyświetlane za pomocą `toast` z biblioteki `sonner`:
+ *   - Sukces: "Konto zostało usunięte."
+ *   - Błąd: "Nie udało się usunąć konta. Spróbuj ponownie."
+ * - Przyciski są dezaktywowane podczas operacji usuwania (`isConfirming`).
+ * - Dialog zamyka się automatycznie po pomyślnym usunięciu konta lub po anulowaniu.
+ * - Funkcja `handleDelete` obsługuje logikę usuwania i powiadomienia.
+ *
+ * @see {@link handleDelete} - Funkcja obsługująca usunięcie konta.
  */
 export function DeleteAccountDialog({
   isDialogOpen,
   setIsDialogOpen,
   platform,
   login,
+  deletePassword,
 }: DeleteAccountDialogProps) {
-  const { deletePassword } = usePasswordContext();
   const [isConfirming, setIsConfirming] = useState(false);
 
   return (

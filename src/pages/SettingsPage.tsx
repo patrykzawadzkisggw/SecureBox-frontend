@@ -6,8 +6,12 @@ import PageTemplate from "./PageTemplate";
 import { UpdateMasterkeyDialog } from "@/components/UpdateMasterkeyDialog";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { usePasswordContext } from "@/data/PasswordContext";
+import { updateMasterKey } from "@/lib/fn2";
 
 export default function SettingsPage() {
+  const { state,updateUser, setMasterkey, addPassword, updatePassword, fetchPasswords  } = usePasswordContext();
+
   const [isMasterkeyDialogOpen, setIsMasterkeyDialogOpen] = useState(false);
   return (
     <PageTemplate title="Manager haseł">
@@ -31,17 +35,21 @@ export default function SettingsPage() {
               <TrustedDevicesTable />
             </TabsContent> */}
             <TabsContent value="export">
-              <ExportToJSON />
+              <ExportToJSON zip={state.zip} passwords={state.passwords} loading={state.loading} setMasterkey={setMasterkey} encryptionKey={state.encryptionKey}/>
             </TabsContent>
             <TabsContent value="import">
-              <ImportFromJSON />
+              <ImportFromJSON addPassword={addPassword} updatePassword={updatePassword} loading={state.loading} passwords={state.passwords} fetchPasswords={fetchPasswords}/>
             </TabsContent>
             <TabsContent value="accountSettings">
-              <UserProfile />
+              <UserProfile updateUser={updateUser} currentUser={state.currentUser} loading={state.loading}/>
               <Button onClick={() => setIsMasterkeyDialogOpen(true)} className="select-none">Zmień Masterkey</Button>
             <UpdateMasterkeyDialog
             isDialogOpen={isMasterkeyDialogOpen}
             setIsDialogOpen={setIsMasterkeyDialogOpen}
+            updatefn={updateMasterKey}
+            currentUser={state.currentUser}
+            passwords={state.passwords}
+            token={state.token}
             />
             </TabsContent>
             </Tabs>
