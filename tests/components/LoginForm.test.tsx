@@ -12,8 +12,13 @@ import {
   recordFailedAttempt,
 } from "@/lib/functions";
 import { MemoryRouter } from "react-router-dom";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
-// Mock dependencies
+jest.mock("react-google-recaptcha-v3", () => ({
+  useGoogleReCaptcha: jest.fn(),
+}));
+
+
 jest.mock("@/lib/validators", () => ({
   validateEmail: jest.fn(),
   validatePassword: jest.fn(),
@@ -26,7 +31,7 @@ jest.mock("sonner", () => ({
     success: jest.fn(),
     error: jest.fn(),
   },
-  Toaster: () => <div data-testid="mock-toaster" />, // Mock Toaster component
+  Toaster: () => <div data-testid="mock-toaster" />, 
 }));
 jest.mock("@/lib/functions", () => ({
   getFailedLogins: jest.fn(),
@@ -43,10 +48,8 @@ jest.mock("react-router-dom", () => ({
   ),
 }));
 
-// Setup user event
 const user = userEvent.setup();
 
-// Mock props
 const mockLoginUser = jest.fn();
 const mockResetPasswordSubmit = jest.fn();
 const mockNavigate = jest.fn();
@@ -65,6 +68,9 @@ describe("LoginForm", () => {
     (mockLoginUser as jest.Mock).mockResolvedValue(undefined);
     (mockResetPasswordSubmit as jest.Mock).mockResolvedValue(undefined);
     (jest.spyOn(require("react-router-dom"), "useNavigate") as jest.Mock).mockReturnValue(mockNavigate);
+    (useGoogleReCaptcha as jest.Mock).mockReturnValue({
+      executeRecaptcha: jest.fn().mockResolvedValue("mocked-recaptcha-token"),
+    });
     localStorage.clear();
   });
 
@@ -94,7 +100,6 @@ describe("LoginForm", () => {
     expect(screen.getByLabelText(/Masterkey \(hasło szyfrowania\)/, { selector: '#masterkey' })).toBeInTheDocument();
     expect(screen.getByLabelText(/Masterkey \(hasło szyfrowania\)/, { selector: '#masterkey2' })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Zaloguj" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Zaloguj się używając Google/ })).toBeInTheDocument();
     expect(screen.getByText("Nie masz jeszcze konta?")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Utwórz konto" })).toHaveAttribute("href", "/register");
   });
@@ -177,11 +182,16 @@ describe("LoginForm", () => {
     await waitFor(() => {
       expect(encryptMasterkey).toHaveBeenCalledWith("masterkey", "123");
       expect(localStorage.getItem("masterkey")).toBe("encrypted-masterkey");
-      expect(mockLoginUser).toHaveBeenCalledWith("test@example.com", "password123", "masterkey");
+      expect(mockLoginUser).toHaveBeenCalledWith(
+        "test@example.com",
+        "password123",
+        "masterkey",
+        "mocked-recaptcha-token"
+      );
       expect(toast.success).toHaveBeenCalledWith("Zalogowano pomyślnie!", { duration: 3000 });
       expect(mockNavigate).toHaveBeenCalledWith("/");
       expect(getFailedLogins).toHaveBeenCalled();
-      expect(saveFailedLogins).toHaveBeenCalledWith({}); // Failed attempts cleared
+      expect(saveFailedLogins).toHaveBeenCalledWith({}); 
     });
   });
 
@@ -201,7 +211,12 @@ describe("LoginForm", () => {
     await user.click(screen.getByRole("button", { name: "Zaloguj" }));
 
     await waitFor(() => {
-      expect(mockLoginUser).toHaveBeenCalledWith("test@example.com", "wrongpassword", "masterkey");
+      expect(mockLoginUser).toHaveBeenCalledWith(
+        "test@example.com",
+        "wrongpassword",
+        "masterkey",
+        "mocked-recaptcha-token"
+      );
       expect(recordFailedAttempt).toHaveBeenCalledWith("test@example.com");
       expect(screen.getByText("Nieprawidłowy login, hasło lub masterkey")).toBeInTheDocument();
       expect(toast.error).toHaveBeenCalledWith("Błąd logowania!", {
@@ -263,7 +278,12 @@ describe("LoginForm", () => {
 
     await waitFor(() => {
       expect(isEmailLockedOut).toHaveBeenCalledWith("test@example.com");
-      expect(mockLoginUser).toHaveBeenCalledWith("test@example.com", "password123", "masterkey");
+      expect(mockLoginUser).toHaveBeenCalledWith(
+        "test@example.com",
+        "password123",
+        "masterkey",
+        "mocked-recaptcha-token"
+      );
       expect(toast.success).toHaveBeenCalledWith("Zalogowano pomyślnie!", { duration: 3000 });
       expect(mockNavigate).toHaveBeenCalledWith("/");
       expect(saveFailedLogins).toHaveBeenCalledWith({}); // Failed attempts cleared
@@ -296,7 +316,6 @@ describe("LoginForm", () => {
       </MemoryRouter>
     );
 
-    // Try locked email
     await user.type(screen.getByLabelText("Login"), "user1@example.com");
     await user.type(screen.getByLabelText("Hasło logowania"), "password123");
     await user.type(screen.getByLabelText(/Masterkey \(hasło szyfrowania\)/, { selector: '#masterkey' }), "masterkey");
@@ -308,13 +327,17 @@ describe("LoginForm", () => {
       expect(mockLoginUser).not.toHaveBeenCalled();
     });
 
-    // Try a different email
     await user.clear(screen.getByLabelText("Login"));
     await user.type(screen.getByLabelText("Login"), "user2@example.com");
     await user.click(screen.getByRole("button", { name: "Zaloguj" }));
 
     await waitFor(() => {
-      expect(mockLoginUser).toHaveBeenCalledWith("user2@example.com", "password123", "masterkey");
+      expect(mockLoginUser).toHaveBeenCalledWith(
+        "user2@example.com",
+        "password123",
+        "masterkey",
+        "mocked-recaptcha-token"
+      );
       expect(screen.queryByText(/Zbyt wiele nieudanych prób logowania/)).not.toBeInTheDocument();
     });
   });

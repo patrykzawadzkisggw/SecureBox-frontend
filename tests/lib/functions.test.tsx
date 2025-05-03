@@ -85,7 +85,6 @@ import {
         d1.setDate(d1.getDate() - 3); 
         const entry = { timestamp: d1.toISOString(), login: 'user123', page: 'Facebook' };
         const result: Activity = formatActivity(entry);
-        console.log(result);
         expect(result).toEqual({
           time: d1.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' }),
           date: '3 dni',
@@ -156,12 +155,16 @@ import {
   
     describe('getTimeDifference', () => {
       it('powinno zwrócić "Dzisiaj" dla tego samego dnia', () => {
-        expect(getTimeDifference('2025-04-27T10:15:00Z')).toBe('Dzisiaj');
+        const d1 = new Date()
+        expect(getTimeDifference(d1.toISOString())).toBe('Dzisiaj');
       });
-  
+      const d2 = new Date()
+      d2.setDate(d2.getDate() - 2);
+      const d3 = new Date()
+      d3.setDate(d3.getDate() - 3);
       it('powinno zwrócić liczbę dni dla starszych dat', () => {
-        expect(getTimeDifference('2025-04-25T10:15:00Z')).toBe('2 dni');
-        expect(getTimeDifference('2025-04-24T10:15:00Z')).toBe('3 dni');
+        expect(getTimeDifference(d2.toISOString())).toBe('2 dni');
+        expect(getTimeDifference(d3.toDateString())).toBe('3 dni');
       });
     });
   
@@ -176,9 +179,15 @@ import {
   
     describe('processLoginData', () => {
       it('powinno przetworzyć logowania na dane wykresu', () => {
+
+        //get last friday date
+        const d1 = new Date()
+        d1.setDate(d1.getDate() - (d1.getDay() + 2) % 7);
+       
+
         const logins = [
-          { timestamp: '2025-04-27T12:00:00Z' }, 
-          { timestamp: '2025-04-27T13:00:00Z' }, 
+          { timestamp: d1.toISOString() }, 
+          { timestamp: d1.toISOString() }, 
           { timestamp: '2025-04-25T12:00:00Z' }, 
         ];
         const result: ChartData[] = processLoginData(logins);
@@ -187,9 +196,9 @@ import {
           { month: 'Wtorek', logins: 0 },
           { month: 'Sroda', logins: 0 },
           { month: 'Czwartek', logins: 0 },
-          { month: 'Piatek', logins: 1 },
+          { month: 'Piatek', logins: 2 },
           { month: 'Sobota', logins: 0 },
-          { month: 'Niedziela', logins: 2 },
+          { month: 'Niedziela', logins: 0 },
         ]);
       });
   
@@ -218,7 +227,6 @@ import {
   
       it('powinno zwrócić 5 ostatnich aktywności użytkownika', () => {
         const result = get5RecentActivities(user, logins);
-        console.log(result);
         expect(result).toHaveLength(2);
         expect(result[0]).toEqual({
           time: d1.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' }),

@@ -1,15 +1,15 @@
 import { decryptMasterkey, decryptPassword, deriveEncryptionKeyFromMasterkey, encryptMasterkey, encryptPassword, PasswordTable, User } from "@/data/PasswordContext";
 import axios from "axios";
 import JSZip from "jszip";
+import api from "./api";
 
 export async function updateMasterKey(oldMasterkey: string, newMasterkey: string, token: string | null, currentUser : User | null, passwords : PasswordTable[]) {
       if (!currentUser ||  !token) {
         throw new Error("Brak danych użytkownika lub tokenu.");
       }
       const [zipResponse] = await Promise.all([
-        axios.get(`${import.meta.env.VITE_API_URL}/passwords/${currentUser.id}/files`, {
+        api.get(`/passwords/${currentUser.id}/files`, {
           responseType: "blob",
-          headers: { Authorization: `Bearer ${token}` },
         })
       ]);
   
@@ -56,26 +56,26 @@ export async function updateMasterKey(oldMasterkey: string, newMasterkey: string
         })
       );
   
-       await axios.put(
-        `${import.meta.env.VITE_API_URL}/passwords/${currentUser.id}/passwords`,
+       await api.put(
+        `/passwords/${currentUser.id}/passwords`,
         { passwordsall: encryptedPasswords },
-        { headers: { Authorization: `Bearer ${token}` } }
       );
       
       const newEncryptedMasterkey = await encryptMasterkey(newMasterkey, currentUser.password);
       localStorage.setItem(`masterkey`, newEncryptedMasterkey);
     }
 
-export const resetPasswordSubmit = async (email : string) => {
-      await axios.post(`${import.meta.env.VITE_API_URL}/users/reset-password/`,{
-        "login": email
+export const resetPasswordSubmit = async (email : string, token: string) => {
+      await api.post(`/users/reset-password/`,{
+        "login": email,
+        "token": token
       });
     }
 
 
    export const resetPasswordFn = async (resetToken: string | undefined, newPassword: any) => {
-      return await axios.post(
-        `${import.meta.env.VITE_API_URL}/users/reset-password/confirm`,
+      return await api.post(
+        `/users/reset-password/confirm`,
         {
           resetToken: resetToken,
           newPassword: newPassword,

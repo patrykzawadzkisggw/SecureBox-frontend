@@ -8,10 +8,12 @@ import { toast } from "sonner";
 
 beforeAll(() => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'log').mockImplementation(() => {});
   });
   
   afterAll(() => {
     (console.error as jest.Mock).mockRestore();
+    (console.log as jest.Mock).mockRestore();
   });
 
 
@@ -33,6 +35,7 @@ const defaultProps = {
   isOpen: true,
   onClose: jest.fn(),
   resetPasswordSubmit: jest.fn(),
+  executeRecaptcha: jest.fn(),
 };
 
 describe("ResetPasswordDialog", () => {
@@ -40,6 +43,7 @@ describe("ResetPasswordDialog", () => {
     jest.clearAllMocks();
     (validateEmail as jest.Mock).mockReturnValue("");
     (defaultProps.resetPasswordSubmit as jest.Mock).mockResolvedValue(undefined);
+    (defaultProps.executeRecaptcha as jest.Mock).mockResolvedValue("mock-recaptcha-token");
   });
 
   afterEach(() => {
@@ -85,13 +89,14 @@ describe("ResetPasswordDialog", () => {
 
   it("wysyła formularz dla prawidłowego emaila i wyświetla potwierdzenie", async () => {
     render(<ResetPasswordDialog {...defaultProps} />);
-
+  
     await user.type(screen.getByLabelText("Email"), "test@example.com");
     await user.click(screen.getByRole("button", { name: "Wyślij" }));
-
+  
     await waitFor(() => {
       expect(defaultProps.resetPasswordSubmit).toHaveBeenCalledWith(
-        "test@example.com"
+        "test@example.com",
+        "mock-recaptcha-token"
       );
       expect(toast.success).toHaveBeenCalledWith(
         "Link do resetowania hasła został wysłany!",

@@ -18,20 +18,20 @@ export default function SettingsPage() {
       <div className="flex justify-center">
         <div className="flex flex-1 flex-col gap-4 px-4 py-10 max-w-4xl">
           <h1 className="text-3xl font-bold tracking-tight select-none">Ustawienia</h1>
-            <Tabs defaultValue="2fa">
+            <Tabs defaultValue="export">
             <TabsList className="w-full select-none">
-              <TabsTrigger value="2fa">2FA</TabsTrigger>
-              {/* <TabsTrigger value="trusted">Zaufane urządzenia</TabsTrigger> */}
+              {/*<TabsTrigger value="2fa">2FA</TabsTrigger>
+               <TabsTrigger value="trusted">Zaufane urządzenia</TabsTrigger> */}
               <TabsTrigger value="export">Export</TabsTrigger>
               <TabsTrigger value="import">Import</TabsTrigger>
               <TabsTrigger value="accountSettings">Konto</TabsTrigger>
             </TabsList>
-            <TabsContent value="2fa">
+            {/*<TabsContent value="2fa">
             
 
 
             </TabsContent>
-            {/* <TabsContent value="trusted">
+             <TabsContent value="trusted">
               <TrustedDevicesTable />
             </TabsContent> */}
             <TabsContent value="export">

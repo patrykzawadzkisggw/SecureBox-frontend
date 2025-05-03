@@ -36,7 +36,9 @@ interface ResetPasswordDialogProps {
    * @param {string} email - Adres email użytkownika.
    * @returns {Promise<void>} Obietnica oznaczająca zakończenie operacji.
    */
-  resetPasswordSubmit: (email: string) => Promise<void>;
+  resetPasswordSubmit: (email: string, token: string) => Promise<void>;
+
+  executeRecaptcha: ((action?: string) => Promise<string>) | undefined;
 }
 
 /**
@@ -82,7 +84,7 @@ interface ResetPasswordDialogProps {
  *
  * @see {@link validateEmail} - Funkcja walidacji email (`validateEmail`).
  */
-export function ResetPasswordDialog({ isOpen, onClose, resetPasswordSubmit }: ResetPasswordDialogProps) {
+export function ResetPasswordDialog({ isOpen, onClose, resetPasswordSubmit,executeRecaptcha }: ResetPasswordDialogProps) {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -103,9 +105,11 @@ export function ResetPasswordDialog({ isOpen, onClose, resetPasswordSubmit }: Re
     setIsLoading(true);
 
     try {
-      
+      if(executeRecaptcha==undefined) return;
+      const token = await executeRecaptcha("submit_form");
+      console.log("r:", token.substring(0, 5));
 
-      await resetPasswordSubmit(email);
+      await resetPasswordSubmit(email,token);
       setIsSent(true);
       toast.success("Link do resetowania hasła został wysłany!", {
         description: `Sprawdź swoją skrzynkę: ${email}`,

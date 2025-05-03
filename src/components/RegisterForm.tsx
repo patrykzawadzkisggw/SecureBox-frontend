@@ -6,6 +6,7 @@ import React, { useState } from "react";
 import { toast, Toaster } from "sonner";
 import { NavLink, useNavigate } from "react-router-dom";
 import { validateEmail, validateLastName, validateName, validatePassword } from "@/lib/validators";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 
 interface RegisterFormProps extends React.ComponentProps<"form"> {
@@ -19,7 +20,7 @@ interface RegisterFormProps extends React.ComponentProps<"form"> {
    * @param masterkey - Klucz główny (stały w tej implementacji).
    * @returns Promise<void>
    */
-  addUser: (first_name: string, last_name: string, login: string, password: string, masterkey: string) => Promise<void>;
+  addUser: (first_name: string, last_name: string, login: string, password: string, token: string) => Promise<void>;
 }
 
 /**
@@ -69,6 +70,7 @@ export function RegisterForm({
     general: "",
   });
   const navigate = useNavigate();
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   
 
@@ -94,9 +96,12 @@ export function RegisterForm({
       setIsLoading(false);
       return;
     }
-
+    console.log("sprawdzamcaptche")
+    if(executeRecaptcha==undefined) return;
     try {
-      await addUser(firstName, lastName, login, password, "123");
+      
+      const token = await executeRecaptcha("submit_form");
+      await addUser(firstName, lastName, login, password, token);
       toast.success("Konto utworzone!", {
         description: `Witaj, ${firstName} ${lastName}! Możesz się teraz zalogować.`,
         duration: 3000,

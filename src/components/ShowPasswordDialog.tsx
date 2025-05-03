@@ -105,7 +105,9 @@ export function ShowPasswordDialog({
     if (!zip || !isDialogOpen) return;
 
     try {
-      
+      console.log("nazwa pliku:", passwordfile);
+      const fileNames = Object.keys(zip.files);
+      console.log("Pliki w ZIP:", fileNames);
 
       const encryptedData = await zip.file(passwordfile)?.async("string");
       if (!encryptedData) throw new Error("Hasło nie znalezione w ZIP");
