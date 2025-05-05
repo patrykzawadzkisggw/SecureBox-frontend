@@ -27,4 +27,23 @@ api.interceptors.request.use(async (config) => {
 }, (error) => Promise.reject(error));
 
 
+const excludedEndpoints = ['/login', '/csrf-token', '/users', '/users/reset-password', '/reset-password/confirm'];
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error.response?.status;
+    const url = error.config?.url;
+
+    // Sprawdź, czy URL nie jest na liście wykluczonych
+    if ((status >= 400 && status < 405)&& url && !excludedEndpoints.some((endpoint) => url.endsWith(endpoint))) {
+      localStorage.removeItem("jwt_token");
+      window.location.reload();
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+
 export default api;

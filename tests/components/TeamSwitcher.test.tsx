@@ -50,7 +50,7 @@ jest.mock('lucide-react', () => ({
 const MockLogo1: React.FC = () => <svg data-testid="active-team-logo-1" />;
 const MockLogo2: React.FC = () => <svg data-testid="active-team-logo-2" />;
 
-describe('TeamSwitcher – Przełącznik zespołów', () => {
+describe('TeamSwitcher - Przełącznik zespołów', () => {
   const mockLogout = jest.fn();
   const currentUser = { first_name: 'Abc', last_name: 'Xyz' };
 

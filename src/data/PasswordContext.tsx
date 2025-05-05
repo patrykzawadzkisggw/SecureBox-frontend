@@ -61,7 +61,7 @@ export type LoginEntry = {
 /**
  * Typ reprezentujący stan kontekstu haseł.
  */
-type PasswordState = {
+export type PasswordState = {
   passwords: PasswordTable[];
   history: PasswordHistory[];
   trustedDevices: TrustedDevice[];
@@ -76,7 +76,7 @@ type PasswordState = {
 /**
  * Typ reprezentujący akcje w kontekście haseł.
  */
-type PasswordAction =
+export type PasswordAction =
   | { type: "SET_DATA"; payload: { passwords: PasswordTable[]; trustedDevices: TrustedDevice[]; currentUser: User; zip: JSZip } }
   | { type: "SET_LOADING"; payload: boolean }
   | { type: "SET_PASSWORDS"; payload: PasswordTable[] }
@@ -101,7 +101,7 @@ type PasswordAction =
  * @param action Akcja do wykonania na stanie.
  * @returns Zaktualizowany stan kontekstu haseł.
  */
-const passwordReducer = (state: PasswordState, action: PasswordAction): PasswordState => {
+export const passwordReducer = (state: PasswordState, action: PasswordAction): PasswordState => {
   switch (action.type) {
     case "SET_DATA":
       return {
@@ -372,6 +372,10 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const [shouldFetchData, setShouldFetchData] = useState(false);
 
+   /**
+   * Ustawia token JWT w stanie i localStorage.
+   * @param token - Token JWT lub null (dla wylogowania).
+   */
   const setToken = (token: string | null) => {
     dispatch({ type: "SET_TOKEN", payload: token });
     if (typeof window !== "undefined") {
@@ -383,7 +387,10 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  const logout = () => {
+/**
+ * Wylogowuje użytkownika, czyszcząc stan, localStorage i przekierowując na stronę logowania.
+ */
+const logout = () => {
     if (state.currentUser) {
       localStorage.setItem(`passwordHistory`, JSON.stringify(state.history));
       localStorage.removeItem(`masterkey`);
@@ -395,6 +402,14 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     window.location.href = "/login";
   };
 
+   /**
+   * Loguje użytkownika, ustawia token, Masterkey i klucz szyfrowania, oraz inicjuje pobieranie danych.
+   * @param login - Adres email użytkownika.
+   * @param password - Hasło użytkownika.
+   * @param masterkey - Klucz główny do szyfrowania.
+   * @param token2 - Token reCAPTCHA.
+   * @throws Error - Jeśli dane logowania są nieprawidłowe lub Masterkey nie pasuje.
+   */
   const login = async (login: string, password: string, masterkey: string, token2: string) => {
     try {
       const response = await api.post<{ user: User; token: string }>(`/login`, {
@@ -437,6 +452,12 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  /**
+   * Pobiera historię logowań użytkownika z API lub pamięci podręcznej.
+   * @param userId - ID użytkownika.
+   * @returns Lista wpisów logowania.
+   * @throws Error - Jeśli brak tokenu lub żądanie API nie powiedzie się.
+   */
   const getUserLogins = async (userId: string): Promise<LoginEntry[]> => {
     try {
       const cachedLogins = state.userLogins.filter((entry) => entry.user_id === userId);
@@ -579,6 +600,14 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     fetchData();
   }, [shouldFetchData, state.token, state.currentUser?.id]);
 
+  /**
+   * Kopiuje hasło do schowka po odszyfrowaniu z pliku ZIP i aktualizuje historię siły hasła.
+   * @param passwordfile - Nazwa pliku hasła w ZIP.
+   * @param platform - Nazwa platformy.
+   * @param login - Login dla hasła.
+   * @param onDecryptionFail - Opcjonalna funkcja wywoływana przy błędzie deszyfrowania.
+   * @throws Error - Jeśli brak ZIP lub klucza szyfrowania, lub deszyfrowanie nie powiedzie się.
+   */
   const copyToClipboard = async (passwordfile: string, platform: string, login: string, onDecryptionFail?: () => void) => {
     try {
       if (!state.zip) {
@@ -612,6 +641,13 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  /**
+   * Dodaje nowe hasło, szyfrując je i wysyłając do API, oraz aktualizuje ZIP i historię.
+   * @param password - Hasło do dodania.
+   * @param platform - Nazwa platformy.
+   * @param login - Login dla hasła.
+   * @throws Error - Jeśli brak użytkownika, tokenu lub klucza szyfrowania, lub żądanie API nie powiedzie się.
+   */
   const addPassword = async (password: string, platform: string, login: string) => {
     try {
       const userId = state.currentUser?.id;
@@ -660,6 +696,13 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  /**
+   * Aktualizuje istniejące hasło, szyfrując je i wysyłając do API, oraz aktualizuje ZIP i historię.
+   * @param newPassword - Nowe hasło.
+   * @param platform - Nazwa platformy.
+   * @param login - Login dla hasła.
+   * @throws Error - Jeśli brak użytkownika, tokenu lub klucza szyfrowania, lub żądanie API nie powiedzie się.
+   */
   const updatePassword = async (newPassword: string, platform: string, login: string) => {
     try {
       const userId = state.currentUser?.id;
@@ -713,6 +756,12 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  /**
+   * Usuwa hasło z API, aktualizuje stan i ZIP.
+   * @param platform - Nazwa platformy.
+   * @param login - Login dla hasła.
+   * @throws Error - Jeśli brak użytkownika lub tokenu, lub żądanie API nie powiedzie się.
+   */
   const deletePassword = async (platform: string, login: string) => {
     console.log(login);
     try {
@@ -745,6 +794,13 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  /**
+   * Dodaje lub aktualizuje zaufane urządzenie w API i stanie.
+   * @param device_id - ID urządzenia.
+   * @param user_agent - Ciąg User-Agent urządzenia.
+   * @param is_trusted - Status zaufania urządzenia.
+   * @throws Error - Jeśli brak użytkownika lub tokenu, lub żądanie API nie powiedzie się.
+   */
   const addOrUpdateTrustedDevice = async (device_id: string, user_agent: string, is_trusted: boolean) => {
     try {
       const userId = state.currentUser?.id;
@@ -767,6 +823,11 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  /**
+   * Usuwa zaufane urządzenie z API i stanu.
+   * @param device_id - ID urządzenia.
+   * @throws Error - Jeśli brak użytkownika lub tokenu, lub żądanie API nie powiedzie się.
+   */
   const deleteTrustedDevice = async (device_id: string) => {
     try {
       const userId = state.currentUser?.id;
@@ -786,6 +847,11 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  /**
+   * Pobiera dane użytkownika z API i aktualizuje stan.
+   * @param userId - ID użytkownika.
+   * @throws Error - Jeśli brak tokenu lub żądanie API nie powiedzie się.
+   */
   const getUser = async (userId: string) => {
     try {
       const token = state.token;
@@ -804,6 +870,15 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  /**
+   * Dodaje nowego użytkownika do API i aktualizuje stan.
+   * @param first_name - Imię użytkownika.
+   * @param last_name - Nazwisko użytkownika.
+   * @param login - Email użytkownika.
+   * @param password - Hasło użytkownika.
+   * @param token - Token reCAPTCHA.
+   * @throws Error - Jeśli żądanie API nie powiedzie się.
+   */
   const addUser = async (first_name: string, last_name: string, login: string, password: string, token: string) => {
     //console.log("Dodawanie użytkownika:", first_name, last_name, login, password, token);
     try {
@@ -830,6 +905,11 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+   /**
+   * Ustawia Masterkey, generuje klucz szyfrowania i inicjuje pobieranie danych.
+   * @param masterkey - Klucz główny do ustawienia.
+   * @throws Error - Jeśli brak użytkownika lub tokenu, lub Masterkey jest nieprawidłowy.
+   */
   const setMasterkey = async (masterkey: string) => {
     try {
       const userId = state.currentUser?.id;
@@ -873,6 +953,15 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  /**
+   * Aktualizuje dane użytkownika w API i stanie.
+   * @param userId - ID użytkownika.
+   * @param first_name - Nowe imię (opcjonalne).
+   * @param last_name - Nowe nazwisko (opcjonalne).
+   * @param login - Nowy email (opcjonalne).
+   * @param password - Nowe hasło (opcjonalne).
+   * @throws Error - Jeśli brak tokenu lub żądanie API nie powiedzie się.
+   */
   const updateUser = async (
     userId: string,
     first_name?: string,
@@ -902,6 +991,10 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+   /**
+   * Pobiera listę haseł z API i aktualizuje stan.
+   * @throws Error - Jeśli brak tokenu lub żądanie API nie powiedzie się.
+   */
   const fetchPasswords = async () => {
     if (!state.token) {
       toast.error("Błąd!", { description: "Brak tokenu autoryzacyjnego. Zaloguj się ponownie.", duration: 3000 });
@@ -943,7 +1036,7 @@ export const PasswordProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         getUserLogins,
         login,
         setMasterkey,
-        fetchPasswords
+        fetchPasswords,
       }}
     >
       {children}

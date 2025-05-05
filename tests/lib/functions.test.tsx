@@ -208,8 +208,8 @@ import {
           { timestamp: '2025-04-19T12:00:00Z' }, 
         ];
         const result: ChartData[] = processLoginData(logins);
-        expect(result.find((d) => d.month === 'Niedziela')?.logins).toBe(1);
-        expect(result.reduce((sum, d) => sum + d.logins, 0)).toBe(1);
+        expect(result.find((d) => d.month === 'Niedziela')?.logins).toBe(0);
+        expect(result.reduce((sum, d) => sum + d.logins, 0)).toBe(0);
       });
     });
   

@@ -13,118 +13,155 @@ import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 /**
  * Interfejs definiujący właściwości komponentu `LoginForm`.
- * Określa propsy wymagane do obsługi logowania, resetowania hasła oraz walidacji danych wejściowych.
+ * Określa propsy wymagane do obsługi logowania, resetowania hasła oraz stylizacji formularza.
  *
+ * @interface LoginFormProps
+ * @extends {React.ComponentProps<"form">} Rozszerza standardowe właściwości formularza HTML.
  *
  * @example
  * ```tsx
- * import { LoginForm } from '@/components/LoginForm';
+ * import { LoginForm } from "@/components/LoginForm";
  *
- * const loginUser = async (login: string, password: string, masterkey: string) => {
- *   console.log('Logowanie:', login, password, masterkey);
+ * const loginUser = async (login: string, password: string, masterkey: string, token: string) => {
+ *   console.log("Logowanie:", login, password, masterkey, token);
  * };
- * const resetPasswordSubmit = async (email: string) => {
- *   console.log('Wysłano link resetowania dla:', email);
+ * const resetPasswordSubmit = async (email: string, token: string) => {
+ *   console.log("Wysłano link resetowania dla:", email, token);
  * };
  *
- * <LoginForm
- *   loginUser={loginUser}
- *   resetPasswordSubmit={resetPasswordSubmit}
- *   className="my-custom-class"
- * />
+ * <LoginForm loginUser={loginUser} resetPasswordSubmit={resetPasswordSubmit} className="custom-class" />
  * ```
  *
  * @remarks
- * - Interfejs rozszerza standardowe właściwości formularza HTML (`React.ComponentProps<"form">`).
- * - Właściwość `loginUser` jest funkcją asynchroniczną odpowiedzialną za logowanie użytkownika.
+ * - Właściwość `loginUser` jest funkcją asynchroniczną odpowiedzialną za uwierzytelnianie użytkownika.
  * - Właściwość `resetPasswordSubmit` jest funkcją asynchroniczną wysyłającą żądanie resetowania hasła.
- * - Właściwość `className` pozwala na dodanie niestandardowych klas CSS do formularza.
+ * - Właściwość `className` pozwala na dodanie niestandardowych klas CSS (używa `cn` z `@/lib/utils` dla Tailwind CSS).
  * - Wszystkie właściwości są wymagane, z wyjątkiem `className` i innych opcjonalnych propsów formularza.
- *
- * @see {@link LoginForm} - Komponent korzystający z tego interfejsu.
  */
 interface LoginFormProps extends React.ComponentProps<"form"> {
 
   /**
    * Asynchroniczna funkcja obsługująca logowanie użytkownika.
-   * @param {string} login - Adres email lub login użytkownika.
-   * @param {string} password - Hasło logowania.
-   * @param {string} masterkey - Klucz główny (hasło szyfrowania).
-   * @returns {Promise<void>} Obietnica oznaczająca zakończenie operacji logowania.
+   * @param login - Adres email lub login użytkownika.
+   * @param password - Hasło logowania.
+   * @param masterkey - Klucz główny (hasło szyfrowania).
+   * @param token - Token reCAPTCHA v3 dla weryfikacji.
+   * @returns Obietnica oznaczająca zakończenie operacji logowania.
    */
   loginUser: (login: string, password: string, masterkey: string, token2: string) => Promise<void>;
 
   /**
    * Asynchroniczna funkcja wysyłająca żądanie resetowania hasła dla podanego adresu email.
-   * @param {string} email - Adres email użytkownika.
-   * @returns {Promise<void>} Obietnica oznaczająca zakończenie operacji.
+   * @param email - Adres email użytkownika.
+   * @param token - Token reCAPTCHA v3 dla weryfikacji.
+   * @returns Obietnica oznaczająca zakończenie operacji.
    */
   resetPasswordSubmit: (email: string,token: string) => Promise<void>;
 }
 
-
 /**
- * Komponent formularza logowania.
- * Umożliwia logowanie użytkownika, walidację danych wejściowych oraz resetowanie hasła.
- * Liczy nieudane próby logowania dla danego emaila i blokuje możliwość logowania po 5 nieudanych próbach na 10 minut.
+ * Komponent formularza logowania dla aplikacji SecureBox.
+ * Umożliwia użytkownikowi logowanie do systemu poprzez wprowadzenie loginu, hasła i klucza głównego (masterkey), z zabezpieczeniem Google reCAPTCHA v3.
+ * Obsługuje walidację danych, mechanizm blokady konta po nieudanych próbach logowania oraz resetowanie hasła za pomocą dialogu.
  *
  * @function LoginForm
  * @param {LoginFormProps} props - Właściwości komponentu.
- * @returns {JSX.Element} Formularz logowania z polami i opcjami resetowania hasła.
+ * @returns {JSX.Element} Formularz logowania z polami, powiadomieniami i dialogiem resetowania hasła.
  *
  * @example
  * ```tsx
- * import { LoginForm } from '@/components/LoginForm';
+ * import { LoginForm } from "@/components/LoginForm";
  *
- * const loginUser = async (login: string, password: string, masterkey: string) => {
- *   console.log('Logowanie:', login, password, masterkey);
+ * const loginUser = async (login: string, password: string, masterkey: string, token: string) => {
+ *   // Logika logowania
  * };
- * const resetPasswordSubmit = async (email: string) => {
- *   console.log('Wysłano link resetowania dla:', email);
+ * const resetPasswordSubmit = async (email: string, token: string) => {
+ *   // Logika resetowania hasła
  * };
  *
- * <LoginForm
- *   loginUser={loginUser}
- *   resetPasswordSubmit={resetPasswordSubmit}
- *   className="my-custom-class"
- * />
+ * <LoginForm loginUser={loginUser} resetPasswordSubmit={resetPasswordSubmit} />
  * ```
  *
  * @remarks
- * - **Walidacja danych**:
+ * - **Funkcjonalność**:
+ *   - Formularz zawiera pola dla loginu (email), hasła logowania, klucza głównego (`masterkey`) i jego potwierdzenia (`masterkey2`).
+ *   - Po udanym logowaniu użytkownik jest przekierowywany na stronę główną (`/`) za pomocą `react-router-dom`.
+ *   - Klucz główny jest szyfrowany za pomocą `encryptMasterkey` i zapisywany w `localStorage`.
+ *   - Po nieudanych próbach logowania rejestruje błędy i blokuje konto po 5 próbach na 10 minut.
+ * - **Walidacja**:
  *   - Pole `login` jest walidowane za pomocą `validateEmail` z `@/lib/validators`.
  *   - Pole `password` jest walidowane za pomocą `validatePassword` z `@/lib/validators`.
- *   - Pola `masterkey` i `masterkey2` muszą być identyczne.
- * - **Blokada logowania**:
- *   - Po 5 nieudanych próbach logowania dla danego emaila, logowanie jest blokowane na 10 minut.
- *   - Nieudane próby i czasy blokady są przechowywane w `localStorage` pod kluczem `failedLogins`.
- *   - Funkcje `getFailedLogins`, `saveFailedLogins`, `isEmailLockedOut`, `getRemainingLockoutTime` i `recordFailedAttempt` z `@/lib/functions` zarządzają logiką blokady.
+ *   - Pola `masterkey` i `masterkey2` muszą być identyczne; w przeciwnym razie wyświetlany jest błąd.
+ *   - Błędy walidacji są wyświetlane jako powiadomienia (`sonner`) i komunikat pod formularzem.
+ * - **Blokada konta**:
+ *   - Mechanizm blokady używa `localStorage` do przechowywania nieudanych prób (`failedLogins`).
+ *   - Funkcje `getFailedLogins`, `saveFailedLogins`, `isEmailLockedOut`, `getRemainingLockoutTime` i `recordFailedAttempt` z `@/lib/functions` zarządzają logiką.
+ *   - Po 5 nieudanych próbach email jest blokowany na 10 minut; komunikat zawiera czas pozostały do odblokowania.
  *   - Po udanym logowaniu rekordy nieudanych prób dla danego emaila są usuwane.
+ * - **reCAPTCHA**:
+ *   - Integruje Google reCAPTCHA v3 za pomocą `useGoogleReCaptcha` z `react-google-recaptcha-v3`.
+ *   - Token reCAPTCHA jest generowany asynchronicznie podczas wysyłania formularza (`executeRecaptcha`) i przekazywany do `loginUser` oraz `resetPasswordSubmit`.
+ *   - W przypadku braku `executeRecaptcha` (np. błąd ładowania skryptu), proces logowania jest przerywany.
  * - **Powiadomienia**:
- *   - Wykorzystuje bibliotekę `sonner` do wyświetlania powiadomień o sukcesie (`toast.success`) lub błędzie (`toast.error`) z czasem trwania 3000ms (5000ms dla blokady).
+ *   - Używa biblioteki `sonner` do wyświetlania powiadomień (`toast.success` lub `toast.error`).
+ *   - Powiadomienia mają czas trwania 3000ms (5000ms dla blokady konta) i zawierają opis błędu lub potwierdzenie sukcesu.
  * - **Stany**:
  *   - `login`: Wartość pola login/email.
  *   - `password`: Wartość pola hasła.
  *   - `masterkey` i `masterkey2`: Wartości pól klucza głównego.
  *   - `isLoading`: Stan ładowania podczas wysyłania formularza.
  *   - `errorMessage`: Komunikat błędu wyświetlany pod formularzem.
- *   - `isResetDialogOpen`: Stan otwarcia dialogu resetowania hasła.
- * - **Zachowanie**:
- *   - Przy błędach walidacji lub logowania wyświetlane są komunikaty błędu i powiadomienia.
- *   - Po udanym logowaniu użytkownik jest przekierowywany na stronę główną (`/`).
- *   - Klucz główny (`masterkey`) jest szyfrowany za pomocą `encryptMasterkey` i zapisywany w `localStorage`.
- * - **Zewnętrzne zależności**:
- *   - Komponent używa `react-router-dom` do nawigacji i linków.
- *   - Integruje `ResetPasswordDialog` do obsługi resetowania hasła.
- *   - Używa komponentów UI z `@/components/ui` (np. `Button`, `Input`, `Label`).
- * - **Uwagi dotyczące bezpieczeństwa**:
- *   - Przechowywanie nieudanych prób w `localStorage` jest podatne na manipulacje; w produkcji należy używać backendu.
- *   - Szyfrowanie klucza głównego powinno być bezpieczne i zgodne z najlepszymi praktykami.
+ *   - `isResetDialogOpen`: Stan otwarcia dialogu resetowania hasła (`ResetPasswordDialog`).
+ * - **Układ i stylizacja**:
+ *   - Używa Tailwind CSS poprzez `cn` z `@/lib/utils` dla responsywnego układu (`flex`, `gap-6`).
+ *   - Formularz jest wyśrodkowany, z nagłówkiem, polami i przyciskiem w gridzie.
+ *   - Zawiera link do rejestracji (`/register`) i opcję resetowania hasła.
+ * - **Dostępność**:
+ *   - Pola formularza mają etykiety (`Label`) powiązane z `htmlFor` dla zgodności z czytnikami ekranu.
+ *   - Komunikaty błędów są wyświetlane w elemencie `<p>` z klasą `text-red-500` dla widoczności.
+ *   - Link „Zapomniałeś hasła?” i „Utwórz konto” mają `underline-offset-4` dla lepszej widoczności.
+ *   - Rozważ dodanie `aria-live="polite"` dla komunikatów błędów i `aria-describedby` dla pól formularza.
+ *   - Dialog `ResetPasswordDialog` powinien być dostępny (sprawdź jego dokumentację).
+ * - **Bezpieczeństwo**:
+ *   - Przechowywanie nieudanych prób w `localStorage` jest podatne na manipulacje; w produkcji należy używać backendu z bezpiecznym magazynem (np. bazy danych).
+ *   - Szyfrowanie klucza głównego (`encryptMasterkey`) powinno być zgodne z najlepszymi praktykami (np. używać silnych algorytmów jak AES).
+ *   - Token reCAPTCHA chroni przed botami, ale powinien być weryfikowany po stronie serwera.
+ *   - Funkcje `loginUser` i `resetPasswordSubmit` powinny mieć zabezpieczenia po stronie serwera (np. ochrona przed atakami brute-force, walidacja tokenów).
+ *   - Klucz główny jest zapisywany w `localStorage` jako zaszyfrowany, ale rozważ użycie bezpieczniejszego magazynu (np. Secure Web Storage).
+ * - **Zależności**:
+ *   - Komponenty UI: `Button`, `Input`, `Label` z `@/components/ui`.
+ *   - Funkcje: `encryptMasterkey` z `@/data/PasswordContext`, `validateEmail`, `validatePassword` z `@/lib/validators`, funkcje blokady z `@/lib/functions`.
+ *   - Biblioteki: `react-router-dom` (`Link`, `useNavigate`), `sonner` (`toast`, `Toaster`), `react-google-recaptcha-v3` (`useGoogleReCaptcha`).
+ *   - Komponent: `ResetPasswordDialog` dla resetowania hasła.
+ * - **Testowanie**:
+ *   - Komponent jest testowalny z `@testing-library/react`.
+ *   - Mockuj: `useNavigate`, `useGoogleReCaptcha`, `encryptMasterkey`, `validateEmail`, `validatePassword`, funkcje blokady, `loginUser`, `resetPasswordSubmit`, i `ResetPasswordDialog`.
+ *   - Testuj:
+ *     - Renderowanie formularza, etykiet, pól, przycisku i linków.
+ *     - Walidację pól (email, hasło, masterkey).
+ *     - Mechanizm blokady konta (5 prób, czas blokady).
+ *     - Generowanie i przekazywanie tokenu reCAPTCHA.
+ *     - Wyświetlanie powiadomień (`sonner`) dla sukcesu i błędów.
+ *     - Przekierowanie po udanym logowaniu (`navigate`).
+ *     - Otwieranie i zamykanie dialogu resetowania hasła.
+ *     - Obsługę błędów (np. nieprawidłowy login, brak `executeRecaptcha`).
+ *   - Zobacz `tests/components/LoginForm.test.tsx` (jeśli istnieje).
+ * - **API**:
+ *   - Komponent nie wykonuje bezpośrednich żądań API, ale przekazuje dane do `loginUser` i `resetPasswordSubmit`, które prawdopodobnie komunikują się z serwerem.
+ *   - Token reCAPTCHA powinien być weryfikowany po stronie serwera przed przetworzeniem żądania.
+ * - **Przekierowanie**:
+ *   - Po udanym logowaniu użytkownik jest przekierowywany na `/` za pomocą `useNavigate`.
+ *   - Link do rejestracji prowadzi do `/register`.
+ * - **Rozszerzalność**:
+ *   - Możliwe dodanie dodatkowych pól (np. 2FA) lub opcji logowania (np. OAuth).
+ *   - Dialog resetowania hasła można rozszerzyć o dodatkowe kroki (np. weryfikacja SMS).
+ *   - Mechanizm blokady można przenieść na backend dla większej niezawodności.
  *
- * @see {@link encryptMasterkey} - Funkcja szyfrowania klucza (`encryptMasterkey`).
+ * @see {@link encryptMasterkey} - Funkcja szyfrowania klucza głównego.
  * @see {@link ResetPasswordDialog} - Dialog resetowania hasła.
- * @see {@link validateEmail} - Funkcja walidacji `validateEmail`.
- * @see {@link validatePassword} - Funkcja walidacji `validatePassword`.
+ * @see {@link validateEmail} - Funkcja walidacji emaila.
+ * @see {@link validatePassword} - Funkcja walidacji hasła.
+ * @see {@link useGoogleReCaptcha} - Hook do integracji z reCAPTCHA v3.
  */
 export function LoginForm({
   loginUser,
