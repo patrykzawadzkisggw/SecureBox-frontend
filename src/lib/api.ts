@@ -37,8 +37,8 @@ api.interceptors.response.use(
 
     // Sprawdź, czy URL nie jest na liście wykluczonych
     if ((status >= 400 && status < 405)&& url && !excludedEndpoints.some((endpoint) => url.endsWith(endpoint))) {
-      localStorage.removeItem("jwt_token");
-      window.location.reload();
+      //localStorage.removeItem("jwt_token");
+      //window.location.reload();
     }
 
     return Promise.reject(error);
