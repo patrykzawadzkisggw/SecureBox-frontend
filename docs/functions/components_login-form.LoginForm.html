@@ -1,0 +1,137 @@
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>LoginForm | My Project Documentation</title><meta name="description" content="Documentation for My Project Documentation"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar"><div class="tsd-toolbar-contents container"><a href="../index.html" class="title">My Project Documentation</a><div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/><ul role="listbox" id="tsd-search-results"></ul><div id="tsd-search-status" aria-live="polite" aria-atomic="true"><div>Preparing search index...</div></div></dialog><a href="#" class="tsd-widget menu" id="tsd-toolbar-menu-trigger" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-menu"></use></svg></a></div></header><div class="container container-main"><div class="col-content"><div class="tsd-page-title"><ul class="tsd-breadcrumb" aria-label="Breadcrumb"><li><a href="../modules/components_login-form.html">components/login-form</a></li><li><a href="" aria-current="page">LoginForm</a></li></ul><h1>Function LoginForm</h1></div><section class="tsd-panel"><ul class="tsd-signatures"><li class=""><div class="tsd-signature tsd-anchor-link" id="loginform"><span class="tsd-kind-call-signature">LoginForm</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">props</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">LoginFormProps</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Element</span><a href="#loginform" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div><div class="tsd-description"><code class="tsd-tag">Function</code><div class="tsd-comment tsd-typography"><p>Komponent formularza logowania dla aplikacji SecureBox.
+Umożliwia użytkownikowi logowanie do systemu poprzez wprowadzenie loginu, hasła i klucza głównego (masterkey), z zabezpieczeniem Google reCAPTCHA v3.
+Obsługuje walidację danych, mechanizm blokady konta po nieudanych próbach logowania oraz resetowanie hasła za pomocą dialogu.</p>
+<p>LoginForm</p>
+</div><div class="tsd-parameters"><h4 class="tsd-parameters-title">Parameters</h4><ul class="tsd-parameter-list"><li><span><span class="tsd-kind-parameter">props</span>: <span class="tsd-signature-type">LoginFormProps</span></span><div class="tsd-comment tsd-typography"><p>Właściwości komponentu.</p>
+</div><div class="tsd-comment tsd-typography"></div></li></ul></div><h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Element</span></h4><p>Formularz logowania z polami, powiadomieniami i dialogiem resetowania hasła.</p>
+<div class="tsd-comment tsd-typography"><div class="tsd-tag-example"><h4 class="tsd-anchor-link" id="example">Example<a href="#example" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="tsx"><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">LoginForm</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&quot;@/components/LoginForm&quot;</span><span class="hl-1">;</span><br/><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-7">loginUser</span><span class="hl-1"> = </span><span class="hl-5">async</span><span class="hl-1"> (</span><span class="hl-2">login</span><span class="hl-1">: </span><span class="hl-9">string</span><span class="hl-1">, </span><span class="hl-2">password</span><span class="hl-1">: </span><span class="hl-9">string</span><span class="hl-1">, </span><span class="hl-2">masterkey</span><span class="hl-1">: </span><span class="hl-9">string</span><span class="hl-1">, </span><span class="hl-2">token</span><span class="hl-1">: </span><span class="hl-9">string</span><span class="hl-1">) </span><span class="hl-5">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">  </span><span class="hl-4">// Logika logowania</span><br/><span class="hl-1">};</span><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-7">resetPasswordSubmit</span><span class="hl-1"> = </span><span class="hl-5">async</span><span class="hl-1"> (</span><span class="hl-2">email</span><span class="hl-1">: </span><span class="hl-9">string</span><span class="hl-1">, </span><span class="hl-2">token</span><span class="hl-1">: </span><span class="hl-9">string</span><span class="hl-1">) </span><span class="hl-5">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">  </span><span class="hl-4">// Logika resetowania hasła</span><br/><span class="hl-1">};</span><br/><br/><span class="hl-8">&lt;</span><span class="hl-9">LoginForm</span><span class="hl-1"> </span><span class="hl-10">loginUser</span><span class="hl-1">=</span><span class="hl-5">{</span><span class="hl-2">loginUser</span><span class="hl-5">}</span><span class="hl-1"> </span><span class="hl-10">resetPasswordSubmit</span><span class="hl-1">=</span><span class="hl-5">{</span><span class="hl-2">resetPasswordSubmit</span><span class="hl-5">}</span><span class="hl-1"> </span><span class="hl-8">/&gt;</span>
+</code><button type="button">Copy</button></pre>
+
+</div><div class="tsd-tag-remarks"><h4 class="tsd-anchor-link" id="remarks">Remarks<a href="#remarks" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><ul>
+<li><strong>Funkcjonalność</strong>:
+<ul>
+<li>Formularz zawiera pola dla loginu (email), hasła logowania, klucza głównego (<code>masterkey</code>) i jego potwierdzenia (<code>masterkey2</code>).</li>
+<li>Po udanym logowaniu użytkownik jest przekierowywany na stronę główną (<code>/</code>) za pomocą <code>react-router-dom</code>.</li>
+<li>Klucz główny jest szyfrowany za pomocą <code>encryptMasterkey</code> i zapisywany w <code>localStorage</code>.</li>
+<li>Po nieudanych próbach logowania rejestruje błędy i blokuje konto po 5 próbach na 10 minut.</li>
+</ul>
+</li>
+<li><strong>Walidacja</strong>:
+<ul>
+<li>Pole <code>login</code> jest walidowane za pomocą <code>validateEmail</code> z <code>@/lib/validators</code>.</li>
+<li>Pole <code>password</code> jest walidowane za pomocą <code>validatePassword</code> z <code>@/lib/validators</code>.</li>
+<li>Pola <code>masterkey</code> i <code>masterkey2</code> muszą być identyczne; w przeciwnym razie wyświetlany jest błąd.</li>
+<li>Błędy walidacji są wyświetlane jako powiadomienia (<code>sonner</code>) i komunikat pod formularzem.</li>
+</ul>
+</li>
+<li><strong>Blokada konta</strong>:
+<ul>
+<li>Mechanizm blokady używa <code>localStorage</code> do przechowywania nieudanych prób (<code>failedLogins</code>).</li>
+<li>Funkcje <code>getFailedLogins</code>, <code>saveFailedLogins</code>, <code>isEmailLockedOut</code>, <code>getRemainingLockoutTime</code> i <code>recordFailedAttempt</code> z <code>@/lib/functions</code> zarządzają logiką.</li>
+<li>Po 5 nieudanych próbach email jest blokowany na 10 minut; komunikat zawiera czas pozostały do odblokowania.</li>
+<li>Po udanym logowaniu rekordy nieudanych prób dla danego emaila są usuwane.</li>
+</ul>
+</li>
+<li><strong>reCAPTCHA</strong>:
+<ul>
+<li>Integruje Google reCAPTCHA v3 za pomocą <code>useGoogleReCaptcha</code> z <code>react-google-recaptcha-v3</code>.</li>
+<li>Token reCAPTCHA jest generowany asynchronicznie podczas wysyłania formularza (<code>executeRecaptcha</code>) i przekazywany do <code>loginUser</code> oraz <code>resetPasswordSubmit</code>.</li>
+<li>W przypadku braku <code>executeRecaptcha</code> (np. błąd ładowania skryptu), proces logowania jest przerywany.</li>
+</ul>
+</li>
+<li><strong>Powiadomienia</strong>:
+<ul>
+<li>Używa biblioteki <code>sonner</code> do wyświetlania powiadomień (<code>toast.success</code> lub <code>toast.error</code>).</li>
+<li>Powiadomienia mają czas trwania 3000ms (5000ms dla blokady konta) i zawierają opis błędu lub potwierdzenie sukcesu.</li>
+</ul>
+</li>
+<li><strong>Stany</strong>:
+<ul>
+<li><code>login</code>: Wartość pola login/email.</li>
+<li><code>password</code>: Wartość pola hasła.</li>
+<li><code>masterkey</code> i <code>masterkey2</code>: Wartości pól klucza głównego.</li>
+<li><code>isLoading</code>: Stan ładowania podczas wysyłania formularza.</li>
+<li><code>errorMessage</code>: Komunikat błędu wyświetlany pod formularzem.</li>
+<li><code>isResetDialogOpen</code>: Stan otwarcia dialogu resetowania hasła (<code>ResetPasswordDialog</code>).</li>
+</ul>
+</li>
+<li><strong>Układ i stylizacja</strong>:
+<ul>
+<li>Używa Tailwind CSS poprzez <code>cn</code> z <code>@/lib/utils</code> dla responsywnego układu (<code>flex</code>, <code>gap-6</code>).</li>
+<li>Formularz jest wyśrodkowany, z nagłówkiem, polami i przyciskiem w gridzie.</li>
+<li>Zawiera link do rejestracji (<code>/register</code>) i opcję resetowania hasła.</li>
+</ul>
+</li>
+<li><strong>Dostępność</strong>:
+<ul>
+<li>Pola formularza mają etykiety (<code>Label</code>) powiązane z <code>htmlFor</code> dla zgodności z czytnikami ekranu.</li>
+<li>Komunikaty błędów są wyświetlane w elemencie <code>&lt;p&gt;</code> z klasą <code>text-red-500</code> dla widoczności.</li>
+<li>Link „Zapomniałeś hasła?” i „Utwórz konto” mają <code>underline-offset-4</code> dla lepszej widoczności.</li>
+<li>Rozważ dodanie <code>aria-live=&quot;polite&quot;</code> dla komunikatów błędów i <code>aria-describedby</code> dla pól formularza.</li>
+<li>Dialog <code>ResetPasswordDialog</code> powinien być dostępny (sprawdź jego dokumentację).</li>
+</ul>
+</li>
+<li><strong>Bezpieczeństwo</strong>:
+<ul>
+<li>Przechowywanie nieudanych prób w <code>localStorage</code> jest podatne na manipulacje; w produkcji należy używać backendu z bezpiecznym magazynem (np. bazy danych).</li>
+<li>Szyfrowanie klucza głównego (<code>encryptMasterkey</code>) powinno być zgodne z najlepszymi praktykami (np. używać silnych algorytmów jak AES).</li>
+<li>Token reCAPTCHA chroni przed botami, ale powinien być weryfikowany po stronie serwera.</li>
+<li>Funkcje <code>loginUser</code> i <code>resetPasswordSubmit</code> powinny mieć zabezpieczenia po stronie serwera (np. ochrona przed atakami brute-force, walidacja tokenów).</li>
+<li>Klucz główny jest zapisywany w <code>localStorage</code> jako zaszyfrowany, ale rozważ użycie bezpieczniejszego magazynu (np. Secure Web Storage).</li>
+</ul>
+</li>
+<li><strong>Zależności</strong>:
+<ul>
+<li>Komponenty UI: <code>Button</code>, <code>Input</code>, <code>Label</code> z <code>@/components/ui</code>.</li>
+<li>Funkcje: <code>encryptMasterkey</code> z <code>@/data/PasswordContext</code>, <code>validateEmail</code>, <code>validatePassword</code> z <code>@/lib/validators</code>, funkcje blokady z <code>@/lib/functions</code>.</li>
+<li>Biblioteki: <code>react-router-dom</code> (<code>Link</code>, <code>useNavigate</code>), <code>sonner</code> (<code>toast</code>, <code>Toaster</code>), <code>react-google-recaptcha-v3</code> (<code>useGoogleReCaptcha</code>).</li>
+<li>Komponent: <code>ResetPasswordDialog</code> dla resetowania hasła.</li>
+</ul>
+</li>
+<li><strong>Testowanie</strong>:
+<ul>
+<li>Komponent jest testowalny z <code>@testing-library/react</code>.</li>
+<li>Mockuj: <code>useNavigate</code>, <code>useGoogleReCaptcha</code>, <code>encryptMasterkey</code>, <code>validateEmail</code>, <code>validatePassword</code>, funkcje blokady, <code>loginUser</code>, <code>resetPasswordSubmit</code>, i <code>ResetPasswordDialog</code>.</li>
+<li>Testuj:
+<ul>
+<li>Renderowanie formularza, etykiet, pól, przycisku i linków.</li>
+<li>Walidację pól (email, hasło, masterkey).</li>
+<li>Mechanizm blokady konta (5 prób, czas blokady).</li>
+<li>Generowanie i przekazywanie tokenu reCAPTCHA.</li>
+<li>Wyświetlanie powiadomień (<code>sonner</code>) dla sukcesu i błędów.</li>
+<li>Przekierowanie po udanym logowaniu (<code>navigate</code>).</li>
+<li>Otwieranie i zamykanie dialogu resetowania hasła.</li>
+<li>Obsługę błędów (np. nieprawidłowy login, brak <code>executeRecaptcha</code>).</li>
+</ul>
+</li>
+<li>Zobacz <code>tests/components/LoginForm.test.tsx</code> (jeśli istnieje).</li>
+</ul>
+</li>
+<li><strong>API</strong>:
+<ul>
+<li>Komponent nie wykonuje bezpośrednich żądań API, ale przekazuje dane do <code>loginUser</code> i <code>resetPasswordSubmit</code>, które prawdopodobnie komunikują się z serwerem.</li>
+<li>Token reCAPTCHA powinien być weryfikowany po stronie serwera przed przetworzeniem żądania.</li>
+</ul>
+</li>
+<li><strong>Przekierowanie</strong>:
+<ul>
+<li>Po udanym logowaniu użytkownik jest przekierowywany na <code>/</code> za pomocą <code>useNavigate</code>.</li>
+<li>Link do rejestracji prowadzi do <code>/register</code>.</li>
+</ul>
+</li>
+<li><strong>Rozszerzalność</strong>:
+<ul>
+<li>Możliwe dodanie dodatkowych pól (np. 2FA) lub opcji logowania (np. OAuth).</li>
+<li>Dialog resetowania hasła można rozszerzyć o dodatkowe kroki (np. weryfikacja SMS).</li>
+<li>Mechanizm blokady można przenieść na backend dla większej niezawodności.</li>
+</ul>
+</li>
+</ul>
+</div><div class="tsd-tag-see"><h4 class="tsd-anchor-link" id="see">See<a href="#see" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><ul>
+<li><a href="data_PasswordContext.encryptMasterkey.html" class="tsd-kind-function">encryptMasterkey</a> - Funkcja szyfrowania klucza głównego.</li>
+<li><a href="components_ResetPasswordDialog.ResetPasswordDialog.html" class="tsd-kind-function">ResetPasswordDialog</a> - Dialog resetowania hasła.</li>
+<li><a href="lib_validators.validateEmail.html" class="tsd-kind-function">validateEmail</a> - Funkcja walidacji emaila.</li>
+<li><a href="lib_validators.validatePassword.html" class="tsd-kind-function">validatePassword</a> - Funkcja walidacji hasła.</li>
+<li>useGoogleReCaptcha - Hook do integracji z reCAPTCHA v3.</li>
+</ul>
+</div></div><aside class="tsd-sources"><ul><li>Defined in <a href="https://github.com/patrykzawadzkisggw/SecureBox-frontend/blob/7f286dc9e29933dd26ef8a6e4ca830928ddc09cc/src/components/login-form.tsx#L166">src/components/login-form.tsx:166</a></li></ul></aside></div></li></ul></section></div><div class="col-sidebar"><div class="page-menu"><div class="tsd-navigation settings"><details class="tsd-accordion"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg><h3>Settings</h3></summary><div class="tsd-accordion-details"><div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span><ul id="tsd-filter-options"><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li></ul></div><div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div></div><div class="site-menu"><nav class="tsd-navigation"><a href="../modules.html">My Project Documentation</a><ul class="tsd-small-nested-navigation" id="tsd-nav-container"><li>Loading...</li></ul></nav></div></div></div><footer><p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer><div class="overlay"></div></body></html>

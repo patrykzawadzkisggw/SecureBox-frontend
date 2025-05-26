@@ -9,7 +9,6 @@ lerna-debug.log*
 
 node_modules
 dist
-docs
 dist-ssr
 *.local
 
@@ -25,4 +24,3 @@ dist-ssr
 *.sw?
 
 *storybook.log
-coverage

@@ -1,0 +1,74 @@
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>default | My Project Documentation</title><meta name="description" content="Documentation for My Project Documentation"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar"><div class="tsd-toolbar-contents container"><a href="../index.html" class="title">My Project Documentation</a><div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/><ul role="listbox" id="tsd-search-results"></ul><div id="tsd-search-status" aria-live="polite" aria-atomic="true"><div>Preparing search index...</div></div></dialog><a href="#" class="tsd-widget menu" id="tsd-toolbar-menu-trigger" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-menu"></use></svg></a></div></header><div class="container container-main"><div class="col-content"><div class="tsd-page-title"><ul class="tsd-breadcrumb" aria-label="Breadcrumb"><li><a href="../modules/App.html">App</a></li><li><a href="" aria-current="page">default</a></li></ul><h1>Function default</h1></div><section class="tsd-panel"><ul class="tsd-signatures"><li class=""><div class="tsd-signature tsd-anchor-link" id="default"><span class="tsd-kind-call-signature">default</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Element</span><a href="#default" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div><div class="tsd-description"><code class="tsd-tag">Function</code><div class="tsd-comment tsd-typography"><p>Komponent główny aplikacji SecureBox.
+Definiuje strukturę routingu aplikacji przy użyciu <code>react-router-dom</code>, obsługując chronione i niechronione trasy.
+Wykorzystuje kontekst <code>PasswordContext</code> do sprawdzania stanu autoryzacji użytkownika (<code>state.token</code>) w celu ochrony tras.
+Zawiera trasy dla logowania, rejestracji, strony głównej, generowania haseł, zarządzania hasłami, ustawień, autoryzacji urządzenia, resetowania hasła, regulaminu, polityki prywatności oraz strony 404.</p>
+<p>App</p>
+</div><h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Element</span></h4><p>Komponent główny z routerem i trasami aplikacji.</p>
+<div class="tsd-comment tsd-typography"><div class="tsd-tag-example"><h4 class="tsd-anchor-link" id="example">Example<a href="#example" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="tsx"><span class="hl-0">import</span><span class="hl-1"> </span><span class="hl-2">App</span><span class="hl-1"> </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&quot;./App&quot;</span><span class="hl-1">;</span><br/><br/><span class="hl-4">// W pliku głównym aplikacji (np. main.tsx)</span><br/><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">StrictMode</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&quot;react&quot;</span><span class="hl-1">;</span><br/><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">createRoot</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&quot;react-dom/client&quot;</span><span class="hl-1">;</span><br/><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">root</span><span class="hl-1"> = </span><span class="hl-7">createRoot</span><span class="hl-1">(</span><span class="hl-2">document</span><span class="hl-1">.</span><span class="hl-7">getElementById</span><span class="hl-1">(</span><span class="hl-3">&quot;root&quot;</span><span class="hl-1">)!);</span><br/><span class="hl-2">root</span><span class="hl-1">.</span><span class="hl-7">render</span><span class="hl-1">(</span><br/><span class="hl-1">  </span><span class="hl-8">&lt;</span><span class="hl-9">StrictMode</span><span class="hl-8">&gt;</span><br/><span class="hl-1">    </span><span class="hl-8">&lt;</span><span class="hl-9">App</span><span class="hl-1"> </span><span class="hl-8">/&gt;</span><br/><span class="hl-1">  </span><span class="hl-8">&lt;/</span><span class="hl-9">StrictMode</span><span class="hl-8">&gt;</span><br/><span class="hl-1">);</span>
+</code><button type="button">Copy</button></pre>
+
+</div><div class="tsd-tag-remarks"><h4 class="tsd-anchor-link" id="remarks">Remarks<a href="#remarks" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><ul>
+<li><strong>Zależności</strong>: Wymaga <code>react-router-dom</code> (<code>BrowserRouter</code>, <code>Routes</code>, <code>Route</code>, <code>Navigate</code>), kontekstu <code>usePasswordContext</code>, komponentów stron (<code>LoginPage</code>, <code>HomePage</code>, <code>GenPasswordPage</code>, <code>SettingsPage</code>, <code>PasswordsPage</code>, <code>NotFoundPage</code>, <code>RegisterPage</code>, <code>ResetPasswordPage</code>, <code>DeviceAuthPage</code>, <code>PrivacyPolicyPage</code>), komponentu <code>TermsOfService</code>, funkcji <code>resetPasswordFn</code> z <code>@/lib/fn2</code>, oraz typu <code>JSX</code> z <code>react</code>.</li>
+<li><strong>Routing</strong>:
+<ul>
+<li>Używa <code>BrowserRouter</code> dla routingu po stronie klienta.</li>
+<li>Trasy są zdefiniowane w komponencie <code>Routes</code> z użyciem <code>Route</code> dla każdej ścieżki.</li>
+<li>Chronione trasy (<code>/</code>, <code>/genpass</code>, <code>/passwords</code>, <code>/settings</code>, <code>/auth/:deviceId/:userAgent</code>) są owinięte w <code>ProtectedRoute</code>, który wymaga ważnego tokena autoryzacyjnego.</li>
+<li>Niechronione trasy (<code>/login</code>, <code>/register</code>) są owinięte w <code>UnProtectedRoute</code>, który przekierowuje zalogowanych użytkowników na stronę główną.</li>
+<li>Publiczne trasy (<code>/reset-password/:id</code>, <code>/termsofservice</code>, <code>/privacy</code>) oraz trasa 404 (<code>*</code>) nie wymagają autoryzacji.</li>
+</ul>
+</li>
+<li><strong>Komponenty tras</strong>:
+<ul>
+<li><code>/login</code>: <code>LoginPage</code> dla logowania użytkownika.</li>
+<li><code>/register</code>: <code>RegisterPage</code> dla rejestracji nowego użytkownika.</li>
+<li><code>/</code>: <code>HomePage</code> jako strona główna z pulpitem nawigacyjnym.</li>
+<li><code>/genpass</code>: <code>GenPasswordPage</code> dla generowania haseł.</li>
+<li><code>/passwords</code>: <code>PasswordsPage</code> dla zarządzania hasłami.</li>
+<li><code>/settings</code>: <code>SettingsPage</code> dla ustawień użytkownika.</li>
+<li><code>/auth/:deviceId/:userAgent</code>: <code>DeviceAuthPage</code> dla autoryzacji urządzeń.</li>
+<li><code>/reset-password/:id</code>: <code>ResetPasswordPage</code> dla resetowania hasła, wymaga funkcji <code>resetPasswordFn</code>.</li>
+<li><code>/termsofservice</code>: <code>TermsOfService</code> dla regulaminu.</li>
+<li><code>/privacy</code>: <code>PrivacyPolicyPage</code> dla polityki prywatności.</li>
+<li><code>*</code>: <code>NotFoundPage</code> dla nieistniejących tras.</li>
+</ul>
+</li>
+<li><strong>Ochrona tras</strong>:
+<ul>
+<li><code>ProtectedRoute</code>: Sprawdza, czy <code>state.token</code> istnieje i ma długość większą niż 2. Jeśli użytkownik nie jest zalogowany, przekierowuje na <code>/login</code>.</li>
+<li><code>UnProtectedRoute</code>: Przekierowuje zalogowanych użytkowników na <code>/</code>, umożliwiając dostęp do <code>/login</code> i <code>/register</code> tylko niezalogowanym użytkownikom.</li>
+</ul>
+</li>
+<li><strong>Kontekst</strong>: Używa <code>usePasswordContext</code> do uzyskania <code>state.token</code> dla weryfikacji autoryzacji. Token powinien być bezpiecznie przechowywany (np. w ciasteczkach HTTP-only) i walidowany po stronie serwera.</li>
+<li><strong>Stylizacja</strong>: Nie definiuje własnych stylów, ale dziedziczy style z komponentów stron (np. Tailwind CSS w <code>PageTemplate</code> lub innych komponentach).</li>
+<li><strong>Dostępność</strong>:
+<ul>
+<li>Router zapewnia nawigację zgodną z dostępnością (np. poprzez <code>aria-current</code> dla aktywnych tras), ale każdy komponent strony powinien być przetestowany pod kątem ARIA i obsługi klawiatury.</li>
+<li><code>Navigate</code> używa <code>replace</code> dla przekierowań, co zapobiega zapisywaniu niepotrzebnych wpisów w historii przeglądarki.</li>
+</ul>
+</li>
+<li><strong>Bezpieczeństwo</strong>:
+<ul>
+<li>Autoryzacja opiera się na <code>state.token</code>. Upewnij się, że token jest bezpiecznie przechowywany i weryfikowany po stronie serwera dla każdej chronionej trasy.</li>
+<li>Trasa <code>/reset-password/:id</code> wymaga bezpiecznego tokena resetowania hasła, obsługiwanego przez <code>resetPasswordFn</code>.</li>
+<li>Trasa <code>/auth/:deviceId/:userAgent</code> przesyła wrażliwe dane w URL; rozważ użycie bezpieczniejszych metod (np. token w ciele żądania).</li>
+</ul>
+</li>
+<li><strong>API</strong>: Komponent nie wykonuje bezpośrednich żądań API, ale przekazuje <code>resetPasswordFn</code> do <code>ResetPasswordPage</code>. Inne strony (np. <code>LoginPage</code>, <code>HomePage</code>) mogą wykonywać żądania przez kontekst <code>PasswordContext</code>.</li>
+<li><strong>Testowanie</strong>: Komponent jest testowalny z <code>@testing-library/react</code> i <code>react-router-dom</code>. Mockuj <code>usePasswordContext</code>, komponenty stron, oraz <code>resetPasswordFn</code>. Testuj przekierowania w <code>ProtectedRoute</code> i <code>UnProtectedRoute</code>, renderowanie odpowiednich stron dla każdej trasy, oraz obsługę strony 404. Zobacz <code>tests/App.test.tsx</code> (jeśli istnieje).</li>
+<li><strong>Przekierowanie</strong>:
+<ul>
+<li><code>ProtectedRoute</code> przekierowuje niezalogowanych użytkowników na <code>/login</code>.</li>
+<li><code>UnProtectedRoute</code> przekierowuje zalogowanych użytkowników na <code>/</code>.</li>
+<li>Trasa 404 (<code>NotFoundPage</code>) obsługuje wszystkie niezdefiniowane ścieżki.</li>
+</ul>
+</li>
+<li><strong>Rozszerzalność</strong>:
+<ul>
+<li>Nowe trasy można łatwo dodać, definiując kolejne <code>Route</code> w <code>Routes</code>.</li>
+<li><code>ProtectedRoute</code> i <code>UnProtectedRoute</code> mogą być rozszerzone o dodatkowe warunki (np. role użytkownika).</li>
+<li>Aplikacja może zostać zintegrowana z dynamicznym ładowaniem tras (lazy loading) dla lepszej wydajności.</li>
+</ul>
+</li>
+</ul>
+</div></div><aside class="tsd-sources"><ul><li>Defined in <a href="https://github.com/patrykzawadzkisggw/SecureBox-frontend/blob/7f286dc9e29933dd26ef8a6e4ca830928ddc09cc/src/App.tsx#L108">src/App.tsx:108</a></li></ul></aside></div></li></ul></section></div><div class="col-sidebar"><div class="page-menu"><div class="tsd-navigation settings"><details class="tsd-accordion"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg><h3>Settings</h3></summary><div class="tsd-accordion-details"><div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span><ul id="tsd-filter-options"><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li></ul></div><div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div></div><div class="site-menu"><nav class="tsd-navigation"><a href="../modules.html">My Project Documentation</a><ul class="tsd-small-nested-navigation" id="tsd-nav-container"><li>Loading...</li></ul></nav></div></div></div><footer><p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer><div class="overlay"></div></body></html>
