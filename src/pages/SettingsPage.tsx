@@ -8,7 +8,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { usePasswordContext } from "@/data/PasswordContext";
 import { updateMasterKey } from "@/lib/fn2";
-
 /**
  * Komponent strony ustawień dla menedżera haseł.
  * Umożliwia użytkownikowi eksport/import haseł, zarządzanie profilem użytkownika oraz zmianę masterkey.
@@ -82,7 +81,7 @@ export default function SettingsPage() {
             <p className="text-sm text-gray-600 mt-2 mb-4">
               Import haseł doda <strong>nowe konta</strong> (strona i login) do Twojej bazy. Dla{' '}
               <strong>istniejących kont</strong> (ta sama strona i login) hasła zostaną zaktualizowane. Upewnij się, że
-              plik JSON jest zgodny z formatem eksportu SecureBox.
+              plik JSON jest zgodny z formatem eksportu SecureBox. <a href="example.json" className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer">Przykład pliku JSON</a>
             </p>
               <ImportFromJSON addPassword={addPassword} updatePassword={updatePassword} loading={state.loading} passwords={state.passwords} fetchPasswords={fetchPasswords}/>
             </TabsContent>

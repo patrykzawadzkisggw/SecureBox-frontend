@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import {  User } from "../data/PasswordContext";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { set } from "zod";
 
 /**
  * Komponent profilu użytkownika do edycji danych osobowych i hasła.
@@ -51,6 +52,7 @@ export default function UserProfile({ updateUser, currentUser, loading }: { upda
  const [firstName, setFirstName] = useState(currentUser?.first_name || "");
  const [lastName, setLastName] = useState(currentUser?.last_name || "");
  const [password, setPassword] = useState("");
+ const [password2, setPassword2] = useState("");
  const [isEditing, setIsEditing] = useState(false);
  const [isSaving, setIsSaving] = useState(false);
  const [errors, setErrors] = useState<{ firstName?: string; lastName?: string; password?: string }>({});
@@ -92,6 +94,9 @@ export default function UserProfile({ updateUser, currentUser, loading }: { upda
  } else if (!/[!@#$%^&*]/.test(password)) {
  newErrors.password = "Hasło musi zawierać przynajmniej jeden znak specjalny";
  }
+    if (password !== password2) {
+    newErrors.password = "Hasła nie pasują do siebie";
+        }
  }
 
  setErrors(newErrors);
@@ -116,6 +121,7 @@ export default function UserProfile({ updateUser, currentUser, loading }: { upda
  password || undefined
  );
  setPassword("");
+ setPassword2("");
  setIsEditing(false);
  toast.success("Profil zaktualizowany!", {
  description: "Zmiany zostały zapisane.",
@@ -179,7 +185,7 @@ export default function UserProfile({ updateUser, currentUser, loading }: { upda
  </div>
  </div>
 
- {isEditing && (
+ {isEditing && (<>
  <div className="grid grid-cols-4 items-center gap-4">
  <Label htmlFor="password" className="text-right">
  Nowe hasło
@@ -197,6 +203,23 @@ export default function UserProfile({ updateUser, currentUser, loading }: { upda
  {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
  </div>
  </div>
+ <div className="grid grid-cols-4 items-center gap-4">
+ <Label htmlFor="password" className="text-right">
+ Potwierdź hasło
+ </Label>
+ <div className="col-span-3">
+ <Input
+ id="password2"
+ type="password"
+ value={password2}
+ onChange={(e) => setPassword2(e.target.value)}
+ className={errors.password ? "border-red-500" : ""}
+ placeholder="Potwierdź nowe hasło (opcjonalne)"
+ disabled={isSaving}
+ />
+ </div>
+ </div>
+ </>
  )}
 
  <div className="flex justify-end gap-2">
@@ -209,6 +232,7 @@ export default function UserProfile({ updateUser, currentUser, loading }: { upda
  setFirstName(currentUser.first_name);
  setLastName(currentUser.last_name);
  setPassword("");
+ setPassword2("");
  setIsEditing(false);
  setErrors({});
  }}

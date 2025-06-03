@@ -1,0 +1,12 @@
+[
+  {
+    "platform": "www.google.pl",
+    "login": "user123@gmail.com",
+    "password": "fdffd"
+  },
+  {
+    "platform": "www.google.pl",
+    "login": "login@int.pl",
+    "password": "123"
+  }
+]
