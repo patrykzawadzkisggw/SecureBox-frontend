@@ -204,7 +204,7 @@ export default function UserProfile({ updateUser, currentUser, loading }: { upda
  </div>
  </div>
  <div className="grid grid-cols-4 items-center gap-4">
- <Label htmlFor="password" className="text-right">
+ <Label htmlFor="password2" className="text-right">
  Potwierdź hasło
  </Label>
  <div className="col-span-3">

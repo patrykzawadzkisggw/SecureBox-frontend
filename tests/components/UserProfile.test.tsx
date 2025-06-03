@@ -131,67 +131,75 @@ describe("Komponent UserProfile", () => {
     });
   });
 
-  it("wyświetla błędy walidacji dla nieprawidłowego hasła", async () => {
-    render(
-      <UserProfile
-        updateUser={mockUpdateUser}
-        currentUser={mockUser}
-        loading={false}
-      />
-    );
+it("wyświetla błędy walidacji dla nieprawidłowego hasła", async () => {
+  render(
+    <UserProfile
+      updateUser={mockUpdateUser}
+      currentUser={mockUser}
+      loading={false}
+    />
+  );
 
-    fireEvent.click(screen.getByRole("button", { name: /edytuj/i }));
+  fireEvent.click(screen.getByRole("button", { name: /edytuj/i }));
 
-    const passwordInput = screen.getByLabelText(/nowe hasło/i);
-    fireEvent.change(passwordInput, { target: { value: "short" } });
+  const passwordInput = screen.getByLabelText(/nowe hasło/i);
+  const confirmPasswordInput = screen.getByLabelText(/potwierdź hasło/i);
 
-    fireEvent.click(screen.getByRole("button", { name: /zapisz/i }));
+  fireEvent.change(passwordInput, { target: { value: "short" } });
+  fireEvent.change(confirmPasswordInput, { target: { value: "short" } });
 
-    await waitFor(() => {
-      expect(
-        screen.getByText(/hasło musi mieć co najmniej 8 znaków/i)
-      ).toBeInTheDocument();
-      expect(toast.error).toHaveBeenCalledWith("Popraw błędy w formularzu");
-      expect(mockUpdateUser).not.toHaveBeenCalled();
-    });
+  // Debug to confirm values
+  screen.debug(); // Check if both inputs reflect "short"
+
+  fireEvent.click(screen.getByRole("button", { name: /zapisz/i }));
+
+  await waitFor(() => {
+    expect(
+      screen.getByText(/hasło musi mieć co najmniej 8 znaków/i)
+    ).toBeInTheDocument();
+    expect(toast.error).toHaveBeenCalledWith("Popraw błędy w formularzu");
+    expect(mockUpdateUser).not.toHaveBeenCalled();
   });
+});
 
-  it("poprawnie zapisuje prawidłowe dane i nawiguje", async () => {
-    render(
-      <UserProfile
-        updateUser={mockUpdateUser}
-        currentUser={mockUser}
-        loading={false}
-      />
+ it("poprawnie zapisuje prawidłowe dane i nawiguje", async () => {
+  render(
+    <UserProfile
+      updateUser={mockUpdateUser}
+      currentUser={mockUser}
+      loading={false}
+    />
+  );
+
+  fireEvent.click(screen.getByRole("button", { name: /edytuj/i }));
+
+  const firstNameInput = screen.getByLabelText(/imię/i);
+  const lastNameInput = screen.getByLabelText(/nazwisko/i);
+  const passwordInput = screen.getByLabelText(/nowe hasło/i);
+  const confirmPasswordInput = screen.getByLabelText(/potwierdź hasło/i);
+
+  fireEvent.change(firstNameInput, { target: { value: "Anna" } });
+  fireEvent.change(lastNameInput, { target: { value: "Nowak" } });
+  fireEvent.change(passwordInput, { target: { value: "Password123!" } });
+  fireEvent.change(confirmPasswordInput, { target: { value: "Password123!" } }); // Add this
+
+  fireEvent.click(screen.getByRole("button", { name: /zapisz/i }));
+
+  await waitFor(() => {
+    expect(mockUpdateUser).toHaveBeenCalledWith(
+      "1",
+      "Anna",
+      "Nowak",
+      undefined,
+      "Password123!"
     );
-
-    fireEvent.click(screen.getByRole("button", { name: /edytuj/i }));
-
-    const firstNameInput = screen.getByLabelText(/imię/i);
-    const lastNameInput = screen.getByLabelText(/nazwisko/i);
-    const passwordInput = screen.getByLabelText(/nowe hasło/i);
-
-    fireEvent.change(firstNameInput, { target: { value: "Anna" } });
-    fireEvent.change(lastNameInput, { target: { value: "Nowak" } });
-    fireEvent.change(passwordInput, { target: { value: "Password123!" } });
-
-    fireEvent.click(screen.getByRole("button", { name: /zapisz/i }));
-
-    await waitFor(() => {
-      expect(mockUpdateUser).toHaveBeenCalledWith(
-        "1",
-        "Anna",
-        "Nowak",
-        undefined,
-        "Password123!"
-      );
-      expect(mockToast).toHaveBeenCalledWith("Profil zaktualizowany!", {
-        description: "Zmiany zostały zapisane.",
-        duration: 3000,
-      });
-      expect(mockNavigate).toHaveBeenCalledWith("/settings");
+    expect(mockToast).toHaveBeenCalledWith("Profil zaktualizowany!", {
+      description: "Zmiany zostały zapisane.",
+      duration: 3000,
     });
+    expect(mockNavigate).toHaveBeenCalledWith("/settings");
   });
+});
 
   it("wyświetla powiadomienie o błędzie przy nieudanej aktualizacji", async () => {
     mockUpdateUser.mockRejectedValueOnce(new Error("Błąd aktualizacji"));
